@@ -67,7 +67,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 
 1. Scenario: Linden Clinics asks a vendor to serve its patients from Europe and offers the Claude API with `inference_geo` set to `us` as the compliant option. Which assessment is right?
    - **a**: It meets the need, as long as the audit log itself is kept in a data store located in Europe
-   - **b**: It fails the need, because that pin places all of the processing in the United States
+   - **b**: It fails the need, because that pin keeps every inference request in the United States only
    - **c**: It meets the need, since the geography of the workspace can still be set to Europe separately
    - **d**: It fails the need only if the clinics have not yet signed the business associate agreement in full
 
@@ -80,7 +80,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The `us` pin is a United States geography, and the API has no European one. *a* is ruled out because where the log is stored does not move inference, and "A customer that needs Europe cannot be served by pinning on that API". *c* is ruled out because "The workspace geography is set per workspace" and the page says it is `us` only. *d* is ruled out because the agreement concerns health data and does not move the processing: "there is no European pin".
+1. **b**. The `us` pin is a United States geography, and the API has no European one. *a* is ruled out because where the log is stored does not move inference, and "A customer that needs Europe cannot be served by pinning on that API". *c* is ruled out because "The workspace geography is set per workspace and is `us` only", so no European setting exists there either. *d* is ruled out because the agreement concerns health data and does not move the processing: "there is no European pin".
 2. **c**. Zero data retention is an arrangement with Anthropic, and on Bedrock the cloud provider is the processor. *a* is ruled out because "Their retention, compliance and region rules are the provider's", so no arrangement is shared. *b* is ruled out because that agreement is a separate arrangement, and "On Amazon Bedrock or Google Cloud, zero data retention is not Anthropic's arrangement to give". *d* is ruled out because the arrangement is not switched on model by model: "it is enabled per organisation, so each new organisation needs its own", and on Bedrock it is still not Anthropic's to enable.
 
 </details>

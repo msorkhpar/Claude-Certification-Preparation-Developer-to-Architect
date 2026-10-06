@@ -774,9 +774,9 @@ fork: general-purpose Explore None
 
 1. A project holds `.claude/commands/deploy.md`, and a teammate then adds `.claude/skills/deploy/SKILL.md`. What does `/deploy` run?
    - **a**: The command, because it was in the project first of the two
-   - **b**: Both, with the command kept under a prefixed second name
+   - **b**: Both in turn, since the two files create the same command
    - **c**: The skill, since it takes precedence over the older format
-   - **d**: Neither, because the duplicate name is refused outright
+   - **d**: Neither, until one of the two files is renamed or removed
 
 2. A session starts at a monorepo's root, and a skill sits in `packages/api/.claude/skills/`. So far Claude has worked only inside `docs/`. When can the skill first be used?
    - **a**: As soon as a file under `packages/api` is read or edited
@@ -787,7 +787,7 @@ fork: general-purpose Explore None
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The product merged the two formats and gives the skill precedence over a command file of the same name, whichever file came first. *a* is ruled out because "A skill beats a command file of the same name", and the order of arrival plays no part. *b* is ruled out because a prefixed second name belongs to two skills, where "the nested one is also reachable as" a path-prefixed command, while for a skill and a command file "the skill runs" alone. *d* is ruled out because "When a skill and a command file share a name, the skill runs", so the clash is settled and not refused.
+1. **c**. The product merged the two formats and gives the skill precedence over a command file of the same name, whichever file came first. *a* is ruled out because "A skill beats a command file of the same name", and the order of arrival plays no part. *b* is ruled out because "When a skill and a command file share a name, the skill runs", so one definition answers the name and not both. *d* is ruled out because the shared name needs no repair: the skill runs at once, and "Existing command files keep working" without being renamed or removed.
 2. **a**. A skill below the start folder is not found at launch; it loads when Claude first works with a file in that folder, which has not happened yet. *b* is ruled out because the launch search covers "the directory where you start and from every parent up to the repository root", and `packages/api` is neither. *c* is ruled out because "a skill in a folder below the start directory loads" later, when a file there is first used. *d* is ruled out because the skill loads "the first time Claude reads or edits a file in that subdirectory", inside the running session, and then the skills "stay available for the rest of the session".
 
 </details>

@@ -407,13 +407,13 @@ a `run.sh` or build file. The starter fails every test.
    - **a**: The system prompt is repeated once for every question, so it dominates the bill
    - **b**: Long conversations are charged at a higher price for each output token that is produced
    - **c**: The model writes longer replies as a conversation grows, and the replies dominate the bill in the end
-   - **d**: Each call resends every earlier exchange, so the later calls carry heavier input
+   - **d**: Calls late in the long chat resend much more history than any call of a short one
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The rule is to "commit a turn only when the whole exchange succeeded", which means removing the user turn on any failure. *a* is ruled out because a retry is a separate decision, and the page says the retry "will send a different conversation from the one the user saw" if the history is damaged. *c* is ruled out because a merge hides the damage while "the next request contains two user turns in a row" in the very same way, and a question that never got an answer stays in the history. *d* is ruled out because a call "can fail after you appended the user turn" with a 529 or a 429 as well as a timeout, and a longer wait leaves those turns dangling.
-2. **d**. The page says "the input cost of a conversation grows with the square of its length", because each turn resends everything before it. *b* is ruled out because nothing on the page prices long conversations differently, and the growth comes from input: "every turn resends everything before it". *c* is ruled out because "turn n sends about 200 n input tokens", which is growth in input and not in replies. *a* is ruled out because the system prompt is the same size on every turn, and the page says "every turn resends everything before it", so the history is what grows.
+1. **b**. The rule is to "commit a turn only when the whole exchange succeeded", which means removing the user turn on any failure. *a* is ruled out because the client must "on any failure remove it before the error leaves the function", and a retry that still fails leaves the user turn in the history. *c* is ruled out because a merge hides the damage while "the next request contains two user turns in a row" in the very same way, and a question that never got an answer stays in the history. *d* is ruled out because a call "can fail after you appended the user turn" with a 529 or a 429 as well as a timeout, and a longer wait leaves those turns dangling.
+2. **d**. Turn 40 resends 39 earlier exchanges while no call of a 10-turn chat resends more than 9, which is why "the input cost of a conversation grows with the square of its length". *b* is ruled out because the cost the page derives comes from input growth, "turn n sends about 200 n input tokens", and nothing in that sum changes the price of an output token. *c* is ruled out because the page's arithmetic assumes "if each exchange adds about 200 tokens", so the replies stay the same size and the gap still appears. *a* is ruled out because "system is the same top-level field on every request", so it goes out 40 times in the long chat and 40 times across the four short ones, and cannot explain the gap.
 
 </details>
 
@@ -437,7 +437,7 @@ This quiz covers all three pages of the module.
 
 3. A team wants an early warning before long chats approach the context window and become expensive. Which signal
    can the client compute from every reply?
-   - **a**: The total of the three input-token fields in the usage object
+   - **a**: The sum of the three input fields in `usage`, as `input_tokens` omits cached input
    - **b**: The count of turns so far, since each turn adds the same number of tokens
    - **c**: The output-token count alone, because the reply is what fills the window
    - **d**: The appearance of the context-window stop reason, which says the limit is close
@@ -454,7 +454,7 @@ This quiz covers all three pages of the module.
 
 1. **b**. Storing only text drops `tool_use` and thinking blocks, and the page says to "store the content list as received". *a* is ruled out because thinking blocks are not rebuilt: "every such block from the turn must be passed back exactly as received". *c* is ruled out because the model id belongs to the "settings that do not change per turn", and it does not carry blocks. *d* is ruled out because adding text after tool results "can teach the model to expect user input after every tool call".
 2. **a**. A truncated reply is kept: "cut replies stay in the history", and the user can ask to continue in a normal turn. *b* is ruled out because "a request that does returns a 400 invalid_request_error", and ending the list with an assistant turn is a prefill. *c* is ruled out because the rollback rule is to "commit a turn only when the whole exchange succeeded", and a cut reply is a completed exchange. *d* is ruled out because on a cut reply the client "keeps the turn as received", and a trimmed turn is no longer what the model wrote.
-3. **a**. The page says the total input is the sum of three numbers, and that counting tokens makes the growth visible. *b* is ruled out because "turn n sends about 200 n input tokens", so each turn adds more than the one before and a turn count is a poor proxy. *c* is ruled out because the page says "the input cost of a conversation grows with the square of its length", and the history is input. *d* is ruled out because that value reports that "the context window filled before max_tokens", which is already too late.
+3. **a**. The page gives the total input as "the sum of three numbers", since `input_tokens` can read 50 when the total is 200,050, and counting tokens makes the growth visible. *b* is ruled out because "turn n sends about 200 n input tokens", so each turn adds more than the one before and a turn count is a poor proxy. *c* is ruled out because earlier replies come back as input, since "every turn resends everything before it", so an output count alone misses most of what the window holds. *d* is ruled out because that value reports that "the context window filled before max_tokens", which is already too late.
 4. **c**. The page describes it: "if the request body holds the client's own history list, a later turn changes earlier requests". *b* is ruled out because the page says to "store the content list as received", which concerns what a turn contains, not whether old requests change. *a* is ruled out because the rollback rule is to "commit a turn only when the whole exchange succeeded", and it concerns failures. *d* is ruled out because "system is the same top-level field on every request", so it does not grow.
 
 </details>

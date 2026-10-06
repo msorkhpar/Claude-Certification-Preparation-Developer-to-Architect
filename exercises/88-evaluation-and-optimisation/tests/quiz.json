@@ -26,10 +26,10 @@
       "scope": "page",
       "stem": "A team grades a research assistant's free-form reports only with exact-match checks, and the score barely moves when the quality of the reports visibly changes. Which addition fits best?",
       "options": {
-        "a": "A longer answer key, so that more phrasings of each answer count as a match",
-        "b": "Human review of every report, as people set the standard other graders must meet",
+        "a": "A longer answer key, with many more phrasings of each answer listed",
+        "b": "Human review of every report, with a person setting each of the scores",
         "c": "A model judge working from a rubric, with people sampling its misses",
-        "d": "Fewer test cases, each graded by hand with care for a cleaner signal"
+        "d": "Fewer test cases, with every one of them carefully graded by hand"
       },
       "key": "c",
       "explanation": {
@@ -43,16 +43,16 @@
       "id": "02-changing-safely-diagnosing-and-the-practice#q1",
       "page": "02-changing-safely-diagnosing-and-the-practice.md",
       "scope": "page",
-      "stem": "A new prompt is tried on 80 live cases in each arm and scores five points higher than the current one. What should the team conclude?",
+      "stem": "A new prompt is tried on 80 live cases in each arm and scores five points higher than the current one. What should the team do?",
       "options": {
         "a": "Adopt the new prompt, since five points is the larger number",
-        "b": "Too small a sample to tell, so gather the planned numbers",
+        "b": "Keep the test running until the planned sample is reached",
         "c": "Rerun the same 80 cases and average the two results",
         "d": "Extend the test only if the new prompt is behind"
       },
       "key": "b",
       "explanation": {
-        "b": "With 80 cases in an arm the gap is inside chance, so the verdict is that there are too few cases.",
+        "b": "With 80 cases in an arm the gap is inside chance, so the test runs on to the minimum sample set in advance.",
         "a": "Ruled out because \"The larger number is not the better version\".",
         "c": "Ruled out because \"Running the same cases again repeats the same sample and adds no information\".",
         "d": "Ruled out because \"Stopping or extending a test according to who is ahead produces false wins\"."
@@ -62,17 +62,17 @@
       "id": "02-changing-safely-diagnosing-and-the-practice#q2",
       "page": "02-changing-safely-diagnosing-and-the-practice.md",
       "scope": "page",
-      "stem": "A new model version matches the current one on overall accuracy in a shadow run. It gains answers in order status and loses answers in refunds, an area the team guards. What does the gate do?",
+      "stem": "A new model version matches the current one on overall accuracy in a shadow run. It gains answers in order status and loses answers in refunds, an area the team guards. What does the gate described on this page do?",
       "options": {
-        "a": "Ship it to everyone, as the gains in order status cover the refund losses",
+        "a": "Hold it back until its overall accuracy is higher than the current version's",
         "b": "Average the accuracy of the two segments and ship if that average has risen",
         "c": "Ship it to half of the live traffic and watch whether any customers complain",
-        "d": "Hold the change back until that costly segment stops losing cases"
+        "d": "Hold the change back until the costly segment stops losing any of its cases"
       },
       "key": "d",
       "explanation": {
         "d": "The gate has a key for guarded segments, and a loss there blocks the change.",
-        "a": "Ruled out because \"A gain in one segment does not pay for a loss in another\".",
+        "a": "Ruled out because a higher total can come from gains elsewhere while refunds still lose, and \"A gain in one segment does not pay for a loss in another\".",
         "c": "Ruled out because \"A change that ships to half of the traffic exposes half of the users to the regression before anyone has measured it\".",
         "b": "Ruled out because \"An average of segment accuracies weights a rare segment like a common one and hides its price\"."
       }

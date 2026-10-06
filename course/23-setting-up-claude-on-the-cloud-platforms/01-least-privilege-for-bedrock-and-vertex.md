@@ -419,7 +419,7 @@ is easy to test, which is the idea of this module's practice.
    - **a**: It is refused, since the grant covers calling the model and no more
    - **b**: It goes through, since a role on an endpoint covers all of it
    - **c**: It goes through, since the account sits in the endpoint's project
-   - **d**: It is refused, since custom roles cannot be bound to an endpoint
+   - **d**: It is refused, since a service account may never change an endpoint
 
 3. A team adds the deploy permission to its invoker role just in case. How should a reviewer judge the change?
    - **a**: Remove it, since it replaces predict and the calls to Claude will fail
@@ -431,7 +431,7 @@ is easy to test, which is the idea of this module's practice.
 <summary>Answer key</summary>
 
 1. **d**. The page says to "grant only the permissions required to perform a task", by "defining the actions that can be taken on specific resources". *b* is ruled out because a wildcard action still grants more than "the permissions required to perform a task". *c* is ruled out because "By default, users and roles don't have permission to create or modify Amazon Bedrock resources", so a policy should add what is needed and not rely on denies. *a* is ruled out because conditions are a refinement on top of a narrow policy: "Both come after the basics: the right action on the right resource".
-2. **a**. The page says the predict role "grants the service account the ability to call the endpoint for predictions", and nothing beyond that. *b* is ruled out because the same grant comes "but not the ability of controlling the endpoint". *c* is ruled out because membership grants nothing by itself: "You grant access by assigning IAM roles to principals." *d* is ruled out because the page says to "assign the role to a service account on an endpoint".
+2. **a**. The page says the predict role "grants the service account the ability to call the endpoint for predictions", and nothing beyond that. *b* is ruled out because the same grant comes "but not the ability of controlling the endpoint". *c* is ruled out because membership grants nothing by itself: "You grant access by assigning IAM roles to principals." *d* is ruled out because the kind of caller sets no limit of its own: "what it may do comes from the role it holds", so the missing permission is the reason.
 3. **c**. The page warns that the deploy permission "might allow a user to export other deployed or deployable models from the project". *b* is ruled out because a predefined role is no model to copy: "Predefined roles often contain more permissions than you need." *a* is ruled out because custom "roles hold exactly the permissions you list", so predict stays beside deploy. *d* is ruled out because the page concludes "so an invoker role should not carry it".
 
 </details>

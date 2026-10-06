@@ -121,24 +121,24 @@ Case `e6` is the rule about types in code: `true` for a `qty` of type `integer` 
    - **c**: Strip the leading sentence and parse all of the text that follows
    - **d**: Raise a parse error, since the reply as a whole is not valid JSON
 
-2. A validator meets `true` for `qty`, which the schema declares an integer of at least 1. What does the problem list hold for `qty`?
-   - **a**: None, since in Python `True` is an `int` and equals 1
-   - **b**: None, once it is converted to 1 and passes the minimum
-   - **c**: Two, one for the wrong type and one for the minimum
-   - **d**: One, for the wrong type, with the minimum skipped
+2. In this module's validator, a value of `true` arrives for `qty`, which the schema declares an integer of at least 1. What does the problem list hold for `qty`?
+   - **a**: No entry, since in Python `True` is an `int` and equals 1
+   - **b**: Nothing, once the value is converted to 1 and passes the minimum
+   - **c**: An entry for the wrong type and a second one for the minimum
+   - **d**: A single entry for the type, and the minimum is not checked
 
-3. Which result ends the extractor loop without another call to the model?
-   - **a**: A reply with a valid body but a total of zero, which breaks the minimum
-   - **b**: A reply that was cut off because it ran into the token limit
-   - **c**: A reply that holds only prose, with no JSON anywhere in it
-   - **d**: A reply that quotes a sentence which the document never contained
+3. In this module's extractor, an answer from the model parses but fails two of the validator's checks. What should the next call carry?
+   - **a**: The first message alone, sent again unchanged as a new request
+   - **b**: The first message, the reply as an assistant turn, and both problems
+   - **c**: The first message and both problems, with the reply left out of it
+   - **d**: One user turn that pastes the reply and both problems into the prompt
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The reply has a fence, and the reader's first step is "If the text has a code fence, take the body of the first fence". *a* is ruled out because the reader "repairs a harmless habit", and only "text with no JSON is retried". *c* is ruled out because the closing remark would reach the parser, while even without a fence the reader keeps only "the span from the first `{` to the last `}`". *d* is ruled out because a parse error comes only "If there is no such span, or it is not valid JSON", and this reply has one.
 2. **d**. The page's own case is that "`true` for a `qty` of type `integer` is one problem", and the type comes before the minimum. *a* is ruled out because "A boolean is never a number or an integer", whatever Python's types say. *b* is ruled out because nothing is converted: "the schema's meaning decides: `true` is not a quantity". *c* is ruled out because "A wrong type stops the checks of that value", so the minimum adds no second problem.
-3. **b**. The page says a reply at the limit has the action "Raise `max_tokens` or continue the response", and that "Asking again with an error list cannot fix either". *a* is ruled out because the validator "returns a list of problems, each with a path", and the next call uses it. *d* is ruled out because a failed check leads to a repair: "the next call needs the whole conversation". *c* is ruled out because a reply with no JSON fails the parse, and "When the reply fails, the next call needs the whole conversation".
+3. **b**. The page says "the next call needs the whole conversation", which ends with "a `user` message that lists each problem with its path and message". *a* is ruled out because "A repair that restarts with the original prompt and no error list tends to repeat the mistake." *d* is ruled out because the reply goes back as "the model's reply as an `assistant` message with exactly its text", not inside the user's prompt. *c* is ruled out because the reply is part of the repair: "The model sees what it wrote and what is wrong with it."
 
 </details>
 
@@ -153,16 +153,16 @@ This quiz covers both pages of the module.
    - **d**: Read `stop_reason` first and re-prompt whenever it is not `end_turn`
 
 2. A team's extractor retries every failed reply up to five times. A document triggers a `refusal`. Following this module's loop, what is the right change?
-   - **a**: End the attempts there and hand the status back to the caller
+   - **a**: End the attempts there and hand the refused status back to the caller
    - **b**: Add the refusal text to the next prompt, for the model to explain itself
    - **c**: Treat it like a cut-off reply and raise `max_tokens` before retrying
    - **d**: Raise the attempts to ten, so that one of the later calls gets past it
 
 3. A schema has an enum of `USD`, `EUR` and `GBP`, and a reply returns `Eur`. How should the program treat it?
-   - **a**: As a match, since the comparison should ignore capital letters in the value
-   - **b**: As a schema violation, since the characters differ from the allowed list
-   - **c**: As an API error, reported with a 400 status code on the request
-   - **d**: As a refusal, because the promised shape was not honoured by the model
+   - **a**: As the value `EUR`, since only its capital letters are different
+   - **b**: As a schema violation, since it is not one of the allowed values
+   - **c**: As a slip to fix by re-prompting the model with the error list
+   - **d**: As a variant to accept by adding `Eur` to the enum's values
 
 4. A reply with `stop_reason` of `max_tokens` holds `{"vendor": "Acme`. Which step should the program take?
    - **a**: Close the braces itself and validate the value it guessed from the text
@@ -174,8 +174,8 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **b**. The page says "If the string is not in the document, the model made it up or changed it", and the check "needs no model". *a* is ruled out because a description is still part of the schema, and "A schema cannot say that a number is at least 0, that a quotation occurs in the document". *c* is ruled out because "a looser match would accept a quotation with a changed number". *d* is ruled out because this reply completes normally, and "A reply that ends with `end_turn` goes on to the parse".
-2. **a**. The page says that "a refusal is a decision, not a malformed answer", and "this course's loop stops and reports"; the documented fallback model is a different request, not a repeat. *d* is ruled out because "The same request gets the same decision, and each call is billed." *b* is ruled out because "Asking again with an error list cannot fix either". *c* is ruled out because a larger limit is the remedy for the other stop reason: "a cut-off reply needs a larger limit".
-3. **a**. The page says "Compare enum values case-insensitively, and avoid enum values that differ only in capitalization." *b* is ruled out because the difference is only in capital letters, and "The example's `normalise_enum` maps `Eur` back to `EUR` before it validates". *c* is ruled out for the same reason, since the response is "with no error and no special `stop_reason`". *d* is ruled out because "A refusal is a result to report", and it is marked by its stop reason, which this reply lacks.
+2. **a**. The page says "this course's loop stops and reports" with the status `refused`, and the documented fallback model is a different request, not a repeat. *d* is ruled out because "The same request gets the same decision, and each call is billed." *b* is ruled out because the refusal text is not a fault to explain away: "a refusal is a decision, not a malformed answer". *c* is ruled out because a larger limit is the remedy for the other stop reason: "a cut-off reply needs a larger limit".
+3. **a**. The page's advice is to "Compare enum values case-insensitively", and compared that way `Eur` is `EUR`. *b* is ruled out because the value is fixed before the check: "The example's `normalise_enum` maps `Eur` back to `EUR` before it validates". *c* is ruled out because no second call is needed: the example "repairs the enum's capital letters" itself, and document 1, whose reply held `Eur`, ended after one attempt. *d* is ruled out because the advice is to "avoid enum values that differ only in capitalization".
 4. **c**. The page says "Raise `max_tokens` or continue the response", and "The reader repairs a harmless habit. It does not repair a broken value". *a* is ruled out because "guessing missing braces turns a cut-off reply into a wrong record". *b* is ruled out because "Asking again with an error list cannot fix either: a cut-off reply needs a larger limit". *d* is ruled out because "a refusal is a decision, not a malformed answer", and a cut-off reply is a different stop reason.
 
 </details>

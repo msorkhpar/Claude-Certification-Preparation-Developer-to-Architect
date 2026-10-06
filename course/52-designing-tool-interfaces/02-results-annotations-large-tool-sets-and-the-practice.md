@@ -98,10 +98,10 @@ This quiz covers both pages of the module.
 1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with four tools: `get_customer`, `lookup_order`, `process_refund` and `escalate_to_human`. Over a week of logs it sends many plain refund requests to `escalate_to_human`, and three rewrites of the system prompt have not changed that. What does this most likely indicate?
    - **a**: The set holds too many tools for the model to choose among reliably
    - **b**: The prompt still needs a sharper rule about which tool to prefer
-   - **c**: The descriptions fail to separate the options and need a redesign
+   - **c**: The descriptions give the model no basis for telling those two apart
    - **d**: The prompt lacks worked examples of refund requests for the model
 
-2. Scenario S3, a multi-agent research system. A coordinator delegates to a web search agent and a document agent, and the cited reports mix up their sources. Both agents hold tools named `analyze_content` and `analyze_document` whose descriptions are nearly the same. Which change fits best?
+2. Scenario S3, a multi-agent research system. A coordinator delegates to a web search agent and a document agent, and the cited reports mix up their sources. Both agents hold tools named `analyze_content` and `analyze_document` whose descriptions are nearly the same, although the first takes a web address and the second an uploaded document id. Which change fits best?
    - **a**: Keep both names and add a prompt rule to use the first for web pages
    - **b**: Rename one for fetched pages and narrow its text to those pages
    - **c**: Merge the pair into one `analyze` tool with a `source` parameter
@@ -117,7 +117,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. Repeated wrong selection that survives prompt rewrites means the tools cannot be told apart from their texts, which is a design fault. *b* is ruled out because the fault is in the surface, and "rewording the system prompt for the fourth time will not change that". *a* is ruled out because four tools are far below the scale at which "Tool selection accuracy degrades with more than 30-50 tools loaded at once." *d* is ruled out because examples in the prompt "leave the descriptions as thin as they were", and the refund and escalation texts still read alike.
-2. **b**. A web-specific name and description removes the overlap at its source. *a* is ruled out because the overlap stays in the descriptions, and the page says to "keep the prompt free of tool-specific triggers". *c* is ruled out because a merged tool "hides two contracts behind one name", while a fetched page and an uploaded document are different jobs. *d* is ruled out because "A parameter that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal."
+2. **b**. A web-specific name and description removes the overlap at its source. *a* is ruled out because the overlap stays in the descriptions, and the page says to "keep the prompt free of tool-specific triggers". *c* is ruled out because a web address and a document id are not "the same operation on one resource, with the same inputs and outputs", so a merged tool "hides two contracts behind one name". *d* is ruled out because "A parameter that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal."
 3. **a**. Under `auto` the point is 10% of the window, and below it everything loads at the start. *b* is ruled out because "Below that, the SDK loads every tool definition into context upfront." *c* is ruled out because the SDK "counts the tokens of the definitions that can be deferred against the context window", not the length of the conversation. *d* is ruled out because the choice turns on the size of the definitions, not on the prompt: "When the total reaches 10% of the window, tool search activates."
 
 </details>

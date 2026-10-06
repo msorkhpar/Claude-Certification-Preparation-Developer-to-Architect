@@ -122,16 +122,16 @@
       "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A new rule should apply to every `.ts` and `.tsx` source at any depth under `src/`, and to nothing outside that folder or of another type. Which `paths` entry does it?",
       "options": {
         "a": "`src/*.{ts,tsx}`",
-        "b": "`src/**/*.{ts,tsx,js}`",
-        "c": "`**/*.{ts,tsx}`",
+        "b": "`src/**/*`",
+        "c": "`**/*.test.{ts,tsx}`",
         "d": "`src/**/*.{ts,tsx}`"
       },
       "key": "d",
       "explanation": {
         "d": "The folder prefix keeps the rule inside `src/`, the `**/` reaches any depth below it, and the brace group covers both extensions.",
         "a": "Ruled out because a single `*` stays in one folder, as \"`*.md` matches Markdown files in the project root\", so only files directly in `src/` would match.",
-        "b": "Ruled out because the pattern \"matches a set, with brace groups expanded\", so the extra `js` entry lets JavaScript files inside `src/` match too.",
-        "c": "Ruled out because \"`**/*.ts` matches TypeScript files in any directory\", so sources outside `src/` would match too."
+        "b": "Ruled out because \"`src/**/*` matches everything under `src/`\", so JavaScript, JSON and every other file type inside `src/` would load the rule too.",
+        "c": "Ruled out because that is the glob for test files, which \"are all reached by one `**/*.test.{ts,tsx}` rule\" in any folder, so it skips the ordinary sources in `src/` and reaches tests outside it such as `tools/export.test.ts`."
       }
     }
   ]

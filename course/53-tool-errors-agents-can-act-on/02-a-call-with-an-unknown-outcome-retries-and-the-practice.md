@@ -79,7 +79,7 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 1. After a timeout, an agent's wrapper sends the same call again at once. Which call may it repeat without any check first?
-   - **a**: Calling a report tool that is annotated with `readOnlyHint`
+   - **a**: Running a tool vouched for only by its read-only hint
    - **b**: Emailing the customer a confirmation of the refund
    - **c**: Creating a support ticket for the case
    - **d**: Looking up the order record by its order number
@@ -93,7 +93,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <details>
 <summary>Answer key</summary>
 
-1. **d**. A read changes nothing when it is repeated. *a* is ruled out because a hint is not a guarantee: "can still write to disk if that's what the handler does". *b* is ruled out because "an email that left the outbox cannot be called back". *c* is ruled out because "a ticket created twice is two tickets".
+1. **d**. A read changes nothing when it is repeated. *a* is ruled out because the hint is unverified: "A hint is the tool author's claim; your retry policy has to rest on what the tool actually does". *b* is ruled out because "an email that left the outbox cannot be called back". *c* is ruled out because "a ticket created twice is two tickets".
 2. **a**. A write that may have happened is followed by a read. *b* is ruled out because a new key defeats the protection that a key gives: "The tool sends the same key on every attempt". *c* is ruled out because the agent would state something unknown as a fact: "the money may have moved, and the agent will say the opposite of what happened". *d* is ruled out because a guess is not news: "it is the absence of news".
 
 </details>
@@ -114,18 +114,18 @@ This quiz covers both pages of the module.
    - **c**: A failed result with its cause, the query sent and any sources found
    - **d**: A failed result carrying the raw timeout exception and its stack trace
 
-3. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A wrapper retries any failed tool call twice; it rescues lookups when the order service is busy, but customers are being refunded twice after timeouts. Which change to the wrapper is best?
+3. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A wrapper retries any failed tool call twice, and customers are being refunded twice after timeouts. Which change to the wrapper is best?
    - **a**: Retry only transient failures, and count every timeout as transient
    - **b**: Retry five times instead of twice, and double the wait between attempts
    - **c**: Retry no writes, and report a timed out write to the customer as failed
-   - **d**: Retry only reads, and writes sent with a key that the receiver honours
+   - **d**: Retry reads and keyed writes, and mark other timed out writes unknown
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. A business rule is understood and refused, and the shopper can be told why. *a* is ruled out because a rule answers the same way every time: "a validation, permission or business failure gives the same answer every time". *c* is ruled out because the refusal must come back flagged: "a business-rule violation comes back with retriable: false". *d* is ruled out because the amount was valid and a rule refused it: "The request is understood and refused by a rule".
 2. **c**. The coordinator needs the context to choose a recovery. *a* is ruled out because a generic status hides what the coordinator needs: "The two opposite mistakes in the guide's sample are the generic status that hides the context". *b* is ruled out because "an empty list marked as a success tells the agent that the search found nothing". *d* is ruled out because a raw exception leaves out what was attempted: "the raw message is rarely enough to act on".
-3. **d**. "A retry is safe when repeating the call cannot do harm", which holds for a read and for a write whose key makes the service "perform the action once however often it receives the key". *a* is ruled out because a timed out write is an unknown outcome, not a transient failure: "The third row is the one that a loop must not fold into the second". *b* is ruled out because more attempts and longer waits only multiply the duplicates: "a refund sent twice refunds twice". *c* is ruled out because the refund may have gone through: "the money may have moved, and the agent will say the opposite of what happened".
+3. **d**. "A retry is safe when repeating the call cannot do harm", which holds for a read and for a write whose key makes the service "perform the action once however often it receives the key", and any other timed out write is reported as unknown, so "the tool does not call again". *a* is ruled out because a timed out write is an unknown outcome, not a transient failure: "The third row is the one that a loop must not fold into the second". *b* is ruled out because more attempts and longer waits only multiply the duplicates: "a refund sent twice refunds twice". *c* is ruled out because the refund may have gone through: "the money may have moved, and the agent will say the opposite of what happened".
 
 </details>
 

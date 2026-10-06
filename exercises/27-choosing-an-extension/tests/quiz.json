@@ -45,10 +45,10 @@
       "scope": "page",
       "stem": "Each edit should leave a line in an audit file, and the context window is already tight. Which feature adds the least to each request?",
       "options": {
-        "a": "A skill with the logging steps and a short description",
-        "b": "An output style that tells Claude to log every change",
-        "c": "A hook whose script runs outside the conversation",
-        "d": "A CLAUDE.md section that holds the logging rules"
+        "a": "A skill whose description names the logging steps",
+        "b": "An output style that tells Claude to log each change",
+        "c": "A hook that appends a record on every change event",
+        "d": "A CLAUDE.md section that lists the logging rules"
       },
       "key": "c",
       "explanation": {
@@ -62,12 +62,12 @@
       "id": "02-choosing-between-similar-features-and-combining-them#q1",
       "page": "02-choosing-between-similar-features-and-combining-them.md",
       "scope": "page",
-      "stem": "A team must make sure that Claude never touches a file named `.env`. Which feature gives the guarantee?",
+      "stem": "A team never wants Claude to edit `secrets.json`, and a review found two edits to it last month. What stops a third?",
       "options": {
-        "a": "A line in CLAUDE.md that forbids the edit",
-        "b": "A hook on the `PreToolUse` event that rejects it",
-        "c": "A skill that explains why the file is private",
-        "d": "An output style that tells Claude to refuse"
+        "a": "A line in CLAUDE.md that forbids editing the file",
+        "b": "A hook that refuses any tool call changing the file",
+        "c": "A skill that explains why the file must stay as is",
+        "d": "An output style that tells Claude to leave the file alone"
       },
       "key": "b",
       "explanation": {
@@ -119,10 +119,10 @@
       "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#q1",
       "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
       "scope": "page",
-      "stem": "A task reads forty log files and looks up each failing job in the company's tracker, which needs a login. What does the page place first?",
+      "stem": "A task reads forty log files and looks up each failing job in the company's hosted tracker. What should be set up first?",
       "options": {
         "a": "A subagent, because the reading would flood the conversation",
-        "b": "An MCP server, because only a connection can reach that system",
+        "b": "An MCP server, because that system needs a connection",
         "c": "A skill, because it can hold the tracker's address and steps",
         "d": "A hook, because it fires each time a job fails"
       },
@@ -176,36 +176,36 @@
       "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#m1",
       "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
       "scope": "module",
-      "stem": "A team wants a linter to run after every file edit, in every session. Which feature fits, and why?",
+      "stem": "In a team's setup, a hook runs the linter after every file edit, and Claude is expected to clear what the linter reports. How do the findings reach Claude and get resolved?",
       "options": {
-        "a": "A skill, because Claude reads it before each change",
-        "b": "A hook, because the matching event fires it each time",
-        "c": "A line in the project file, because it is read at the start of a session",
-        "d": "An output style, because it applies to the whole session"
+        "a": "Hooks add nothing to context, and Claude reruns the linter to read it",
+        "b": "The output enters context as text, and a skill holds the steps for fixing it",
+        "c": "An MCP server relays the output, and Claude queries it after each edit",
+        "d": "An output style reformats the output, and Claude fixes what it shows"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says a hook \"Always fires on its event; the trigger is guaranteed\".",
-        "a": "Ruled out because with a skill, \"Claude interprets the instructions; outcome can vary.\"",
-        "c": "Ruled out because an instruction in the project file \"is a request, not a guarantee\".",
-        "d": "Ruled out because \"Claude follows both as instructions, so neither is enforced.\""
+        "b": "The page says \"a hook's output lands in context as text Claude reads\", and a skill such as `/fix-lint` \"tells Claude how to resolve them\".",
+        "a": "Ruled out because a hook \"costs nothing in context unless its output is added as messages\", so its output can reach Claude without a second run.",
+        "c": "Ruled out because MCP answers \"Is it a connection to a system outside the machine?\", and the linter runs on the machine with the hook.",
+        "d": "Ruled out because \"an output style sets how Claude responds\", not what a hook returns."
       }
     },
     {
       "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#m2",
       "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
       "scope": "module",
-      "stem": "A team uses the same set of skills, hooks and MCP servers in six repositories. What should the team do?",
+      "stem": "A team keeps the same review skill, hook and MCP server in six repositories, and a change made in one often misses the others. What should the team do?",
       "options": {
-        "a": "Package them as one plugin that each repository installs",
-        "b": "Copy the files into each repository by hand and keep them in step",
+        "a": "Publish them as one plugin and install it everywhere",
+        "b": "Keep a master copy and sync the six by hand after changes",
         "c": "Put the whole set into one long CLAUDE.md in each repository",
         "d": "Describe the set in one skill that each repository loads on demand"
       },
       "key": "a",
       "explanation": {
         "a": "The page says \"A plugin bundles skills, hooks, subagents, and MCP servers into a single installable unit\", for \"the same setup in several repositories, or to share it\".",
-        "b": "Ruled out because the trigger is \"A second repository needs the same setup\", which calls for a plugin.",
+        "b": "Ruled out because \"copying files by hand lets the six copies drift apart\".",
         "c": "Ruled out because CLAUDE.md is paid for on \"every request\", and the guidance is \"Keep CLAUDE.md under 200 lines.\"",
         "d": "Ruled out because a skill provides \"Knowledge, workflows, reference material\", and cannot carry hooks or servers."
       }
@@ -237,7 +237,7 @@
       "options": {
         "a": "In CLAUDE.md, so that it is available in every session",
         "b": "In an output style, so that it shapes each response",
-        "c": "In a skill, which loads the full content only when used",
+        "c": "In a skill, so that just its description sits in every request",
         "d": "In an MCP server, so that Claude can open it as a connection"
       },
       "key": "c",

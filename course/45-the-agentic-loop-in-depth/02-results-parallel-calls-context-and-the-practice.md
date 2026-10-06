@@ -67,7 +67,7 @@ These are the wrong answers that the exam's options for this task statement offe
    - **d**: That the reader waits, since the SDK works out the dependency from the tool names
 
 4. A finance dashboard reads the `usage` field of every result to report what agent runs cost, but the invoices are higher for the runs that delegated to subagents. What explains the gap, and what is the fix?
-   - **a**: The helpers bill on their own, so parse each helper's messages out of the stream
+   - **a**: It is read before the helpers finish, so wait for the final message of the stream
    - **b**: The figure is complete, so look for unlogged retries elsewhere in the application
    - **c**: It leaves out the helpers' work, so use the per-model figures for the whole tree
    - **d**: The figure is zeroed whenever a run is cut off, so leave those runs out
@@ -76,8 +76,8 @@ These are the wrong answers that the exam's options for this task statement offe
 <details>
 <summary>Answer key</summary>
 
-3. **b**. Marking the reader read-only lets it run alongside the write, so it may read the old level, and the page's remedy is to split the calls: "a dependency belongs in two turns." *a* is ruled out because the documented rule only keeps state-changing tools from clashing with one another, and says nothing of holding readers back: "Tools that modify state (like Edit, Write, and Bash) run sequentially to avoid conflicts." *c* is ruled out because a tool marked read-only is allowed to run alongside others: "To enable parallel execution for a custom tool, set readOnlyHint in its annotations." *d* is ruled out because the SDK leaves the order to the tool's author, not to its name: "Do not write a tool that depends on another tool from the same turn having finished first unless you know it runs sequentially".
-4. **c**. The `usage` figure counts the main loop only, so subagent work is missing, and the page names the field for the whole tree. *a* is ruled out because the SDK already provides that accounting: "Use `modelUsage`, or `model_usage` in Python, for whole-tree token and cost accounting." *b* is ruled out because the figure is incomplete by design: "A run that delegated to subagents has spent more than `usage` says." *d* is ruled out because zeroed figures belong to a crash and not to a cut-off: "the final result is an `error_during_execution` whose cost fields may be zeroed".
+3. **b**. Marking the reader read-only lets it run alongside the write, so it may read the old level, and the page's remedy is to split the calls: "a dependency belongs in two turns." *a* is ruled out because a reader marked read-only runs alongside the write instead of waiting behind it, so no order holds: "Read-only tools (like Read, Glob, Grep, and MCP tools marked as read-only) can run concurrently." *c* is ruled out because a tool marked read-only is allowed to run alongside others: "To enable parallel execution for a custom tool, set readOnlyHint in its annotations." *d* is ruled out because the SDK leaves the order to the tool's author, not to its name: "Do not write a tool that depends on another tool from the same turn having finished first unless you know it runs sequentially".
+4. **c**. The `usage` figure counts the main loop only, so subagent work is missing, and the page names the field for the whole tree. *a* is ruled out because the result is already the run's final message, and its figure leaves the subagents out however long one waits: "The `usage` field covers only the main agent loop." *b* is ruled out because the figure is incomplete by design: "A run that delegated to subagents has spent more than `usage` says." *d* is ruled out because zeroed figures belong to a crash and not to a cut-off: "the final result is an `error_during_execution` whose cost fields may be zeroed".
 
 </details>
 

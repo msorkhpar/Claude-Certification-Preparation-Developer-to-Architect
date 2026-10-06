@@ -399,17 +399,17 @@ The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/9
    - **c**: Move that customer's vault rows into a separate archive table
    - **d**: Mark that customer's entries as deleted and hide them from reports
 
-2. Scenario: Tomas must set how long a support assistant keeps its audit records. Tomas's design has a shortest period, a longest period and a number of days between them. A court order then opens a case that covers a set of those records. What happens to those records?
-   - **a**: They are trimmed to the floor, since every extra month is exposure
-   - **b**: They follow the same schedule and the case uses what is left
-   - **c**: They are moved to a table with no limit on their retention
-   - **d**: They are held past the ceiling until the matter is settled
+2. Scenario: To keep exposure low, Tomas has a support assistant purge each audit record once it is a month old. In the second month a customer complains about a reply the assistant sent in its first week, and the team finds no record of it. What change to the retention design fixes this?
+   - **a**: Keep the text of each reply in its entry, so that a complaint can be checked against it
+   - **b**: Put every entry under a legal hold, so that none of them is purged
+   - **c**: Raise the ceiling to 365 days, so that an entry is allowed to stay a year
+   - **d**: Add a floor of 90 days, so that nothing is removed before that age
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. Removing the vault rows leaves the entries and unlinks them from the person. *a* is ruled out because "the audit entries hold tokens and the proof is worth keeping", so the customer's entries stay and only their link to the customer goes. *c* is ruled out because "the vault entries for that person go", and an archive table still maps those tokens to the customer. *d* is ruled out because "keeping both leaves the person identifiable", and hidden entries still sit beside the vault map.
-2. **d**. A legal hold is the one thing that outranks the ceiling, and the records are released when it ends. *a* is ruled out because the hold keeps records longer, as "the records in scope are kept past it". *c* is ruled out because "they are released when the hold ends", and an unlimited table keeps them after the case. *b* is ruled out because "A legal hold is the one thing that outranks the ceiling", so the ordinary schedule does not apply.
+2. **d**. A floor is the shortest period an entry is kept, so an entry about a reply is still there when a complaint about it arrives weeks later, which a purge at a month prevents. *a* is ruled out because the log holds the size of the text "and never the text itself", and a stored text would be purged after a month with the rest of the entry. *c* is ruled out because the ceiling is "the longest period kept without a reason", so raising it allows a longer life but does not stop the purge at a month. *b* is ruled out because a hold applies "when a matter is open the records in scope are kept past it", and no matter was open when the reply was sent.
 
 </details>
 
@@ -430,7 +430,7 @@ This quiz covers both pages of the module.
    - **d**: Accept it, since the launch test covered the traffic broadly
 
 3. Scenario: An auditor asks a team to show that a refund paid 200 days ago was put in front of a person. The team's audit entry for it holds the request id, the action, the consequence high, the outcome human and a character count. The team keeps entries for 365 days, above a floor of 90. What should the team tell the auditor?
-   - **a**: That it falls short, since it leaves out the model's confidence score
+   - **a**: That it serves as proof once the request text is attached to it
    - **b**: That it has expired, since it is older than the 90-day floor
    - **c**: That it cannot be shared, since it would expose the customer
    - **d**: That it proves the step, since the routing result is logged
@@ -440,6 +440,6 @@ This quiz covers both pages of the module.
 
 1. **c**. Every control in the register must be a real control in the design, with a layer and a failure mode, so a filter that exists only on paper fails the row. *b* is ruled out because a residual comes on top of a control, as each failure mode "gets a control, an owner and a stated residual". *a* is ruled out because an owner does not create the control, and "a row with a control that does not exist is a wish". *d* is ruled out because "a line in a prompt is a request, and a control is a step the model cannot skip".
 2. **b**. Fairness is the same metric computed per group, with the gap between the best and the worst group shown, and a group at 70 beside an average of 94 is a gap the average does not show. *a* is ruled out because "a segment you cannot label cannot be reported", and this group was labelled, since it was scored at 70 percent. *c* is ruled out because "a headline average hides a failing group exactly as it hides a failing segment", so a higher average can still hide the group at 70. *d* is ruled out because "fairness is a property of outcomes by group", and a broad launch test is not a gap measure.
-3. **d**. A high-consequence action is routed to a person, and the outcome field records that route for this refund, with no text needed to show it. *b* is ruled out because the floor is "the shortest period kept, so that an incident found late can still be examined", and an entry of 200 days is still inside a window of 365. *c* is ruled out because the entry holds "request id, action, consequence, outcome and the size of the text", none of which names the customer. *a* is ruled out because "a high-consequence action goes to `human` whatever the confidence", so a score adds nothing to the proof of the route.
+3. **d**. A high-consequence action is routed to a person, and the outcome field records that route for this refund, with no text needed to show it. *b* is ruled out because the floor is "the shortest period kept, so that an incident found late can still be examined", and an entry of 200 days is still inside a window of 365. *c* is ruled out because the entry holds "request id, action, consequence, outcome and the size of the text", none of which names the customer. *a* is ruled out because the log is meant to "keep proof of what happened, and keep content only where the requirement says so", and the route is proven by the entry without the text.
 
 </details>

@@ -331,10 +331,10 @@ These are the wrong answers the exam's options for this domain offer, each with 
    - **a**: A system prompt that instructs the model to ignore any personal details it comes across
    - **b**: A review step that checks the model's reply for personal details after it has been returned
    - **c**: A larger model that is better at noticing which parts of a note are sensitive ones
-   - **d**: A step in the caller that swaps each identifier for a token and puts the values back afterwards
+   - **d**: A step in the caller that replaces each identifier with a meaningless token before sending
 
 2. Scenario: Rook Mutual's auditors ask for proof of each model call. The team proposes logging every full prompt and reply for ten years. What should the architect say?
-   - **a**: Log each call's id, caller, time and size, and pull content from the source records only when needed
+   - **a**: Log each call's id, caller, time and size, since the content can be rebuilt from the source records
    - **b**: Accept the proposal, since a complete record is the strongest evidence that a regulator can ask to see
    - **c**: Log full content, but encrypt the log, which removes the obligations that a data store has
    - **d**: Log nothing from the calls, since any stored record of a call becomes a risk in itself
@@ -342,7 +342,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. A layer before the call means the provider sees tokens and never the values, and the layer can be tested. *a* is ruled out because "the data has already crossed the boundary". *c* is ruled out because a larger model still receives the data, and "a compliance control belongs in the architecture where it can be tested". *b* is ruled out because a check on the reply, like an instruction, "acts after the data has already crossed the boundary".
+1. **d**. A layer before the call means the provider sees tokens and never the values, and the layer can be tested. *a* is ruled out because "the data has already crossed the boundary". *c* is ruled out because a larger model still receives the data, and noticing what is sensitive is still "the control that depends on the model". *b* is ruled out because a check on the reply, like an instruction, "acts after the data has already crossed the boundary".
 2. **a**. The log proves what happened without becoming a second copy of the data. *b* is ruled out because "the log becomes a second store of sensitive data with its own obligations". *c* is ruled out because encryption protects a store and does not remove it: the log would still be "a store of health or personal data, with all the obligations of one". *d* is ruled out because an audit log must record "who, when, which request and what size".
 
 </details>
@@ -355,7 +355,7 @@ This quiz covers both pages of the module.
    - **a**: Turn it away for now with an error, and let the caller try again once the local site is back up
    - **b**: Send it to the United States deployment, since being available matters more than where the data sits
    - **c**: Send it to the United States deployment, after tokenising the identifiers in the request
-   - **d**: Send it to whichever deployment answers the fastest, and record the exception in the audit log
+   - **d**: Process it on whichever deployment answers the fastest, and record the exception in the audit log
 
 2. Scenario: Alder Dental needs zero data retention on its Claude API deployment and has chosen a model that requires 30-day retention. What is the finding?
    - **a**: None, because the arrangement is organisation-wide and covers the models that are in use
@@ -372,7 +372,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Serving the user from another region breaks the residency requirement, so with no deployment that keeps the data in the region the answer is none. *b* is ruled out because "serving a European user from a United States deployment because it was available is the failure the router exists to prevent". *c* is ruled out because tokenising does not change where the request is processed, and "a user's data goes only to a deployment that keeps it in the user's region". *d* is ruled out because speed is not a criterion, and the router sends a user's data "only to a deployment that keeps it in that region".
+1. **a**. Serving the user from another region breaks the residency requirement, so with no deployment that keeps the data in the region the answer is none. *b* is ruled out because "serving a European user from a United States deployment because it was available is the failure the router exists to prevent". *c* is ruled out because tokenising does not change where the request is processed and does not remove every identifier, since "A person's name has no fixed shape, so a pattern layer leaves it in", and "a user's data goes only to a deployment that keeps it in the user's region". *d* is ruled out because speed is not a criterion, and the router sends a user's data "only to a deployment that keeps it in that region".
 2. **b**. A model that requires 30-day retention cannot meet a zero-retention requirement. *a* is ruled out because the arrangement "excludes models that need 30-day retention" so it does not cover every model. *c* is ruled out because the requirement is zero, not short, and "A model that requires 30-day retention cannot satisfy a zero-retention requirement". *d* is ruled out because the arrangement means "Anthropic does not store prompts or responses at rest", which the deployment's own audit log does not change, and "the model is part of the check and not only the platform".
 3. **c**. A legal hold keeps an entry whatever its age. *a* is ruled out because an entry under a hold "is never removed, whatever its age". *b* is ruled out because the hold "keeps the entry itself and not a copy made at purge time", so nothing is removed first. *d* is ruled out because no audit date decides: "A hold ends only when counsel releases it".
 

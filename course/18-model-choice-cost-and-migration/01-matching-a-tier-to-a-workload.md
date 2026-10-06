@@ -97,8 +97,8 @@ earlier turns without the earlier reasoning, and should test for it.
 
 ## Quiz
 
-1. A team labels support tickets with one word each, and its tests show the cheapest tier is as accurate as the others. Which
-   choice does the page back?
+1. A team labels support tickets with one word each. On a sample of its hardest tickets, Haiku 4.5, Sonnet 5.5 and Opus 5.5
+   score within one point of each other. Which choice does the page back?
    - **a**: The newest release, since a later model has the lowest price
    - **b**: The most capable tier, because ticket text can always hide a hard case
    - **c**: The middle tier, since it balances the tests against the price list
@@ -106,9 +106,9 @@ earlier turns without the earlier reasoning, and should test for it.
 
 2. A job feeds 300,000 tokens to a model and expects a short answer. One model is cheapest by price per million. What rules it
    out first?
-   - **a**: Its context window is smaller than what is sent
+   - **a**: Its context window is smaller than the input it would receive
    - **b**: Its latency is the highest of all the models in the table
-   - **c**: Its tokenizer is older than the tokenizers of the others
+   - **c**: Its tokenizer is older than the tokenizers of the other models
    - **d**: Its max output is the lowest of the models in the table
 
 3. A model lists a price 10% lower per token than its predecessor, but its tokenizer produces about 30% more tokens for the
@@ -121,7 +121,7 @@ earlier turns without the earlier reasoning, and should test for it.
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page's method is to move down "until quality drops, and keep the last tier that held", and the tests show nothing is lost at the cheapest tier. *b* is ruled out because a tier above Opus is "earned by failing an evaluation, not assumed". *c* is ruled out because the method keeps "the cheapest tier that passes", not a tier in the middle. *a* is ruled out because "A newer model can be cheaper than the one it replaces, and the reverse can happen".
+1. **d**. The page's method is to move down "until quality drops, and keep the last tier that held", and a sample that follows "Test the cheap tier first on the hard cases" shows no drop all the way down to Haiku 4.5, the cheapest of the three. *b* is ruled out because a tier above Opus is "earned by failing an evaluation, not assumed". *c* is ruled out because the method keeps "the cheapest tier that passes", not a tier in the middle. *a* is ruled out because "A newer model can be cheaper than the one it replaces, and the reverse can happen".
 2. **a**. The page says "a 300,000-token input rules Haiku 4.5 out whatever its price", because the input must fit the context window. *b* is ruled out because the latency column is relative and "depends on prompt length, output length, and thinking effort". *c* is ruled out because "A tokenizer change moves the count" and does not block an input. *d* is ruled out because max output decides a long answer, as in "a 100,000-token report rules Haiku 4.5 out too", and this answer is short.
 3. **c**. The page multiplies rate by count, as in "costs 0.8 x 1.3 = 1.04 times as much per task", so 0.9 times 1.3 gives 1.17 times the cost per task. *b* is ruled out because the two facts "make the price per token a poor proxy for the price per task". *a* is ruled out because "The same document costs more tokens on a newer model", input included. *d* is ruled out because the page multiplies the factors and does not add the percentages: the real pair "costs 2/3 x 1.3, about 0.87 times as much", where adding would give about 0.97.
 

@@ -121,12 +121,12 @@ test, and the test stays in the suite as the regression guard. If you cannot scr
 
 ## Quiz
 
-1. A screen that a user watches calls the API with the SDK defaults, and a stuck connection now leaves users waiting for
-   about half an hour. What is the best first change?
+1. A screen that a user watches calls the API with the SDK defaults. The connection opens at once but the reply never
+   arrives, and users are now stuck for about half an hour. What is the best first change?
    - **a**: Raise the number of retries so that a stuck call is more likely to succeed in the end
-   - **b**: Cap the whole call at the latency budget and shrink each attempt's timeout to match
+   - **b**: Cap the whole call at the latency budget, since each try adds a timeout to the wait
    - **c**: Turn on debug logging so that the stuck call is recorded in full for later reading
-   - **d**: Lower only the connect timeout, since the stall happens while the connection opens
+   - **d**: Stream the reply instead, since a streamed reply restarts the read clock at each event
 
 2. A team opens a ticket with the provider about one call that failed last night. Which item should their log have
    kept for it?
@@ -138,7 +138,7 @@ test, and the test stays in the suite as the regression guard. If you cannot scr
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says to "set the total deadline from the latency budget of module 12, then choose a per-attempt timeout and an attempt count that fit under it". *a* is ruled out because "three attempts of ten minutes each" is the cause of the half hour, and more retries lengthen it. *c* is ruled out because logging records the wait and does not shorten it, and "debug logging is a development tool". *d* is ruled out because a stall on an open connection is the read clock: "Read: how long to wait between bytes of the reply".
+1. **b**. The page says to "set the total deadline from the latency budget of module 12, then choose a per-attempt timeout and an attempt count that fit under it". *a* is ruled out because "three attempts of ten minutes each" is the cause of the half hour, and more retries lengthen it. *c* is ruled out because logging records the wait and does not shorten it, and "debug logging is a development tool". *d* is ruled out because streaming is the cure for "Timeouts only on long outputs", and a reply that sends no event never restarts the clock, so each try still waits out the default: "The SDKs default to ten minutes".
 2. **d**. The page calls the request id "the one handle the provider's support can use". *b* is ruled out because "prompts and replies unless the spec says they may be stored" stay out of the log. *c* is ruled out because the log must not hold "the API key and the authorization or x-api-key header". *a* is ruled out because "neither job needs a secret or a customer's text", and the reply is customer-facing text.
 
 </details>
@@ -150,8 +150,8 @@ This quiz covers all three pages of the module.
 1. A job's calls sometimes fail with a lost network link, and sometimes with a 409 because two workers touched the same
    resource. How should the job handle the two kinds?
    - **a**: Repeat both at once, since each is a passing fault that clears by itself
-   - **b**: Repeat both, since the second can succeed too once the clash is resolved
-   - **c**: Repeat neither, since each one needs a person to act before it can succeed
+   - **b**: Repeat both, since the second will succeed too once the clash is resolved
+   - **c**: Repeat neither until a person has checked, since each needs someone to act first
    - **d**: Repeat only the second, since the first has no status that the code could read
 
 2. A user-facing summary call has a budget of 2,000 ms. Its client allows three attempts with a 1,000 ms timeout and
@@ -161,12 +161,12 @@ This quiz covers all three pages of the module.
    - **c**: Three seconds, because the waits between the attempts are not counted
    - **d**: Two seconds, because the budget itself stops the call at that point
 
-3. Users behind a corporate proxy report that streamed answers arrive in one lump and, now and then, as an HTML page.
-   Which origin does the page point to first?
-   - **a**: The network path, where a device rewrites or buffers the traffic
-   - **b**: Their credential, which the proxy has stripped from the calls
-   - **c**: Capacity, because the provider could not take every request
-   - **d**: The output limit, because the replies are cut before the end
+3. Only users in one office report that streamed answers arrive in one lump and, now and then, as an HTML page; the
+   same app runs smoothly from home. What is the most likely origin?
+   - **a**: The network path, because a hop on the way alters what comes back
+   - **b**: Their credential, because that office's setup strips the key from calls
+   - **c**: Capacity, because the provider is too busy to take every request
+   - **d**: The output limit, because the replies are cut off before the end
 
 4. Errors with status 529 appear in bursts each time a marketing campaign multiplies the job's traffic. What is the
    best response?
@@ -180,7 +180,7 @@ This quiz covers all three pages of the module.
 
 1. **b**. The page's table lists "A lost or timed-out connection (no status)" and "408, 409 (once the conflict is resolved)" under "Retry". *a* is ruled out because a 409 is retried only "once the conflict is resolved". *c* is ruled out because a lost link needs no person: "A lost or timed-out connection (no status)" is the first row under "Retry". *d* is ruled out because the SDKs retry "because of a network connectivity problem" as well.
 2. **a**. The page's formula is "attempts x timeout + sum of the waits between attempts": three seconds of attempts and one and a half seconds of waits make four and a half. *b* is ruled out because "the time a caller may wait is not the timeout". *c* is ruled out because the formula adds "the waits between attempts". *d* is ruled out because a budget bounds nothing until you "Set a total deadline from the budget", and this client only sets a per-attempt timeout.
-3. **a**. The page's table lists "works locally, fails behind the proxy" under the path, with the checks "Is the body still JSON? Is the stream buffered?". *b* is ruled out because a credential fault is a "401 or 403 from one environment only", and a stripped key would not give an HTML page with partial streaming. *c* is ruled out because capacity means "the request was fine and the service could not take it now", with a 429 or 529 status. *d* is ruled out because a cut reply is "replies cut mid-sentence, status 200" and does not come as HTML.
+3. **a**. The page's table puts "works locally, fails behind the proxy" under the path, with the checks "Is the body still JSON? Is the stream buffered?"; an HTML page fails the first and a lumped stream the second, in one office only. *b* is ruled out because a credential fault shows as a "401 or 403 from one environment only", an error status rather than a buffered stream or an HTML page. *c* is ruled out because capacity means "the request was fine and the service could not take it now", with a 429 or 529 status. *d* is ruled out because a cut reply is "replies cut mid-sentence, status 200" and does not come as HTML.
 4. **c**. The table lists "529 in bursts" with the check "Is your traffic ramping fast?" and the cure "Back off; ramp up gradually". *b* is ruled out because immediate retries make it worse: "a brief overload becomes a retry storm that keeps the service down". *a* is ruled out because a 529 is not the account's quota: "529 happens when the whole service is busy". *d* is ruled out because raising the timeout is a cure for "Timeouts only on long outputs", while a 529 comes from "The provider's capacity".
 
 </details>

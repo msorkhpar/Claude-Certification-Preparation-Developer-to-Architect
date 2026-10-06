@@ -416,7 +416,7 @@ This quiz covers both pages of the module.
 
 2. Scenario: Lars hands a finished assistant to an operations team with an architecture diagram and a list of settings. The first alert fires on a Saturday and nobody knows who should act on it. Which part of the hand-off was missing?
    - **a**: A longer pilot, so that more alerts would have fired before the launch
-   - **b**: A runbook kept by a named service owner, saying who responds and how
+   - **b**: A runbook kept by a named owner of the service, explaining each warning
    - **c**: A monthly report to the sponsor listing the alerts of the previous period
    - **d**: A second diagram showing the alert thresholds drawn on the architecture
 

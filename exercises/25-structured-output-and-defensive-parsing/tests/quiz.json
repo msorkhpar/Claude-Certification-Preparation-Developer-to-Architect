@@ -8,14 +8,14 @@
       "stem": "A team moves an invoice extractor to Claude Sonnet 5.5. The old code set `tool_choice` to an invoice tool and read the call's `input`. What should the request use now?",
       "options": {
         "a": "A tool choice of `any`, so that the invoice tool is still always called",
-        "b": "The invoice tool with `strict: true` and a tool choice of `auto`",
+        "b": "The invoice tool marked `strict: true` and named in a tool choice of `tool`",
         "c": "A prompt that shows the invoice record and asks for the same shape",
         "d": "Structured outputs, with the record's schema in `output_config.format`"
       },
       "key": "d",
       "explanation": {
         "d": "A forced tool no longer works on this model, and the documentation's advice is structured outputs \"when you need a response in a fixed JSON shape\".",
-        "b": "Ruled out because the task returns a record, and \"A task that must return a record, such as an invoice, uses structured outputs\".",
+        "b": "Ruled out because `strict: true` does not change the forcing, and of a forced tool the page says \"On some models it no longer works\".",
         "c": "Ruled out because a prompt gives \"no guarantee; the program must parse defensively\".",
         "a": "Ruled out because `any` is one of the values that \"return a 400 error\" on this model."
       }
@@ -26,9 +26,9 @@
       "scope": "page",
       "stem": "The schema says a field named `total` has a `minimum` of 0, and the request is sent with that schema unchanged. What happens?",
       "options": {
-        "a": "It fails with a 400 error that comes with details of the unsupported item",
+        "a": "The API rejects the call as invalid and sends back no reply",
         "b": "The reply is checked against the limit and retried for the caller",
-        "c": "The limit is read as a hint and the call goes on as usual",
+        "c": "The limit is read as a hint only, and the call goes on as usual",
         "d": "The total is kept at 0 or above while the reply is generated"
       },
       "key": "a",
@@ -81,12 +81,12 @@
       "id": "02-defensive-parsing-validation-and-the-re-prompt#q2",
       "page": "02-defensive-parsing-validation-and-the-re-prompt.md",
       "scope": "page",
-      "stem": "A validator meets `true` for `qty`, which the schema declares an integer of at least 1. What does the problem list hold for `qty`?",
+      "stem": "In this module's validator, a value of `true` arrives for `qty`, which the schema declares an integer of at least 1. What does the problem list hold for `qty`?",
       "options": {
-        "a": "None, since in Python `True` is an `int` and equals 1",
-        "b": "None, once it is converted to 1 and passes the minimum",
-        "c": "Two, one for the wrong type and one for the minimum",
-        "d": "One, for the wrong type, with the minimum skipped"
+        "a": "No entry, since in Python `True` is an `int` and equals 1",
+        "b": "Nothing, once the value is converted to 1 and passes the minimum",
+        "c": "An entry for the wrong type and a second one for the minimum",
+        "d": "A single entry for the type, and the minimum is not checked"
       },
       "key": "d",
       "explanation": {
@@ -100,19 +100,19 @@
       "id": "02-defensive-parsing-validation-and-the-re-prompt#q3",
       "page": "02-defensive-parsing-validation-and-the-re-prompt.md",
       "scope": "page",
-      "stem": "Which result ends the extractor loop without another call to the model?",
+      "stem": "In this module's extractor, an answer from the model parses but fails two of the validator's checks. What should the next call carry?",
       "options": {
-        "a": "A reply with a valid body but a total of zero, which breaks the minimum",
-        "b": "A reply that was cut off because it ran into the token limit",
-        "c": "A reply that holds only prose, with no JSON anywhere in it",
-        "d": "A reply that quotes a sentence which the document never contained"
+        "a": "The first message alone, sent again unchanged as a new request",
+        "b": "The first message, the reply as an assistant turn, and both problems",
+        "c": "The first message and both problems, with the reply left out of it",
+        "d": "One user turn that pastes the reply and both problems into the prompt"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says a reply at the limit has the action \"Raise `max_tokens` or continue the response\", and that \"Asking again with an error list cannot fix either\".",
-        "a": "Ruled out because the validator \"returns a list of problems, each with a path\", and the next call uses it.",
-        "d": "Ruled out because a failed check leads to a repair: \"the next call needs the whole conversation\".",
-        "c": "Ruled out because a reply with no JSON fails the parse, and \"When the reply fails, the next call needs the whole conversation\"."
+        "b": "The page says \"the next call needs the whole conversation\", which ends with \"a `user` message that lists each problem with its path and message\".",
+        "a": "Ruled out because \"A repair that restarts with the original prompt and no error list tends to repeat the mistake.\"",
+        "d": "Ruled out because the reply goes back as \"the model's reply as an `assistant` message with exactly its text\", not inside the user's prompt.",
+        "c": "Ruled out because the reply is part of the repair: \"The model sees what it wrote and what is wrong with it.\""
       }
     },
     {
@@ -140,16 +140,16 @@
       "scope": "module",
       "stem": "A team's extractor retries every failed reply up to five times. A document triggers a `refusal`. Following this module's loop, what is the right change?",
       "options": {
-        "a": "End the attempts there and hand the status back to the caller",
+        "a": "End the attempts there and hand the refused status back to the caller",
         "b": "Add the refusal text to the next prompt, for the model to explain itself",
         "c": "Treat it like a cut-off reply and raise `max_tokens` before retrying",
         "d": "Raise the attempts to ten, so that one of the later calls gets past it"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says that \"a refusal is a decision, not a malformed answer\", and \"this course's loop stops and reports\"; the documented fallback model is a different request, not a repeat.",
+        "a": "The page says \"this course's loop stops and reports\" with the status `refused`, and the documented fallback model is a different request, not a repeat.",
         "d": "Ruled out because \"The same request gets the same decision, and each call is billed.\"",
-        "b": "Ruled out because \"Asking again with an error list cannot fix either\".",
+        "b": "Ruled out because the refusal text is not a fault to explain away: \"a refusal is a decision, not a malformed answer\".",
         "c": "Ruled out because a larger limit is the remedy for the other stop reason: \"a cut-off reply needs a larger limit\"."
       }
     },
@@ -159,17 +159,17 @@
       "scope": "module",
       "stem": "A schema has an enum of `USD`, `EUR` and `GBP`, and a reply returns `Eur`. How should the program treat it?",
       "options": {
-        "a": "As a match, since the comparison should ignore capital letters in the value",
-        "b": "As a schema violation, since the characters differ from the allowed list",
-        "c": "As an API error, reported with a 400 status code on the request",
-        "d": "As a refusal, because the promised shape was not honoured by the model"
+        "a": "As the value `EUR`, since only its capital letters are different",
+        "b": "As a schema violation, since it is not one of the allowed values",
+        "c": "As a slip to fix by re-prompting the model with the error list",
+        "d": "As a variant to accept by adding `Eur` to the enum's values"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says \"Compare enum values case-insensitively, and avoid enum values that differ only in capitalization.\"",
-        "b": "Ruled out because the difference is only in capital letters, and \"The example's `normalise_enum` maps `Eur` back to `EUR` before it validates\".",
-        "c": "is ruled out for the same reason, since the response is \"with no error and no special `stop_reason`\".",
-        "d": "Ruled out because \"A refusal is a result to report\", and it is marked by its stop reason, which this reply lacks."
+        "a": "The page's advice is to \"Compare enum values case-insensitively\", and compared that way `Eur` is `EUR`.",
+        "b": "Ruled out because the value is fixed before the check: \"The example's `normalise_enum` maps `Eur` back to `EUR` before it validates\".",
+        "c": "Ruled out because no second call is needed: the example \"repairs the enum's capital letters\" itself, and document 1, whose reply held `Eur`, ended after one attempt.",
+        "d": "Ruled out because the advice is to \"avoid enum values that differ only in capitalization\"."
       }
     },
     {

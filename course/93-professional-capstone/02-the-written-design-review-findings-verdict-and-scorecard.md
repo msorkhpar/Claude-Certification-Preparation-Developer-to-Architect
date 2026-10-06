@@ -603,7 +603,7 @@ The practice is in [`exercises/93-professional-capstone`](../../exercises/93-pro
    - **a**: The sponsor would have to read every finding to reach the verdict
    - **b**: Two reviewers would still produce different lists from the same design
    - **c**: A finding that spans two domains would be listed twice in the review
-   - **d**: A rejecting P5 item could fall below P1 items that ask for revision
+   - **d**: A flaw that rejects could sit below flaws that only ask for revision
 
 <details>
 <summary>Answer key</summary>
@@ -618,10 +618,10 @@ The practice is in [`exercises/93-professional-capstone`](../../exercises/93-pro
 This quiz covers both pages of the module.
 
 1. Scenario: A proposal uses a team of agents for a task whose steps are known in advance and whose value equals ten chats. The designer says the team is more flexible. What does the review record?
-   - **a**: One medium item under P1, so it goes back for revision
-   - **b**: One high item under P1, so it is rejected
-   - **c**: Two medium items under P1, so it goes back for revision
-   - **d**: Two low items under P1, so it is approved
+   - **a**: One medium and one low item under P1, so it goes back for revision
+   - **b**: One high item under P1 for the team's cost, so it is rejected
+   - **c**: Two medium items under P1, so the plan goes back for revision
+   - **d**: Two low items under P1, so it is approved with both recorded
 
 2. Scenario: A review is run on two proposals that differ in one number: the first has an evaluation set of 20 cases and the second has 19. What does the review record for each?
    - **a**: Both are flagged, and the thinner suite more severely
@@ -638,7 +638,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The path is known, so the team is unneeded, and a value of ten is below fifteen, which makes two medium rules fire. *a* is ruled out because the first page's cost rule gives a second item: "A team of agents would cost about 15 times a chat". *b* is ruled out because "reject if any finding is high", and neither rule is high. *d* is ruled out because the rule table lists "an agent or a team is used where the path is known" as medium and not low.
+1. **c**. The path is known, so the team is unneeded, and a value of ten is below fifteen, which makes two medium rules fire. *a* is ruled out because the table lists "a team's value is below 15 chats' worth" as medium, like the known-path rule, so neither item is low. *b* is ruled out because "reject if any finding is high", and neither rule is high. *d* is ruled out because the rule table lists "an agent or a team is used where the path is known" as medium and not low.
 2. **b**. The edge is met at 20 and missed at 19, and the rule is low. *a* is ruled out because "an evaluation set of exactly 20 cases passes", so the fuller suite is not flagged, and the table lists the rule as low for "fewer than 20 evaluation cases", whatever the shortfall. *c* is ruled out because "One step past any of them is a finding". *d* is ruled out because "an evaluation set of exactly 20 cases passes", so the fuller suite has no finding.
 3. **d**. Identifiers reaching the model is high and the audit log keeping content is medium, both in P5. *a* is ruled out because the table lists "the audit log stores content" as medium, which asks for revision. *b* is ruled out because the table lists "identifiers go to the model" as high, which blocks. *c* is ruled out because the low bullet reads "It is recorded and does not hold the design back", and neither flaw is low.
 

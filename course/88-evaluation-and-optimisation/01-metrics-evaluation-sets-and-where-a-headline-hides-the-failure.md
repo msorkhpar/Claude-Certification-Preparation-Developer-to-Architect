@@ -666,10 +666,10 @@ model for 90% accuracy within 2000 ms: medium; for 94% within 2000 ms: none
    - **d**: The number of cases in the set behind each of the scores
 
 2. A team grades a research assistant's free-form reports only with exact-match checks, and the score barely moves when the quality of the reports visibly changes. Which addition fits best?
-   - **a**: A longer answer key, so that more phrasings of each answer count as a match
-   - **b**: Human review of every report, as people set the standard other graders must meet
+   - **a**: A longer answer key, with many more phrasings of each answer listed
+   - **b**: Human review of every report, with a person setting each of the scores
    - **c**: A model judge working from a rubric, with people sampling its misses
-   - **d**: Fewer test cases, each graded by hand with care for a cleaner signal
+   - **d**: Fewer test cases, with every one of them carefully graded by hand
 
 <details>
 <summary>Answer key</summary>

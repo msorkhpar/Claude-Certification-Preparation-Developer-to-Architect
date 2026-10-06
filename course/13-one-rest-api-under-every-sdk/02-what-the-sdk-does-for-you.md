@@ -420,7 +420,7 @@ how a key reaches a log.
 1. Verbose diagnostics are on in a deployed service. Credentials look masked in the output, but customers' messages show
    up in it. What should the team do?
    - **a**: Keep it on, because the SDK masks sensitive data in request and response bodies
-   - **b**: Switch that mode off for live traffic and record request ids instead
+   - **b**: Switch that mode off for live traffic so that request bodies stay out of it
    - **c**: Redact the headers further so that the output holds no credentials at all
    - **d**: Log only the failing calls so that less customer text reaches the output
 
@@ -429,12 +429,12 @@ how a key reaches a log.
    - **a**: It is attempted once, because the SDK reads the cap and stops early
    - **b**: It is attempted once, because a 429 is never retried by the SDK
    - **c**: It is attempted three times, and the third attempt succeeds after a pause
-   - **d**: It is attempted three times in all, and every attempt fails
+   - **d**: It is attempted three times in all, and every one of the attempts fails
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. In that mode "all HTTP requests and responses are logged, including headers and bodies", so it does not belong on live traffic, and request ids are the safe handle for a support ticket. *a* is ruled out because "sensitive data in request and response bodies may still be visible". *c* is ruled out because "headers are partly redacted, bodies are not", and the leak is in the bodies. *d* is ruled out because failing calls carry customer text too, and "customer text does not belong in a log by default".
-2. **d**. Two retries after the first attempt make three, and for a spend-cap 429 "every retry of it fails". *b* is ruled out because "certain errors are automatically retried 2 times by default". *c* is ruled out because the cap "stays in force until the next month begins", so no pause helps. *a* is ruled out because the retry default "applies to every retryable failure, including ones that cannot succeed", and the SDK does not inspect the cap.
+1. **b**. In that mode "all HTTP requests and responses are logged, including headers and bodies", so it does not belong on live traffic, where those bodies are customer text. *a* is ruled out because "sensitive data in request and response bodies may still be visible". *c* is ruled out because "headers are partly redacted, bodies are not", and the leak is in the bodies. *d* is ruled out because failing calls carry customer text too, and "customer text does not belong in a log by default".
+2. **d**. Two retries after the first attempt make three, and for a spend-cap 429 "every retry of it fails". *b* is ruled out because a spend-cap 429 is retried, and "module 15 shows the SDK retrying one". *c* is ruled out because the cap "stays in force until the next month begins", so no pause helps. *a* is ruled out because the retry default "applies to every retryable failure, including ones that cannot succeed", and the SDK does not inspect the cap.
 
 </details>

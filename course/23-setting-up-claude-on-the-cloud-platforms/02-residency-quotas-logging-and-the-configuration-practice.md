@@ -103,18 +103,18 @@ The ARN rule is a shape check only. The `foundation-model` form is the one AWS d
    - **c**: AWS alone decides, since the quota is a Bedrock matter only
    - **d**: It is above the self-service ceiling, so Anthropic must approve it
 
-3. A compliance team must be able to investigate misuse of Claude by the project's users on Google Cloud. What do the pages advise?
-   - **a**: Rely on Anthropic to hold the prompts for the customer
-   - **b**: Switch on request-response logging for at least thirty days
-   - **c**: Log the prompts alone, since misuse shows up in what users ask
-   - **d**: Keep request logs for a week, since misuse surfaces within days
+3. A Google Cloud project using Claude receives an abuse report three weeks after the activity, and the team finds nothing to inspect. What should have been in place?
+   - **a**: Anthropic retaining the project's prompts for the customer to review
+   - **b**: Logs of both prompts and replies, retained for a month or longer
+   - **c**: Logs of the prompts alone, since abuse shows in what people ask
+   - **d**: Request logs rotated weekly, since abuse surfaces within days
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The page says a specific region serves `claude-sonnet-4-6` only and that the EU needs "the `eu` multi-region endpoint or a `europe-` region", so Sonnet 5.5 takes the multi-region value. *a* is ruled out because "Global endpoints: Dynamic routing for maximum availability" promises availability only, while residency comes with the multi-region kind, "for data residency with high availability". *c* is ruled out because "A specific region serves `claude-sonnet-4-6` only". *d* is ruled out because "The endpoint decides where a request may be processed."
 2. **d**. The page says "You can request up to 5 million input TPM and 500,000 output TPM without additional Anthropic approval", and 8 million is above it. *b* is ruled out because "Default quota is 2 million input tokens per minute (TPM)." and 8 million is far above that. *c* is ruled out because the approval named is "without additional Anthropic approval", so Anthropic is part of the decision. *a* is ruled out because self-service stops at the ceiling, not at the default: "Above those figures, Anthropic has to approve."
-3. **b**. The page says "Enable 30-day request-response logging of your prompt and completion activity to track any model misuse by your users." *a* is ruled out because "Turning on this service does not give Google or Anthropic any access to your content." *c* is ruled out because the page asks for "prompt and completion activity to track any model misuse by your users", not prompts alone. *d* is ruled out because "Anthropic recommends that you log your activity on at least a 30-day rolling basis", not for a week.
+3. **b**. Activity from three weeks back can only be inspected if both sides of each exchange were logged and kept past that gap, and the page says to "Enable 30-day request-response logging". *a* is ruled out because "Turning on this service does not give Google or Anthropic any access to your content." *c* is ruled out because the logging covers "prompt and completion activity", not prompts alone. *d* is ruled out because Anthropic "recommends retaining activity logs on at least a 30-day rolling basis", and a weekly rotation would have deleted the activity before the report arrived.
 
 </details>
 
@@ -140,11 +140,11 @@ This quiz covers both pages of the module.
    - **c**: It passes the request, since the input figure is under 5,000,000
    - **d**: It passes the request, since output has no quota of its own stated
 
-4. A project with residency us asks for endpoint us-central1 and model claude-opus-5-5. What does the review say?
-   - **a**: It passes, since one region keeps the data most tightly in the us
-   - **b**: It passes, since the region begins with the us prefix
-   - **c**: It fails, since a named location serves one older name only
-   - **d**: It fails, since the model id lacks the `anthropic.` prefix
+4. A project with residency us asks for endpoint us and model anthropic.claude-sonnet-5-5. What does the review say?
+   - **a**: It passes, since the multi-region value keeps the data in the us
+   - **b**: It passes, since the id takes the form the model ARNs use
+   - **c**: It fails, since a Vertex id carries no prefix of that kind
+   - **d**: It fails, since the us value serves one older model only
 
 <details>
 <summary>Answer key</summary>
@@ -152,6 +152,6 @@ This quiz covers both pages of the module.
 1. **b**. The rule is "Every resource is a model ARN with a region from the Bedrock region list, the `anthropic.` model id form, and no wildcard." *a* is ruled out because that rule concerns the version: "The policy has the version `2012-10-17`", which a star in a resource does not change. *c* is ruled out because that rule concerns the action field, "no wildcard anywhere in an action", and the star sits in the resource. *d* is ruled out because that rule concerns the effect and the negated fields, "only `Allow` statements, and no `NotAction` or `NotResource`", and a star in a resource is neither.
 2. **a**. The rule is "The Vertex role is a custom role (its `id` starts with `projects/` or `organizations/`, not `roles/`) whose only permission is `aiplatform.endpoints.predict`." *b* is ruled out because the rule asks for a role "whose only permission is `aiplatform.endpoints.predict`", and adding a deny leaves the bundle's extra permissions in place. *c* is ruled out because basic roles "provide access control to your Agent Platform resources at the project level", which a custom role is meant to avoid. *d* is ruled out because the id "starts with `projects/` or `organizations/`, not `roles/`", and a predefined id starts with `roles/`.
 3. **a**. The rule is "Without Anthropic's approval a quota request is at most 5,000,000 input tokens and 500,000 output tokens per minute.", and 800,000 output is above it. *b* is ruled out because the default is only the starting quota, and a team "can request up to 5 million input TPM" on its own. *c* is ruled out because the ceiling has two figures, and either one can fail: "Past 5 million input and 500,000 output tokens per minute, Anthropic has to approve." *d* is ruled out because the self-service figures include "500,000 output TPM without additional Anthropic approval".
-4. **c**. The rule is "A specific region serves `claude-sonnet-4-6` only", and the model asked for is newer. *b* is ruled out because the prefix rule, "`us` needs `us` or a `us-` region", is met but is not the only rule. *a* is ruled out because residency is not the only test: "the docs say specific regions serve older models". *d* is ruled out because "A Vertex model id never carries the `anthropic.` prefix".
+4. **c**. The rule is "A Vertex model id never carries the `anthropic.` prefix", and the id asked for has it. *b* is ruled out because that form belongs to the Bedrock side, and "The Vertex model id is the plain name, `claude-sonnet-5-5`, with no `anthropic.` prefix." *a* is ruled out because residency is met but the prefix is a Bedrock rule, "a region from the Bedrock region list, the `anthropic.` model id form", and fails on Vertex. *d* is ruled out because the multi-region kind serves the new model: "A project that must stay in the EU and use Sonnet 5.5 therefore uses the `eu` multi-region endpoint".
 
 </details>

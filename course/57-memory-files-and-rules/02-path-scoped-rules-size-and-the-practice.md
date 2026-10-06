@@ -741,8 +741,8 @@ This quiz covers both pages of the module.
 
 3. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A new rule should apply to every `.ts` and `.tsx` source at any depth under `src/`, and to nothing outside that folder or of another type. Which `paths` entry does it?
    - **a**: `src/*.{ts,tsx}`
-   - **b**: `src/**/*.{ts,tsx,js}`
-   - **c**: `**/*.{ts,tsx}`
+   - **b**: `src/**/*`
+   - **c**: `**/*.test.{ts,tsx}`
    - **d**: `src/**/*.{ts,tsx}`
 
 <details>
@@ -750,7 +750,7 @@ This quiz covers both pages of the module.
 
 1. **c**. The default is that AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above, and the local file counts as one, so the fallback ends. *a* is ruled out because a conflict matters only for the same behaviour, where "Claude may pick one arbitrarily", and a sandbox address shares no behaviour with the other file, while its presence alone counts: "A `CLAUDE.md`, a `.claude/CLAUDE.md` or a `CLAUDE.local.md` in the working directory or any directory above it counts". *b* is ruled out because "All discovered files are concatenated into context rather than overriding each other", so no file replaces the ones after it. *d* is ruled out because a git-ignored file is read beside the committed one and not instead of it: "In each folder the local file comes after the shared one".
 2. **a**. A path between backticks is a mention and not an import, so the five files were never pulled in. *b* is ruled out because imported files "are expanded and loaded into context at launch alongside the CLAUDE.md that references them", whatever Claude reads later. *c* is ruled out because the limit applies to chains, since imports can import others "with a maximum depth of four hops", and each of the five is one hop from the root. *d* is ruled out because the approval dialog is for "Imports that point outside the project", and these files sit inside the repository.
-3. **d**. The folder prefix keeps the rule inside `src/`, the `**/` reaches any depth below it, and the brace group covers both extensions. *a* is ruled out because a single `*` stays in one folder, as "`*.md` matches Markdown files in the project root", so only files directly in `src/` would match. *b* is ruled out because the pattern "matches a set, with brace groups expanded", so the extra `js` entry lets JavaScript files inside `src/` match too. *c* is ruled out because "`**/*.ts` matches TypeScript files in any directory", so sources outside `src/` would match too.
+3. **d**. The folder prefix keeps the rule inside `src/`, the `**/` reaches any depth below it, and the brace group covers both extensions. *a* is ruled out because a single `*` stays in one folder, as "`*.md` matches Markdown files in the project root", so only files directly in `src/` would match. *b* is ruled out because "`src/**/*` matches everything under `src/`", so JavaScript, JSON and every other file type inside `src/` would load the rule too. *c* is ruled out because that is the glob for test files, which "are all reached by one `**/*.test.{ts,tsx}` rule" in any folder, so it skips the ordinary sources in `src/` and reaches tests outside it such as `tools/export.test.ts`.
 
 </details>
 

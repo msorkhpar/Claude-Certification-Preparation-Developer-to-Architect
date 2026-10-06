@@ -132,7 +132,7 @@ accepts a forced choice, set `tool_choice`; otherwise prompt for it.
 
 2. Which description follows the documentation's advice for a tool named `get_stock_price`?
    - **a**: Returns the latest USD quote for a listed ticker, for current quotes only and never for history
-   - **b**: Returns the full quote record for a ticker, history included, so the model can pick what it needs
+   - **b**: Returns price, volume and market cap for a ticker, so the model has every figure it could need
    - **c**: Gets the stock price for a ticker symbol, so the model can call it whenever any ticker is named in a message
    - **d**: Returns the latest quote for a ticker, and asks for the model's full reasoning in a `thoughts` field
 
@@ -146,7 +146,7 @@ accepts a forced choice, set `tool_choice`; otherwise prompt for it.
 <summary>Answer key</summary>
 
 1. **d**. The page says a client tool call ends with `stop_reason: "tool_use"` and "your code drives a loop". *a* is ruled out because Anthropic's servers run only the server tools, where "you never construct a `tool_result` block". *c* is ruled out because "The model never executes anything on its own." *b* is ruled out because a tool definition carries no code: Claude "only sees the schema you provided and the result you returned".
-2. **a**. The page asks for a description that explains what the tool does, when to use it and when not to, and what it does not return, and this one says what it does, when to use it, and that history is not returned. *c* is ruled out because a short description is the pattern to avoid: "Provide extremely detailed descriptions." *b* is ruled out because a tool should return "only the fields the model needs for its next step, since bloated results waste context". *d* is ruled out because a parameter that asks for the model's thinking "may lead to a `reasoning_extraction` refusal".
+2. **a**. The page asks for a description that explains what the tool does, when to use it and when not to, and what it does not return, and this one says what it does, when to use it, and that history is not returned. *c* is ruled out because it says to call the tool whenever a ticker is named, while the page asks for "when to use it and when not to". *b* is ruled out because it lists what comes back and names no limit, while the page asks it to say "what the tool does not return". *d* is ruled out because a parameter that asks for the model's thinking "may lead to a `reasoning_extraction` refusal".
 3. **c**. The page says that for Claude Opus 5.5, Claude Sonnet 5.5, Claude Fable 5.1 and Claude Mythos 5.1, "`any` and `tool` return a 400 error". *b* is ruled out because `any` "doesn't force a particular tool", and the request is rejected before any tool is chosen. *a* is ruled out because for the values that work, "the API prefills the assistant message to force a tool to be used", so no explanation comes first. *d* is ruled out because the page's advice is to choose it yourself: "Use `auto` with strict tools or structured outputs."
 
 </details>

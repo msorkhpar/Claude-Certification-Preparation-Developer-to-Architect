@@ -578,9 +578,9 @@ expired lines, since "You will not be billed for these requests."
 
 ## Quiz
 
-1. The first line of a result file carries the id of the request sent third. What should the program do?
+1. The first line of a result file belongs to the request sent third. What should the program do?
    - **a**: Treat the file as corrupt, since entries must follow the order of submission
-   - **b**: Pair each entry with its source through the id you set, whatever the order
+   - **b**: Match each entry by its `custom_id`, since the order carries no meaning
    - **c**: Sort by finishing time, since that is the order that counts for the match
    - **d**: Match by position once the first entries are read, since the rest follow suit
 
@@ -599,7 +599,7 @@ expired lines, since "You will not be billed for these requests."
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says "always use the `custom_id` field" to match, since the file order carries no meaning. *a* is ruled out because the file "may not match the ordering of requests when the batch was created". *c* is ruled out because the page names the match key: "always use the `custom_id` field". *d* is ruled out because "Batch results can be returned in any order".
+1. **b**. The page says "always use the `custom_id` field" to match, since the file order carries no meaning. *a* is ruled out because the file "may not match the ordering of requests when the batch was created". *c* is ruled out because "The result lines carry `custom_id` and a `result` whose `type` is one of the four.", with no finishing time to sort by, and "Position in the file means nothing." *d* is ruled out because "Batch results can be returned in any order".
 2. **d**. The page says "You will not be billed for these requests." of the three failure types. *b* is ruled out because "You will not be billed for these requests." is stated for the errored results too. *c* is ruled out because "Only the `succeeded` results carry tokens that are billed." *a* is ruled out because an expired request means "the 24 hours passed before this request was sent", so it never ran.
 3. **b**. The page's table says for this error "fix it first; the same request fails again", and then a new batch can carry it. *a* is ruled out because of "fix it first; the same request fails again". *c* is ruled out because "once a batch has been submitted, it cannot be modified", so a batch does not retry on its own. *d* is ruled out because the page says "Collect the failures into a new, smaller batch."
 
@@ -609,17 +609,17 @@ expired lines, since "You will not be billed for these requests."
 
 This quiz covers both pages of the module.
 
-1. A nightly job has 180,000 requests and wants the answers by the next evening. Which plan should they follow?
+1. A nightly job of 80,000 requests comes to 300 MB, and the answers are wanted by the next evening. Which plan should the team follow?
    - **a**: Send one batch and read the results in the order they were sent
    - **b**: Split into at least two batches and match each result by its id
-   - **c**: Send them live with `stream: true` and skip the batch route
+   - **c**: Split into batches that first pre-warm the cache with `max_tokens: 0`
    - **d**: Send one batch with `speed` fast to finish before the next evening
 
 2. A team tries to download its output 35 days after the job was created. What do they find?
-   - **a**: Only the batch record remains, since the results window has closed
+   - **a**: The batch still shows up, but its results lapsed almost a week earlier
    - **b**: The downloads are fine, since the 29 days count from the end of processing
    - **c**: The record is deleted, since it expires together with its downloads
-   - **d**: The downloads cost extra, since they come from an archive
+   - **d**: The downloads are fine, since each read of the batch renews the window
 
 3. A batch of 3,000 requests ends with 2,700 succeeded and 300 expired. What is the sound handling?
    - **a**: Resend the 300 unchanged, since they never got to run
@@ -627,18 +627,18 @@ This quiz covers both pages of the module.
    - **c**: Drop the 300, since an expired request cannot be sent again
    - **d**: Fix the 300 first, since an expired request is an invalid one
 
-4. A program sums `input_tokens` over every line of a result file, and the total exceeds the invoice. What is the likely cause?
+4. A program prices the succeeded tokens of a Claude Sonnet 5.5 batch at $2 and $10 per million, and the total exceeds the invoice. What is the likely cause?
    - **a**: It counts entries past the spend limit, which the invoice leaves out
    - **b**: It counts retried requests twice, since each retry adds a line
-   - **c**: It also adds the errored, expired and canceled entries, none billed
+   - **c**: It uses the standard rates, where this route charges only half
    - **d**: It counts polling calls, since each poll is billed as a request
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says "A Message Batch is limited to either 100,000 Message requests or 256 MB in size, whichever is reached first", so 180,000 needs two, and the ids match the results. *a* is ruled out because "Batch results can be returned in any order". *c* is ruled out because work nobody is waiting for "costs half as much through the Message Batches API", and the next evening leaves time for a batch. *d* is ruled out because the page 1 table marks `speed` as refused, and "Fast mode tunes synchronous latency" does not apply in a batch.
-2. **a**. The page says "you may still view the Batch, but its results will no longer be available for download", after the 29-day window. *b* is ruled out because "Results live for 29 days after `created_at`", not after the end. *c* is ruled out because "you may still view the Batch" after the window. *d* is ruled out because the page says "Store what you need within the window." and names no archive.
-3. **a**. The page's table says an expired request is resubmitted unchanged, and the finished answers stay. *b* is ruled out because "the failure of one request in a batch does not affect the processing of other requests." *c* is ruled out because an expired request means "the 24 hours passed before this request was sent", so it can go in again. *d* is ruled out because "the batch ran out of time first" is the cause of an expiry, not a bad request.
-4. **c**. The page says "You will not be billed for these requests." for the failures, and "Only the `succeeded` results carry tokens that are billed." *b* is ruled out because "every request has exactly one result" once processing has ended. *a* is ruled out because page 1 says "The limit is not a hard stop for a batch.", so entries past it are still billed. *d* is ruled out because "Poll the batch by its `id`, with a wait between polls." returns a status and no message, so no tokens.
+1. **b**. The page says "A Message Batch is limited to either 100,000 Message requests or 256 MB in size, whichever is reached first", so 300 MB needs two batches although 80,000 is under the count, and the ids match the results. *a* is ruled out because "A batch above 256 MB returns a 413 `request_too_large` error.", and "Batch results can be returned in any order". *c* is ruled out because the page 1 table says "pre-warming a cache is not supported" in a batch, so `max_tokens: 0` is refused. *d* is ruled out because the page 1 table marks `speed` as refused, and "Fast mode tunes synchronous latency" does not apply in a batch.
+2. **a**. "Results live for 29 days after `created_at`", so on day 35 the results lapsed six days earlier, while "you may still view the Batch" after the window. *b* is ruled out because "Results live for 29 days after `created_at`", not after the end. *c* is ruled out because "you may still view the Batch" after the window. *d* is ruled out because "Batch results are available for 29 days after creation.", a fixed count that no read of the batch renews.
+3. **a**. The page's table says an expired request is resubmitted unchanged, and the finished answers stay. *b* is ruled out because the page says "Collect the failures into a new, smaller batch.", so only the 300 go in again. *c* is ruled out because an expired request means "the 24 hours passed before this request was sent", so it can go in again. *d* is ruled out because "the batch ran out of time first" is the cause of an expiry, not a bad request.
+4. **c**. Page 1 gives "At the standard $2 and $10" for Claude Sonnet 5.5, and "All usage is charged at 50% of the standard API prices.", so the batch rates are $1 and $5. *b* is ruled out because "every request has exactly one result" once processing has ended. *a* is ruled out because page 1 says "The limit is not a hard stop for a batch.", so entries past it are still billed. *d* is ruled out because "Poll the batch by its `id`, with a wait between polls." returns a status and no message, so no tokens.
 
 </details>

@@ -118,10 +118,10 @@ their matching events regardless of source."
    - **d**: Full text from the first, and only names from the second
 
 3. Each edit should leave a line in an audit file, and the context window is already tight. Which feature adds the least to each request?
-   - **a**: A skill with the logging steps and a short description
-   - **b**: An output style that tells Claude to log every change
-   - **c**: A hook whose script runs outside the conversation
-   - **d**: A CLAUDE.md section that holds the logging rules
+   - **a**: A skill whose description names the logging steps
+   - **b**: An output style that tells Claude to log each change
+   - **c**: A hook that appends a record on every change event
+   - **d**: A CLAUDE.md section that lists the logging rules
 
 <details>
 <summary>Answer key</summary>

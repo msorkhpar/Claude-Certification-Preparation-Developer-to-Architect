@@ -105,11 +105,11 @@ A short chain of questions covers most scenarios:
 
 ## Quiz
 
-1. A team must make sure that Claude never touches a file named `.env`. Which feature gives the guarantee?
-   - **a**: A line in CLAUDE.md that forbids the edit
-   - **b**: A hook on the `PreToolUse` event that rejects it
-   - **c**: A skill that explains why the file is private
-   - **d**: An output style that tells Claude to refuse
+1. A team never wants Claude to edit `secrets.json`, and a review found two edits to it last month. What stops a third?
+   - **a**: A line in CLAUDE.md that forbids editing the file
+   - **b**: A hook that refuses any tool call changing the file
+   - **c**: A skill that explains why the file must stay as is
+   - **d**: An output style that tells Claude to leave the file alone
 
 2. A research task reads dozens of files and only the conclusions matter to the main conversation. Which feature fits?
    - **a**: A dynamic workflow, whose script runs many workers in the background

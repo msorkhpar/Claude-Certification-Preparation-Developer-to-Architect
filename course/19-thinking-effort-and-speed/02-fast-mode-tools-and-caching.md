@@ -165,9 +165,9 @@ This quiz covers both pages of the module.
 2. A helpdesk bot prints replies live for agents and also sends overnight jobs through the Batch API. Management wants the
    speed option on all of it. What should the team tell management?
    - **a**: It suits only the watched output, since the bulk path excludes it
-   - **b**: It suits neither, since it only lowers time to first token
-   - **c**: It suits neither, because only the cloud platforms offer it
-   - **d**: It suits both, at the standard price for the bulk jobs
+   - **b**: It suits only the bulk path, where the output volume is the largest
+   - **c**: It suits both, once the beta header is added to the bulk jobs
+   - **d**: It suits neither, since the premium price outweighs the gain on any job
 
 3. A shared helper serves three Claude models and must never emit a parameter that one of them rejects. What design does the
    practice use?
@@ -176,18 +176,19 @@ This quiz covers both pages of the module.
    - **c**: It picks the lowest common field and drops the rest silently
    - **d**: It passes each field from the caller through to the API unchanged
 
-4. A cost-conscious team wants cheaper answers on Opus 5.5 without losing the cache of a long conversation. Which plan fits?
-   - **a**: Move to a smaller tier halfway through, once the context is cached
-   - **b**: Lower the top-level effort only on the turns that look simple
-   - **c**: Set a lower effort before the first turn and keep it throughout
-   - **d**: Turn thinking off after the first answer to cut the output tokens
+4. A feature on Opus 5.5 handles short lookup questions, yet some replies stop with `stop_reason: "max_tokens"`. The usage
+   shows long thinking before replies that a sentence would settle. What should the team change?
+   - **a**: Raise `max_tokens` so the thinking has room to finish before the answer
+   - **b**: Send a manual `budget_tokens` that keeps the thinking below `max_tokens`
+   - **c**: Lower the effort so the model reasons less before each brief answer
+   - **d**: Drop `max_tokens` and let the effort level cap the length of each reply
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The mode is valid on Sonnet 5.5 only below the top two levels: "it works at low, medium and high effort and returns a 400 at xhigh and max". *a* is ruled out because "disabled and a manual budget return a 400 on the always-on models". *c* is ruled out because "Fable 5.1 and Opus 5.5 always think adaptively and cannot be told otherwise". *d* is ruled out because the manual budget belongs to the old kind of model: "Haiku 4.5 is the old kind: no thinking unless you ask, and then only the manual budget".
-2. **a**. The page says "Fast mode is not available with the Batch API." and the speed gain is for output people watch. *b* is ruled out because "Speed benefits are focused on output tokens per second (OTPS), not time to first token (TTFT)." *c* is ruled out because fast mode "is available on the Claude API (first-party) only". *d* is ruled out because fast mode is never at the standard price: it costs "twice the standard $4 and $20".
+2. **a**. Live replies that agents watch are the case the page names, "Use it for interactive, output-heavy work where a person watches the text arrive", and the batch path cannot take the option. *b* is ruled out because "A batch is not waiting on anyone's screen, so there is nothing for it to speed up." *c* is ruled out because no header changes the batch rule: "Fast mode is not available with the Batch API." *d* is ruled out because the page weighs the price per use, telling the team to "measure whether the seconds saved are worth twice the price", not to rule it out for every job.
 3. **a**. The practice "turns what an application wants into request parameters for one model" and raises an error for the invalid pairs. *b* is ruled out because the course's rule is "Build the thinking setting from the model, as the practice does", not one body and a retry. *c* is ruled out because the practice raises `RejectedRequest` "for what the API would answer with a 400" instead of dropping a field. *d* is ruled out because "The rules are the tables of this module", and a pass-through applies none of them.
-4. **c**. Lowering the effort is the lever for a bill with quality headroom, and its cost is a cache restart only when it is changed mid-conversation, so the level is set before the first turn and held. *b* is ruled out because a top-level effort change "always discards the cached messages". *a* is ruled out because the design rule is to "pick the model, the thinking mode, the effort and the speed once per conversation". *d* is ruled out because "Fable 5.1 and Opus 5.5 always think adaptively and cannot be told otherwise".
+4. **c**. The cut-off answers are simple ones that were over-thought, and the page's choice between the two remedies is to "lower the effort if they were over-thought". *b* is ruled out because "`disabled` and a manual budget return a 400 on the always-on models", Opus 5.5 among them. *a* is ruled out because the page keeps that remedy for answers that needed the depth: "raise `max_tokens` if the truncated answers needed the reasoning". *d* is ruled out because "Effort is a behavioral signal, not a strict token budget", and only `max_tokens` is a hard ceiling.
 
 </details>

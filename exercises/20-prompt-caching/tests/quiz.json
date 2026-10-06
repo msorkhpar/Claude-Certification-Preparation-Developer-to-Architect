@@ -157,19 +157,19 @@
       "id": "02-prices-lifetimes-lookback-and-invalidation#m3",
       "page": "02-prices-lifetimes-lookback-and-invalidation.md",
       "scope": "module",
-      "stem": "A request marks the system block with a five-minute breakpoint and the final message with a one-hour breakpoint. What does the module say?",
+      "stem": "A team's request puts a five-minute breakpoint on the system block and a one-hour breakpoint on the final message, and the API rejects it. The team wants to keep one entry of each lifetime. What should they change?",
       "options": {
-        "a": "It violates the ordering rule, since the longer entry has to come first",
-        "b": "It is accepted, with both entries billed at one common rate",
-        "c": "It is accepted, with only the short entry written",
-        "d": "It violates a one-TTL rule, since a request carries one lifetime"
+        "a": "Reverse the two `ttl` values, so that the earlier marker is the `1h` one",
+        "b": "Split the work into two requests, since one call may carry only one lifetime",
+        "c": "Move the system block after the messages, so that the one-hour marker leads",
+        "d": "Drop the `ttl` field from the system block, so that it takes the one-hour default"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says \"Cache entries with longer TTL must appear before shorter TTLs\".",
-        "b": "Ruled out because the writes are billed differently: \"1-hour cache write tokens are 2 times the base input tokens price\".",
-        "c": "Ruled out because \"The usage object then splits the writes\" by lifetime, so both can be written.",
-        "d": "Ruled out because \"You can use both 1-hour and 5-minute cache controls in the same request\" when ordered correctly."
+        "a": "The page says \"Cache entries with longer TTL must appear before shorter TTLs\", and reversing them puts the one-hour entry on the earlier block while keeping one entry of each lifetime.",
+        "b": "Ruled out because \"You can use both 1-hour and 5-minute cache controls in the same request\" when they are ordered correctly.",
+        "c": "Ruled out because the prefix order is fixed as \"tools, then system, then messages\", so the system block cannot follow the dialogue.",
+        "d": "Ruled out because \"By default, the cache has a 5-minute lifetime\", so dropping the field leaves the system entry as the short one."
       }
     },
     {
@@ -188,7 +188,7 @@
         "c": "The page reads this pattern as \"writes without reads mean the prefix keeps changing\", and the filled-in opening lines are what changes, so they go \"after the last breakpoint\".",
         "b": "Ruled out because \"Changes at each level invalidate that level and all subsequent levels\", whatever the TTL.",
         "a": "Ruled out because padding only helps a prefix that falls short, since \"A prefix shorter than the model's minimum is not cached\", and writes on every call show that this prompt is cached and is not short.",
-        "d": "Ruled out because \"You can define up to 4 cache breakpoints\", yet an earlier changing block still changes the hash."
+        "d": "Ruled out because every marker hashes the opening lines ahead of it, and \"A change anywhere inside that span gives a different hash, and the request starts over\", so an earlier changing block still changes the hash whatever the number of markers."
       }
     }
   ]

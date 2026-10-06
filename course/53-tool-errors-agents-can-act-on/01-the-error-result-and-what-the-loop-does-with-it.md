@@ -664,17 +664,17 @@ These are the wrong answers that the exam's options for this task statement offe
    - **c**: Name in the reply the kind of problem and whether a retry is worthwhile
    - **d**: Pass the card service's raw exception text through to the model
 
-2. A calendar service gets three requests: one asks for a function that it lacks, one gives a date as "next Friday" where a calendar date is needed, and one reaches a backend that answers 503. Which request alone is a protocol error?
+2. A calendar service gets three requests: one asks for a function that it lacks, one gives a date as "next Friday" where a calendar date is needed, and one reaches a backend that answers 503. Which of them, if any, is a protocol error?
    - **a**: The one that has nowhere to be routed
    - **b**: The one whose date has the wrong format
    - **c**: The one that met the busy backend
-   - **d**: All three, because each of them ended in a failure
+   - **d**: None, as all three reached the server
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. The agent can only choose a recovery if the reply says which one applies. *a* is ruled out because more attempts do not help when the reply gives no reason: "Retry every failed call a few times, whatever the reason". *b* is ruled out because a model with nothing to go on can only guess: "A model that has to guess will retry a request that can never succeed". *d* is ruled out because a raw exception says nothing about the next step: "the raw message is rarely enough to act on".
-2. **a**. Only a request with nothing to run is a protocol error; the other two reached the tool. *b* is ruled out because "an input validation failure" is a tool execution error, which the model can repair. *c* is ruled out because a failed backend call is an "API failure" that comes back with the flag and a message that allows "retry with adjusted parameters". *d* is ruled out because the specification wants execution errors passed on: "Clients SHOULD provide tool execution errors to language models to enable self-correction."
+2. **a**. Only a request with nothing to run is a protocol error; the other two reached the tool. *b* is ruled out because "an input validation failure" is a tool execution error, which the model can repair. *c* is ruled out because a failed backend call is an "API failure" that comes back with the flag and a message that allows "retry with adjusted parameters". *d* is ruled out because reaching the server is not where the line falls: "A request that names a tool the server does not have is a protocol error".
 
 </details>
 

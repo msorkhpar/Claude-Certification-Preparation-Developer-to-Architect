@@ -638,14 +638,14 @@ Java and Kotlin readers: the practice of the next page implements the parser and
 
 1. A team moves an invoice extractor to Claude Sonnet 5.5. The old code set `tool_choice` to an invoice tool and read the call's `input`. What should the request use now?
    - **a**: A tool choice of `any`, so that the invoice tool is still always called
-   - **b**: The invoice tool with `strict: true` and a tool choice of `auto`
+   - **b**: The invoice tool marked `strict: true` and named in a tool choice of `tool`
    - **c**: A prompt that shows the invoice record and asks for the same shape
    - **d**: Structured outputs, with the record's schema in `output_config.format`
 
 2. The schema says a field named `total` has a `minimum` of 0, and the request is sent with that schema unchanged. What happens?
-   - **a**: It fails with a 400 error that comes with details of the unsupported item
+   - **a**: The API rejects the call as invalid and sends back no reply
    - **b**: The reply is checked against the limit and retried for the caller
-   - **c**: The limit is read as a hint and the call goes on as usual
+   - **c**: The limit is read as a hint only, and the call goes on as usual
    - **d**: The total is kept at 0 or above while the reply is generated
 
 3. A reply arrives with a 200 status and `stop_reason` of `refusal`. What should the program assume about the body?
@@ -657,7 +657,7 @@ Java and Kotlin readers: the practice of the next page implements the parser and
 <details>
 <summary>Answer key</summary>
 
-1. **d**. A forced tool no longer works on this model, and the documentation's advice is structured outputs "when you need a response in a fixed JSON shape". *b* is ruled out because the task returns a record, and "A task that must return a record, such as an invoice, uses structured outputs". *c* is ruled out because a prompt gives "no guarantee; the program must parse defensively". *a* is ruled out because `any` is one of the values that "return a 400 error" on this model.
+1. **d**. A forced tool no longer works on this model, and the documentation's advice is structured outputs "when you need a response in a fixed JSON shape". *b* is ruled out because `strict: true` does not change the forcing, and of a forced tool the page says "On some models it no longer works". *c* is ruled out because a prompt gives "no guarantee; the program must parse defensively". *a* is ruled out because `any` is one of the values that "return a 400 error" on this model.
 2. **a**. The page says "If you use an unsupported feature, you'll receive a 400 error with details." *b* is ruled out because "a helper that validates responses still enforces every constraint in your code", so the check is the program's job. *c* is ruled out because "If you use an unsupported feature" the outcome is an error, with no hint read. *d* is ruled out because the API does not enforce the limit: it does not support "Numerical constraints (such as `minimum`, `maximum`, `multipleOf`)".
 3. **c**. The page says "The output may not match your schema because the refusal message takes precedence over schema constraints." *b* is ruled out because a refusal has "a 200 status code and billed tokens" and still breaks the shape. *a* is ruled out because the remedy of more tokens belongs to `max_tokens`: "Retry with a higher `max_tokens` value to get the complete structured output." *d* is ruled out because "A refusal is a result to report, not a malformed reply to repeat".
 

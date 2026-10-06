@@ -66,14 +66,14 @@
       "options": {
         "a": "Batch jobs on Bedrock, at the same half price as on the direct API",
         "b": "Ordinary one-by-one calls, at the usual per-token rate with no discount",
-        "c": "Batch jobs on Bedrock, at half price plus a ten percent regional premium",
+        "c": "Ordinary one-by-one calls, at half price once a global endpoint is chosen",
         "d": "Batch jobs on Bedrock, with the inputs uploaded through the Files API"
       },
       "key": "b",
       "explanation": {
         "b": "The Bedrock page lists \"API endpoints (Message Batches, Models, Admin, Compliance, Usage and Cost)\" under features not supported, and the discount \"belongs to the Message Batches API\".",
         "a": "Ruled out because \"Bedrock has no such endpoint on this integration\".",
-        "c": "Ruled out because the premium belongs to regional routing, \"Regional endpoints carry a 10% pricing premium over global endpoints.\", and there is no batch endpoint to apply it to.",
+        "c": "Ruled out because the global kind removes only the premium, not half the price: \"dynamic routing across all available regions for maximum availability. No pricing premium.\"",
         "d": "Ruled out because the Files API is itself on the list: \"URL sources for images and documents, Files API\"."
       }
     },
@@ -157,38 +157,38 @@
       "id": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs#m3",
       "page": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
       "scope": "module",
-      "stem": "A team wants the faster output mode for its streamed chat on Opus 5.5 and may call Claude from any platform. Where can it get it?",
+      "stem": "A team on the direct API keeps two products in separate workspaces so that their prompt caches never mix, and now plans to move both to Bedrock. What should it expect there?",
       "options": {
-        "a": "The direct API, since the option is offered on that door alone",
-        "b": "Google Cloud, since it offers more features than Bedrock does",
-        "c": "Claude Platform on AWS, since Anthropic itself operates that door",
-        "d": "Bedrock or Google Cloud, once a beta header is sent with the call"
+        "a": "Isolation is per organisation there, so the split stops holding them apart",
+        "b": "Caching is missing there, so each call pays the full input price once more",
+        "c": "Isolation stays per workspace there, just as it is on the first-party door",
+        "d": "Isolation is unchanged, but entries lapse sooner without the one-hour lifetime"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says fast mode \"is available on the Claude API (first-party) only\".",
-        "b": "Ruled out because \"One more gap spans the partner platforms\", and Google Cloud is one of them.",
-        "c": "Ruled out because fast mode \"is not available on Claude Platform on AWS\", although Anthropic operates it.",
-        "d": "Ruled out because a header does not change that: \"not available on Claude Platform on AWS or partner-operated cloud platforms\"."
+        "a": "The page says caches are isolated per workspace on the Claude API but that \"Bedrock and Google Cloud maintain organization-level cache isolation\", so the workspace split no longer keeps the two caches apart.",
+        "b": "Ruled out because Bedrock's highlight list includes \"prompt caching, thinking, tool use with the bash\" tools.",
+        "c": "Ruled out because per-workspace isolation is named for the direct API only: \"caches are isolated per workspace on the Claude API\".",
+        "d": "Ruled out because the caching page \"lists the one-hour lifetime as available\" on both Amazon Bedrock and Google Cloud."
       }
     },
     {
       "id": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs#m4",
       "page": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
       "scope": "module",
-      "stem": "A team's Bedrock traffic needs 4 million input tokens per minute. What do the docs say?",
+      "stem": "A team on Bedrock must keep its traffic in Japan, and the outage of a single AWS region must not stop it. Which route fits?",
       "options": {
-        "a": "It sits beyond every limit, so a second account is needed",
-        "b": "It fits inside the default, so nothing extra is asked of anyone",
-        "c": "It exceeds the default but stays beneath the requestable ceiling",
-        "d": "It follows the direct API quota rather than the cloud one"
+        "a": "A global endpoint, which routes to whichever region has capacity",
+        "b": "A regional endpoint, which resolves to one AWS location for residency",
+        "c": "A JP inference profile, which spreads calls across that geography",
+        "d": "A multi-region endpoint, which spans several regions of an area"
       },
       "key": "c",
       "explanation": {
-        "c": "The page gives \"Default quota is 2 million input tokens per minute (TPM).\" and \"You can request up to 5 million input TPM and 500,000 output TPM without additional Anthropic approval.\"",
-        "b": "Ruled out because \"Default quota is 2 million input tokens per minute (TPM).\" and 4 million exceeds it.",
-        "a": "Ruled out because \"You can request up to 5 million input TPM\" covers 4 million.",
-        "d": "Ruled out because \"AWS enforces requests-per-minute (RPM) limits on the Bedrock side\"."
+        "c": "The page says \"To route across several regions of a geography, use an inference profile (US, EU, JP or AU)\", so a JP profile keeps the calls in Japan and survives the loss of one region.",
+        "a": "Ruled out because a global endpoint gives \"dynamic routing across all available regions for maximum availability\", so calls leave Japan.",
+        "b": "Ruled out because a regional endpoint \"resolves to a single AWS region for data residency\", so one outage stops it.",
+        "d": "Ruled out because multi-region endpoints are the Google Cloud term, and \"Bedrock has the same idea with different words\"."
       }
     }
   ]

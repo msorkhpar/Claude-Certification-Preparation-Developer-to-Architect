@@ -106,18 +106,18 @@ This quiz covers both pages of the module.
    - **c**: Sample a tenth of them for review, since a sample is cheaper than a full check
    - **d**: Route them by the same rule as the unconfident items, since one policy for the whole flow is simpler to run
 
-3. Scenario: Corvid Care runs a pilot of a discharge-letter drafting assistant for nurses, who now spend less time writing. The sponsor must say which value pillar the project serves and how it will be shown. Which answer fits best?
-   - **a**: Productivity, measured by hours saved per staff member each week against a baseline taken before launch
-   - **b**: Cost, measured by the monthly token bill of the assistant compared with the licence fee that the hospital pays today
-   - **c**: Transformation, measured by the count of letters that the assistant produced during the pilot
-   - **d**: Performance, measured by the median response time of the assistant for each single request
+3. Scenario: Corvid Care pilots a discharge-letter drafting assistant on two wards. Ward staff still check and sign every letter, and the sponsor's case rests on what they do with the time the drafts give back. The sponsor must say which value pillar the project serves and how it will be shown. Which answer fits best?
+   - **a**: Productivity, measured by the number of patients sent home per person in a shift
+   - **b**: Cost, measured by the token price of each discharge letter that the assistant drafts
+   - **c**: Transformation, measured by the share of discharge letters the assistant drafts each week
+   - **d**: Performance, measured by the 95th percentile time the assistant takes to return a draft
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. An unbounded requirement cannot be designed against, so it is made concrete first: "needed accuracy comes from two costs". *b* is ruled out because capability without a target spends money without a bar: "cannot be designed against, tested or priced". *c* is ruled out because the ladder buys complexity only for a stated requirement, and the page says "find the simplest solution possible". *d* is ruled out because the design is aimed at a number, and "the first piece of work" is finding it before the pilot is built.
 2. **b**. The expected error cost of 2.50 per item is below the review cost of 5, so a review loses money. *a* is ruled out because "reviewing the item loses money" where the model beats the break-even, and the page says "Reviewing everything wastes review". *c* is ruled out because a sample is a guess at the same trade-off, and the page asks for design that spends attention "only where it changes the outcome". *d* is ruled out because the needed accuracy is "a property of the slice of work, not of the model", and the page asks for a target per slice, "not one number for the whole system".
-3. **a**. Nurses getting more done is the productivity pillar, measured as hours saved per person. *b* is ruled out because the page says the cost pillar counts "tokens, review time and rework, not model price alone". *c* is ruled out because a count of outputs measures activity and not a new capability: "Share of customers served in a new way". *d* is ruled out because latency belongs to the performance pillar, with "95th percentile latency, availability, accuracy by case type".
+3. **a**. Time handed back to staff who then send more patients home is people getting more done, so the pillar is productivity and the measure follows the people, not the tool. *b* is ruled out because the page says the cost pillar counts "tokens, review time and rework, not model price alone". *c* is ruled out because transformation claims "Something that could not be done before", and ward staff wrote discharge letters before the pilot. *d* is ruled out because a draft's turnaround time is a system target of the performance pillar, with "95th percentile latency, availability, accuracy by case type", and says nothing of what the staff complete.
 
 </details>
 

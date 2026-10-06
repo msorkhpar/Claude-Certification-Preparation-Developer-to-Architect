@@ -81,19 +81,19 @@
       "id": "03-timeouts-logging-and-debugging#q1",
       "page": "03-timeouts-logging-and-debugging.md",
       "scope": "page",
-      "stem": "A screen that a user watches calls the API with the SDK defaults, and a stuck connection now leaves users waiting for about half an hour. What is the best first change?",
+      "stem": "A screen that a user watches calls the API with the SDK defaults. The connection opens at once but the reply never arrives, and users are now stuck for about half an hour. What is the best first change?",
       "options": {
         "a": "Raise the number of retries so that a stuck call is more likely to succeed in the end",
-        "b": "Cap the whole call at the latency budget and shrink each attempt's timeout to match",
+        "b": "Cap the whole call at the latency budget, since each try adds a timeout to the wait",
         "c": "Turn on debug logging so that the stuck call is recorded in full for later reading",
-        "d": "Lower only the connect timeout, since the stall happens while the connection opens"
+        "d": "Stream the reply instead, since a streamed reply restarts the read clock at each event"
       },
       "key": "b",
       "explanation": {
         "b": "The page says to \"set the total deadline from the latency budget of module 12, then choose a per-attempt timeout and an attempt count that fit under it\".",
         "a": "Ruled out because \"three attempts of ten minutes each\" is the cause of the half hour, and more retries lengthen it.",
         "c": "Ruled out because logging records the wait and does not shorten it, and \"debug logging is a development tool\".",
-        "d": "Ruled out because a stall on an open connection is the read clock: \"Read: how long to wait between bytes of the reply\"."
+        "d": "Ruled out because streaming is the cure for \"Timeouts only on long outputs\", and a reply that sends no event never restarts the clock, so each try still waits out the default: \"The SDKs default to ten minutes\"."
       }
     },
     {
@@ -122,8 +122,8 @@
       "stem": "A job's calls sometimes fail with a lost network link, and sometimes with a 409 because two workers touched the same resource. How should the job handle the two kinds?",
       "options": {
         "a": "Repeat both at once, since each is a passing fault that clears by itself",
-        "b": "Repeat both, since the second can succeed too once the clash is resolved",
-        "c": "Repeat neither, since each one needs a person to act before it can succeed",
+        "b": "Repeat both, since the second will succeed too once the clash is resolved",
+        "c": "Repeat neither until a person has checked, since each needs someone to act first",
         "d": "Repeat only the second, since the first has no status that the code could read"
       },
       "key": "b",
@@ -157,17 +157,17 @@
       "id": "03-timeouts-logging-and-debugging#m3",
       "page": "03-timeouts-logging-and-debugging.md",
       "scope": "module",
-      "stem": "Users behind a corporate proxy report that streamed answers arrive in one lump and, now and then, as an HTML page. Which origin does the page point to first?",
+      "stem": "Only users in one office report that streamed answers arrive in one lump and, now and then, as an HTML page; the same app runs smoothly from home. What is the most likely origin?",
       "options": {
-        "a": "The network path, where a device rewrites or buffers the traffic",
-        "b": "Their credential, which the proxy has stripped from the calls",
-        "c": "Capacity, because the provider could not take every request",
-        "d": "The output limit, because the replies are cut before the end"
+        "a": "The network path, because a hop on the way alters what comes back",
+        "b": "Their credential, because that office's setup strips the key from calls",
+        "c": "Capacity, because the provider is too busy to take every request",
+        "d": "The output limit, because the replies are cut off before the end"
       },
       "key": "a",
       "explanation": {
-        "a": "The page's table lists \"works locally, fails behind the proxy\" under the path, with the checks \"Is the body still JSON? Is the stream buffered?\".",
-        "b": "Ruled out because a credential fault is a \"401 or 403 from one environment only\", and a stripped key would not give an HTML page with partial streaming.",
+        "a": "The page's table puts \"works locally, fails behind the proxy\" under the path, with the checks \"Is the body still JSON? Is the stream buffered?\"; an HTML page fails the first and a lumped stream the second, in one office only.",
+        "b": "Ruled out because a credential fault shows as a \"401 or 403 from one environment only\", an error status rather than a buffered stream or an HTML page.",
         "c": "Ruled out because capacity means \"the request was fine and the service could not take it now\", with a 429 or 529 status.",
         "d": "Ruled out because a cut reply is \"replies cut mid-sentence, status 200\" and does not come as HTML."
       }

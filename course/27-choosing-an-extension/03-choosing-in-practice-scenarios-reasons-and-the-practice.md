@@ -138,9 +138,9 @@ The practice is in [`exercises/27-choosing-an-extension`](../../exercises/27-cho
 
 ## Quiz
 
-1. A task reads forty log files and looks up each failing job in the company's tracker, which needs a login. What does the page place first?
+1. A task reads forty log files and looks up each failing job in the company's hosted tracker. What should be set up first?
    - **a**: A subagent, because the reading would flood the conversation
-   - **b**: An MCP server, because only a connection can reach that system
+   - **b**: An MCP server, because that system needs a connection
    - **c**: A skill, because it can hold the tracker's address and steps
    - **d**: A hook, because it fires each time a job fails
 
@@ -169,15 +169,15 @@ The practice is in [`exercises/27-choosing-an-extension`](../../exercises/27-cho
 
 This quiz covers all three pages of the module.
 
-1. A team wants a linter to run after every file edit, in every session. Which feature fits, and why?
-   - **a**: A skill, because Claude reads it before each change
-   - **b**: A hook, because the matching event fires it each time
-   - **c**: A line in the project file, because it is read at the start of a session
-   - **d**: An output style, because it applies to the whole session
+1. In a team's setup, a hook runs the linter after every file edit, and Claude is expected to clear what the linter reports. How do the findings reach Claude and get resolved?
+   - **a**: Hooks add nothing to context, and Claude reruns the linter to read it
+   - **b**: The output enters context as text, and a skill holds the steps for fixing it
+   - **c**: An MCP server relays the output, and Claude queries it after each edit
+   - **d**: An output style reformats the output, and Claude fixes what it shows
 
-2. A team uses the same set of skills, hooks and MCP servers in six repositories. What should the team do?
-   - **a**: Package them as one plugin that each repository installs
-   - **b**: Copy the files into each repository by hand and keep them in step
+2. A team keeps the same review skill, hook and MCP server in six repositories, and a change made in one often misses the others. What should the team do?
+   - **a**: Publish them as one plugin and install it everywhere
+   - **b**: Keep a master copy and sync the six by hand after changes
    - **c**: Put the whole set into one long CLAUDE.md in each repository
    - **d**: Describe the set in one skill that each repository loads on demand
 
@@ -190,7 +190,7 @@ This quiz covers all three pages of the module.
 4. A project has an API style guide of 3,000 lines that matters only when endpoints are written. Where does it belong?
    - **a**: In CLAUDE.md, so that it is available in every session
    - **b**: In an output style, so that it shapes each response
-   - **c**: In a skill, which loads the full content only when used
+   - **c**: In a skill, so that just its description sits in every request
    - **d**: In an MCP server, so that Claude can open it as a connection
 
 5. A platform team wants a note posted to the team chat whenever any Claude Code session closes, in forty repositories. What fits?
@@ -202,8 +202,8 @@ This quiz covers all three pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says a hook "Always fires on its event; the trigger is guaranteed". *a* is ruled out because with a skill, "Claude interprets the instructions; outcome can vary." *c* is ruled out because an instruction in the project file "is a request, not a guarantee". *d* is ruled out because "Claude follows both as instructions, so neither is enforced."
-2. **a**. The page says "A plugin bundles skills, hooks, subagents, and MCP servers into a single installable unit", for "the same setup in several repositories, or to share it". *b* is ruled out because the trigger is "A second repository needs the same setup", which calls for a plugin. *c* is ruled out because CLAUDE.md is paid for on "every request", and the guidance is "Keep CLAUDE.md under 200 lines." *d* is ruled out because a skill provides "Knowledge, workflows, reference material", and cannot carry hooks or servers.
+1. **b**. The page says "a hook's output lands in context as text Claude reads", and a skill such as `/fix-lint` "tells Claude how to resolve them". *a* is ruled out because a hook "costs nothing in context unless its output is added as messages", so its output can reach Claude without a second run. *c* is ruled out because MCP answers "Is it a connection to a system outside the machine?", and the linter runs on the machine with the hook. *d* is ruled out because "an output style sets how Claude responds", not what a hook returns.
+2. **a**. The page says "A plugin bundles skills, hooks, subagents, and MCP servers into a single installable unit", for "the same setup in several repositories, or to share it". *b* is ruled out because "copying files by hand lets the six copies drift apart". *c* is ruled out because CLAUDE.md is paid for on "every request", and the guidance is "Keep CLAUDE.md under 200 lines." *d* is ruled out because a skill provides "Knowledge, workflows, reference material", and cannot carry hooks or servers.
 3. **a**. The page says to use `disable-model-invocation: true`: "This saves context and ensures only you trigger them." *b* is ruled out because a skill can run "in isolated context with `context: fork`", which changes where it runs, not who starts it. *c* is ruled out because a line in CLAUDE.md "is a request, not a guarantee". *d* is ruled out because "If descriptions are vague or overlap, Claude may load the wrong skill or miss one that would help", so a vague one can still be loaded.
 4. **c**. The page says reference material goes to skills, "which load on demand", while "descriptions at start, full content when used" keeps the cost low. *a* is ruled out because "CLAUDE.md is paid for on every request", and "Keep CLAUDE.md under 200 lines." *b* is ruled out because an output style is "a voice, length or format wanted in every response", not a library of facts. *d* is ruled out because MCP "connects Claude to external services", and a local guide is knowledge, not a service: "MCP for knowledge."
 5. **b**. Row 12 gives a hook for "Post a message to the team channel when a session ends". A plugin is how the same hook reaches many repositories: "A plugin bundles skills, hooks, subagents, and MCP servers into a single installable unit". *a* is ruled out because "an MCP server only offers tools that Claude may or may not call; nothing fires at the end". *c* is ruled out because "Anything written in text, CLAUDE.md, a skill or an output style, is followed as an instruction", and an instruction is not an event. *d* is ruled out because "a line in the instruction file is a request, not a guarantee".

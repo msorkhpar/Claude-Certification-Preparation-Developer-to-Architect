@@ -164,12 +164,12 @@ This quiz covers both pages of the module.
    - **c**: A few percent more
    - **d**: About the same as two plain sends
 
-3. A request marks the system block with a five-minute breakpoint and the final message with a one-hour breakpoint. What does
-   the module say?
-   - **a**: It violates the ordering rule, since the longer entry has to come first
-   - **b**: It is accepted, with both entries billed at one common rate
-   - **c**: It is accepted, with only the short entry written
-   - **d**: It violates a one-TTL rule, since a request carries one lifetime
+3. A team's request puts a five-minute breakpoint on the system block and a one-hour breakpoint on the final message, and the
+   API rejects it. The team wants to keep one entry of each lifetime. What should they change?
+   - **a**: Reverse the two `ttl` values, so that the earlier marker is the `1h` one
+   - **b**: Split the work into two requests, since one call may carry only one lifetime
+   - **c**: Move the system block after the messages, so that the one-hour marker leads
+   - **d**: Drop the `ttl` field from the system block, so that it takes the one-hour default
 
 4. A 600-token system prompt is marked on a model whose minimum is 512, and usage shows a write on every call and no reads. The
    prompt is a template whose opening lines are filled in with each caller's details. What should the team do?
@@ -183,7 +183,7 @@ This quiz covers both pages of the module.
 
 1. **b**. The page says a cache entry "only becomes available after the first response begins", so all six write. *a* is ruled out because a shared hash is not enough: "If you need cache hits for parallel requests, wait for the first response before sending subsequent requests". *c* is ruled out because an ordinary first request writes without any pre-warm, as in "Row 1 writes the 600 tokens". *d* is ruled out because the extra requests write rather than fail: "ten parallel requests write ten times".
 2. **a**. A five-minute write at 1.25 plus a read at 0.1 gives 1.35 against 2, about two thirds. *b* is ruled out because the first send alone costs more than that: "5-minute cache write tokens are 1.25 times the base input tokens price". *c* is ruled out because that figure is the one-hour case, from "1-hour cache write tokens are 2 times the base input tokens price". *d* is ruled out because the second send is a read: "Cache read tokens are 0.1 times the base input tokens price".
-3. **a**. The page says "Cache entries with longer TTL must appear before shorter TTLs". *b* is ruled out because the writes are billed differently: "1-hour cache write tokens are 2 times the base input tokens price". *c* is ruled out because "The usage object then splits the writes" by lifetime, so both can be written. *d* is ruled out because "You can use both 1-hour and 5-minute cache controls in the same request" when ordered correctly.
-4. **c**. The page reads this pattern as "writes without reads mean the prefix keeps changing", and the filled-in opening lines are what changes, so they go "after the last breakpoint". *b* is ruled out because "Changes at each level invalidate that level and all subsequent levels", whatever the TTL. *a* is ruled out because padding only helps a prefix that falls short, since "A prefix shorter than the model's minimum is not cached", and writes on every call show that this prompt is cached and is not short. *d* is ruled out because "You can define up to 4 cache breakpoints", yet an earlier changing block still changes the hash.
+3. **a**. The page says "Cache entries with longer TTL must appear before shorter TTLs", and reversing them puts the one-hour entry on the earlier block while keeping one entry of each lifetime. *b* is ruled out because "You can use both 1-hour and 5-minute cache controls in the same request" when they are ordered correctly. *c* is ruled out because the prefix order is fixed as "tools, then system, then messages", so the system block cannot follow the dialogue. *d* is ruled out because "By default, the cache has a 5-minute lifetime", so dropping the field leaves the system entry as the short one.
+4. **c**. The page reads this pattern as "writes without reads mean the prefix keeps changing", and the filled-in opening lines are what changes, so they go "after the last breakpoint". *b* is ruled out because "Changes at each level invalidate that level and all subsequent levels", whatever the TTL. *a* is ruled out because padding only helps a prefix that falls short, since "A prefix shorter than the model's minimum is not cached", and writes on every call show that this prompt is cached and is not short. *d* is ruled out because every marker hashes the opening lines ahead of it, and "A change anywhere inside that span gives a different hash, and the request starts over", so an earlier changing block still changes the hash whatever the number of markers.
 
 </details>

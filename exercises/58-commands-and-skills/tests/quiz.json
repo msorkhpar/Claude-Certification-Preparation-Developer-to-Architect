@@ -8,16 +8,16 @@
       "stem": "A project holds `.claude/commands/deploy.md`, and a teammate then adds `.claude/skills/deploy/SKILL.md`. What does `/deploy` run?",
       "options": {
         "a": "The command, because it was in the project first of the two",
-        "b": "Both, with the command kept under a prefixed second name",
+        "b": "Both in turn, since the two files create the same command",
         "c": "The skill, since it takes precedence over the older format",
-        "d": "Neither, because the duplicate name is refused outright"
+        "d": "Neither, until one of the two files is renamed or removed"
       },
       "key": "c",
       "explanation": {
         "c": "The product merged the two formats and gives the skill precedence over a command file of the same name, whichever file came first.",
         "a": "Ruled out because \"A skill beats a command file of the same name\", and the order of arrival plays no part.",
-        "b": "Ruled out because a prefixed second name belongs to two skills, where \"the nested one is also reachable as\" a path-prefixed command, while for a skill and a command file \"the skill runs\" alone.",
-        "d": "Ruled out because \"When a skill and a command file share a name, the skill runs\", so the clash is settled and not refused."
+        "b": "Ruled out because \"When a skill and a command file share a name, the skill runs\", so one definition answers the name and not both.",
+        "d": "Ruled out because the shared name needs no repair: the skill runs at once, and \"Existing command files keep working\" without being renamed or removed."
       }
     },
     {
@@ -64,17 +64,17 @@
       "scope": "page",
       "stem": "A skill's text says only 'Use these naming conventions for new endpoints', and its header sets `context: fork`. What comes of invoking it?",
       "options": {
-        "a": "It forks the conversation so far and applies the conventions to it",
-        "b": "It starts a subagent that has no task and returns nothing of use",
-        "c": "It has a subagent apply the conventions to the project's endpoint files",
-        "d": "It adds the conventions to the main conversation for later turns"
+        "a": "A subagent starts with a copy of the conversation and applies the conventions to it",
+        "b": "A subagent starts with those guidelines as its whole prompt and no job to carry out",
+        "c": "A subagent starts with the conventions and applies them to the endpoint files",
+        "d": "A subagent starts with an empty prompt, since the body holds no instruction"
       },
       "key": "b",
       "explanation": {
-        "b": "The setting hands the body to a new subagent, which \"gives it the skill content as its prompt\", and conventions alone name no endpoint or job, so the subagent has nothing to carry out.",
+        "b": "The fork hands the body to a new subagent as its prompt, and a line of conventions names no endpoint and no job, so the subagent has nothing to carry out.",
         "a": "Ruled out because the name misleads and \"this is not a fork of the conversation\": the subagent \"doesn't see your conversation history\".",
-        "c": "Ruled out because the setting \"only makes sense for skills with explicit instructions\", and a line of conventions names no files to change.",
-        "d": "Ruled out because the setting \"starts a new subagent of the type named in\" the agent field, so the conventions go to that subagent and not into the main conversation."
+        "c": "Ruled out because a body of guidelines \"gives the subagent no task\", so nothing tells it to change any file.",
+        "d": "Ruled out because the setting \"gives it the skill content as its prompt\", so the conventions are the prompt and it is not empty."
       }
     },
     {
@@ -102,16 +102,16 @@
       "scope": "module",
       "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. The team's review skill must be unable to change files for the turn that runs it. Which header line does that?",
       "options": {
-        "a": "`disable-model-invocation: true`",
+        "a": "`disallowed-tools: Bash`",
         "b": "`disallowed-tools: Edit Write`",
-        "c": "`context: fork`",
+        "c": "`allowed-tools: Bash(gh pr view *) Bash(gh pr diff *)`",
         "d": "`disallowed-tools: Edit(src/**)`"
       },
       "key": "b",
       "explanation": {
         "b": "A bare name in the removal field takes the tool out of the pool while the skill is active.",
-        "a": "Ruled out because that field controls who starts the skill and \"keeps the model from deciding by itself that the time has come\", not which tools it has.",
-        "c": "Ruled out because a fork isolates the conversation, since \"The subagent doesn't see your conversation history\", and a restriction calls for `disallowed-tools` \"or deny rules for a restriction\".",
+        "a": "Ruled out because a bare name \"removes the tool from Claude's context entirely\", only the tool it names, so taking away the shell leaves Edit and Write in the pool.",
+        "c": "Ruled out because that field is a pre-approval, so with it \"Edit and Write stay callable\" and the permission settings decide.",
         "d": "Ruled out because \"only a bare name removes a tool\", so the scoped entry leaves editing in place."
       }
     },

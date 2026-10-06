@@ -438,28 +438,28 @@ This quiz covers both pages of the module.
 
 1. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. The labels for how bad a finding is are free text, and the gate cannot compare them with its floor. Which change fixes it?
    - **a**: Ask for stronger adjectives on the most urgent findings
-   - **b**: Let the gate map each label to a level by its keywords
+   - **b**: Replace each label with a confidence score for the gate
    - **c**: Use a closed list of levels, each with a worked sample
    - **d**: Drop the floor and let every label through as written
 
-2. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. One group of findings has 40 percent precision. Its dismissals all trace to line-length remarks, while its other remarks are always accepted. What fits?
+2. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. One group of findings has 45 percent precision. Its dismissals all trace to line-length remarks, while its other remarks are always accepted. What fits?
    - **a**: Disable the whole group until every remark in it improves
-   - **b**: Put that one pattern on the skip list and keep the rest
+   - **b**: Rework that one pattern's criterion and keep the rest
    - **c**: Delete the group's criteria and rewrite them from scratch
    - **d**: Leave the group unchanged while more reviews accumulate
 
-3. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. Before pushing, a developer starts the same review in a terminal session with neither a branch nor a reviewer given; the project defines `main` as the default branch and has no default reviewer. What should the session do?
-   - **a**: Fail at once with a message listing both absent fields
-   - **b**: Ask about both missing fields before any work begins
-   - **c**: Ask whom to assign and state that it assumes `main`
-   - **d**: Take `main`, leave the reviewer slot blank, and proceed
+3. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. Its prompt holds three worked cases, one reported unchecked access and two skipped guarded ones, each made of the code and its verdict. A new kind of guard that resembles none of them is still flagged. What should change?
+   - **a**: Add skipped examples until every guard style has one
+   - **b**: Swap the examples for typical changes from recent commits
+   - **c**: Give each example a sentence on why its label was chosen
+   - **d**: Copy the skipped examples so the skip label weighs more
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. A level with a code sample has a boundary, and a closed list can be compared with a floor. *a* is ruled out because "A definition with a code example gives the reviewer a case to compare with", and adjectives give none. *b* is ruled out because the gate needs a value it can compute with: "an open, free-text severity cannot be computed with". *d* is ruled out because the gate "drops findings below a floor and fails the job at a severity", and without a floor it has no policy.
-2. **b**. The recorded pattern shows where the dismissals come from, and line length is minor style, so only that pattern is put on the skip list. *a* is ruled out because "The fix is then to adjust the criteria for the one pattern and not to disable the category". *c* is ruled out because "Deleting the category from the criteria loses the examples that the next attempt needs". *d* is ruled out because leaving the group unchanged keeps the noise, which has a cost, since "each dismissed comment lowers trust in the accepted ones".
-3. **c**. A developer at the keyboard can answer, so the session asks only about the field with no default and states the assumption it makes for the other. *a* is ruled out because failing is the move for a run where nobody can answer: "In an unattended run (CI) nobody can answer". *b* is ruled out because the branch has a default, so it is assumed and stated rather than asked: "to state the assumptions made for the rest". *d* is ruled out because the reviewer has no default to fall back on, and "the right move is to ask only what cannot be assumed".
+1. **c**. A level with a code sample has a boundary, and a closed list can be compared with a floor. *a* is ruled out because "A definition with a code example gives the reviewer a case to compare with", and adjectives give none. *b* is ruled out because a number the model gives about its own certainty says nothing about how bad a finding is, and "self-reported confidence is another vague instruction". *d* is ruled out because the gate "drops findings below a floor and fails the job at a severity", and without a floor it has no policy.
+2. **b**. The recorded pattern shows that one pattern draws every dismissal, so only its criterion changes and the remarks developers accept keep coming. *a* is ruled out because "The fix is then to adjust the criteria for the one pattern and not to disable the category". *c* is ruled out because "Deleting the category from the criteria loses the examples that the next attempt needs". *d* is ruled out because leaving the group unchanged keeps the noise, which has a cost, since "each dismissed comment lowers trust in the accepted ones".
+3. **c**. The set is targeted and shows both verdicts, so what it lacks is the reason, and "The reason is what transfers to a case that matches no example". *a* is ruled out because new guard styles keep coming and "the guide asks for two to four targeted examples, and a long list teaches accidents". *b* is ruled out because the guard is a border case, while "typical cases are settled by the criteria". *d* is ruled out because copies add no new case and tilt the set toward one label, while examples "should be diverse enough that the reviewer does not learn an accident".
 
 </details>
 

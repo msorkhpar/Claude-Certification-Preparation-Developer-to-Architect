@@ -43,10 +43,10 @@
       "id": "02-choosing-a-model-and-shaping-the-context#q1",
       "page": "02-choosing-a-model-and-shaping-the-context.md",
       "scope": "page",
-      "stem": "Scenario: Osprey Support needs ticket tagging answered within 800 ms. Candidates A and B are capable enough and fast enough, and B costs less per output token. Candidate C costs less still, but it takes 1,400 ms. Which candidate should the plan pick?",
+      "stem": "Scenario: Osprey Support needs ticket tagging answered within 800 ms. Candidates A and B are capable enough and fast enough, and B has the lower price of those two. Candidate C costs less still, but it takes 1,400 ms. Which candidate should the plan pick?",
       "options": {
         "a": "C, since the lowest price decides the matter once capability has been established",
-        "b": "B, since C drops out on latency and B is the cheaper of the two models that remain",
+        "b": "B, since it is the cheaper of the two models that meet the response-time limit",
         "c": "A, since the dearer of the two capable models is the safer pick for live tagging",
         "d": "A or B alike, since price cannot make a model wrong once both are within the limit"
       },
@@ -74,7 +74,7 @@
         "c": "No candidate meets both the tier and the latency, so the finding is a mismatch that someone must resolve by relaxing a requirement.",
         "a": "Ruled out because \"A model below the tier fails the task\".",
         "b": "Ruled out because the limit is part of the requirement too, and the candidate would fall under \"A model slower than the limit\".",
-        "d": "Ruled out because \"Price comes last because it is the only fact that cannot make a model wrong\", so it cannot rescue a candidate that fails a requirement."
+        "d": "Ruled out because price \"can only rank models that are already right\", and here neither candidate is right."
       }
     },
     {
@@ -84,16 +84,16 @@
       "stem": "Scenario: Plover Insurance's assembler receives a dynamic module with the placeholder {claim_id}, and the caller supplies no value for it. What should the assembler do?",
       "options": {
         "a": "Send the request, leaving the placeholder in its text",
-        "b": "Stop with an error, so that no request goes out to the model",
+        "b": "Stop with an error, sending no request to the model",
         "c": "Send it, replacing the placeholder with an empty string",
-        "d": "Fill the gap with a default value that the module's author set"
+        "d": "Fill it, using the caller's value from its previous request"
       },
       "key": "b",
       "explanation": {
         "b": "A missing value is a defect in the caller, so the assembler stops with an error and sends nothing.",
         "a": "Ruled out because \"A request that goes out with `{customer}` in its text\" is sent with a gap that nobody checks.",
-        "c": "Ruled out because a blank is the same silent defect, and \"A missing variable is an error\".",
-        "d": "Ruled out because a default hides the missing value from everyone, and a request with a gap \"is a defect that no model will report\"."
+        "c": "Ruled out because a blank is the same silent gap, and such a request \"is a defect that no model will report\".",
+        "d": "Ruled out because an old value is only a guess, and \"A missing variable is an error\": \"the assembler refuses it\"."
       }
     },
     {

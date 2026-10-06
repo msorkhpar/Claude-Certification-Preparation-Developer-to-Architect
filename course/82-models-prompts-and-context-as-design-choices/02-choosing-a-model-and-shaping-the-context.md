@@ -62,9 +62,9 @@ These are the wrong answers the exam's options for this domain offer, each with 
 
 ## Quiz
 
-1. Scenario: Osprey Support needs ticket tagging answered within 800 ms. Candidates A and B are capable enough and fast enough, and B costs less per output token. Candidate C costs less still, but it takes 1,400 ms. Which candidate should the plan pick?
+1. Scenario: Osprey Support needs ticket tagging answered within 800 ms. Candidates A and B are capable enough and fast enough, and B has the lower price of those two. Candidate C costs less still, but it takes 1,400 ms. Which candidate should the plan pick?
    - **a**: C, since the lowest price decides the matter once capability has been established
-   - **b**: B, since C drops out on latency and B is the cheaper of the two models that remain
+   - **b**: B, since it is the cheaper of the two models that meet the response-time limit
    - **c**: A, since the dearer of the two capable models is the safer pick for live tagging
    - **d**: A or B alike, since price cannot make a model wrong once both are within the limit
 
@@ -78,7 +78,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 <summary>Answer key</summary>
 
 1. **b**. Latency rules C out, and price ranks the models that remain. *a* is ruled out because C fails the limit, and price "can only rank models that are already right". *c* is ruled out because the rule is to choose "among the models whose tier is at least the workload's and whose latency is within the limit" and take the cheapest, with no bonus for the dearer one. *d* is ruled out because price still ranks the two that remain, and the rule is to "take the cheapest, and break a tie by name so that the choice is repeatable".
-2. **c**. No candidate meets both the tier and the latency, so the finding is a mismatch that someone must resolve by relaxing a requirement. *a* is ruled out because "A model below the tier fails the task". *b* is ruled out because the limit is part of the requirement too, and the candidate would fall under "A model slower than the limit". *d* is ruled out because "Price comes last because it is the only fact that cannot make a model wrong", so it cannot rescue a candidate that fails a requirement.
+2. **c**. No candidate meets both the tier and the latency, so the finding is a mismatch that someone must resolve by relaxing a requirement. *a* is ruled out because "A model below the tier fails the task". *b* is ruled out because the limit is part of the requirement too, and the candidate would fall under "A model slower than the limit". *d* is ruled out because price "can only rank models that are already right", and here neither candidate is right.
 
 </details>
 
@@ -88,9 +88,9 @@ This quiz covers both pages of the module.
 
 1. Scenario: Plover Insurance's assembler receives a dynamic module with the placeholder {claim_id}, and the caller supplies no value for it. What should the assembler do?
    - **a**: Send the request, leaving the placeholder in its text
-   - **b**: Stop with an error, so that no request goes out to the model
+   - **b**: Stop with an error, sending no request to the model
    - **c**: Send it, replacing the placeholder with an empty string
-   - **d**: Fill the gap with a default value that the module's author set
+   - **d**: Fill it, using the caller's value from its previous request
 
 2. Scenario: Teal Logistics runs a ticket tagger that must answer within 300 ms at tier 1, and its prompt carries a long block of unchanging text. Which two decisions follow?
    - **a**: Take the largest model for safety, and put the constant passage first
@@ -107,7 +107,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A missing value is a defect in the caller, so the assembler stops with an error and sends nothing. *a* is ruled out because "A request that goes out with `{customer}` in its text" is sent with a gap that nobody checks. *c* is ruled out because a blank is the same silent defect, and "A missing variable is an error". *d* is ruled out because a default hides the missing value from everyone, and a request with a gap "is a defect that no model will report".
+1. **b**. A missing value is a defect in the caller, so the assembler stops with an error and sends nothing. *a* is ruled out because "A request that goes out with `{customer}` in its text" is sent with a gap that nobody checks. *c* is ruled out because a blank is the same silent gap, and such a request "is a defect that no model will report". *d* is ruled out because an old value is only a guess, and "A missing variable is an error": "the assembler refuses it".
 2. **d**. The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached. *a* is ruled out because the largest model is not needed when "the cheapest model that meets the first two is the right one for each workload". *b* is ruled out because "A model below the tier fails the task", whatever its price. *c* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", so the whole request, which includes the changing part, cannot be cached as one piece.
 3. **c**. The rules and the policy are the same for every traveller, so they go first as static modules, and the question and the chat follow as dynamic ones, so that the stable prefix can be cached. *a* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", and the question and the chat differ on every request, so no entry would ever match. *b* is ruled out because the question changes on every request, and a dynamic module is one that "changes with the customer, the question or the history". *d* is ruled out because the house rules are the same for every traveller, and a static module is one that is "the same on every request".
 

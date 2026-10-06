@@ -131,20 +131,20 @@ in advance" each point at one row.
    best?
    - **a**: Stream every reply from the workers so that the first words of each label arrive sooner
    - **b**: Hand the whole job to the batch interface, which halves the price and runs unattended
-   - **c**: Move the workers to the fastest tier so that the overnight window is certain to be enough
+   - **c**: Move the workers to the fastest tier so that the overnight window is comfortably met
    - **d**: Chain a second call after each label that checks the label before the result is stored
 
 2. A requirement says customer data may only be processed in the United States. A developer plans to use
-   `claude-haiku-4-5-20251001` and set `inference_geo` to `"us"` on every request. What does the page predict?
-   - **a**: The calls succeed and are billed at 1.1 times the standard rate for inference kept in the US
-   - **b**: The calls succeed and run in any region, because the unsupported setting is quietly dropped
-   - **c**: The calls fail with a 429 error, because the capacity inside the US for that model is limited
-   - **d**: The calls fail with a 400 error, because the setting is not supported on that model
+   `claude-haiku-4-5-20251001` and set `inference_geo` to `"us"` on every request. What happens to the first request?
+   - **a**: It succeeds, and the bill shows 1.1 times the standard rate for inference kept in the US
+   - **b**: It succeeds, with the unsupported setting dropped and the call run wherever capacity is free
+   - **c**: It is refused with a 429, because the capacity inside the US for that model is limited
+   - **d**: It is rejected, so meeting the residency rule needs a newer model that supports the setting
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Nobody is waiting and volume is large, which the page assigns to a batch: "most batches finishing in less than 1 hour while reducing costs by 50%". *a* is ruled out because streaming "does not shorten the total time", and no reader is watching the words arrive. *c* is ruled out because a faster tier is correct only "if your evaluation set (page 1) says its quality holds", and it does not change the cost. *d* is ruled out because "chaining calls multiplies latency" and also cost, and the requirement gives no reason for a second call.
-2. **d**. The page says a request that sets the geography on Claude Haiku 4.5 or an earlier model "return a 400 error". *a* is ruled out because the 1.1 times price belongs to models where the setting is "supported on Claude 4.6 and later", which excludes this one. *b* is ruled out because the documentation says such requests "return a 400 error", so the setting is rejected and not dropped. *c* is ruled out because "Rate limits are shared across all geos", so the setting opens no separate US pool whose capacity could run out.
+1. **b**. Nobody is waiting and volume is large, which the page assigns to a batch: "most batches finishing in less than 1 hour while reducing costs by 50%". *a* is ruled out because streaming "does not shorten the total time", and no reader is watching the words arrive. *c* is ruled out because a faster tier still makes one interactive call per ticket, and "an interactive call pays for latency you do not need" when nobody is waiting. *d* is ruled out because a second call per ticket doubles the calls, while the page's cost lever is that "one call that returns three fields beats three calls that each return one".
+2. **d**. Requests that set the geography on Claude Haiku 4.5 or an earlier model "return a 400 error", so the residency rule can only be met by changing the model. *a* is ruled out because the 1.1 times price belongs to models where the setting is "supported on Claude 4.6 and later", which excludes this one. *b* is ruled out because the documentation says such requests "return a 400 error", so the setting is rejected and not dropped. *c* is ruled out because "Rate limits are shared across all geos", so the setting opens no separate US pool whose capacity could run out.
 
 </details>

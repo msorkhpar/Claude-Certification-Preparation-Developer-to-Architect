@@ -27,15 +27,15 @@
       "stem": "Which description follows the documentation's advice for a tool named `get_stock_price`?",
       "options": {
         "a": "Returns the latest USD quote for a listed ticker, for current quotes only and never for history",
-        "b": "Returns the full quote record for a ticker, history included, so the model can pick what it needs",
+        "b": "Returns price, volume and market cap for a ticker, so the model has every figure it could need",
         "c": "Gets the stock price for a ticker symbol, so the model can call it whenever any ticker is named in a message",
         "d": "Returns the latest quote for a ticker, and asks for the model's full reasoning in a `thoughts` field"
       },
       "key": "a",
       "explanation": {
         "a": "The page asks for a description that explains what the tool does, when to use it and when not to, and what it does not return, and this one says what it does, when to use it, and that history is not returned.",
-        "c": "Ruled out because a short description is the pattern to avoid: \"Provide extremely detailed descriptions.\"",
-        "b": "Ruled out because a tool should return \"only the fields the model needs for its next step, since bloated results waste context\".",
+        "c": "Ruled out because it says to call the tool whenever a ticker is named, while the page asks for \"when to use it and when not to\".",
+        "b": "Ruled out because it lists what comes back and names no limit, while the page asks it to say \"what the tool does not return\".",
         "d": "Ruled out because a parameter that asks for the model's thinking \"may lead to a `reasoning_extraction` refusal\"."
       }
     },
@@ -138,18 +138,18 @@
       "id": "03-parallel-calls-the-tool-runner-and-the-practice#q2",
       "page": "03-parallel-calls-the-tool-runner-and-the-practice.md",
       "scope": "page",
-      "stem": "A team's handler has side effects that must not overlap, so each response should hold at most one call. How does the request say so?",
+      "stem": "A team's handler has side effects that must not overlap, so each response should hold at most one call. What should the team do?",
       "options": {
-        "a": "With `disable_parallel_tool_use: true` in the `tool_choice` object",
-        "b": "With `disable_parallel_tool_use: true` in each tool definition",
-        "c": "With a line in the system prompt that asks for one call at a time",
-        "d": "With `disable_parallel_tool_use: true` at the top level of the body"
+        "a": "Send `{\"type\": \"auto\", \"disable_parallel_tool_use\": true}` as `tool_choice` on each request",
+        "b": "Send `{\"type\": \"auto\"}` as `tool_choice` and run the first call, dropping the rest",
+        "c": "Send `{\"type\": \"auto\"}` with a system prompt line asking for one call at a time",
+        "d": "Send `{\"type\": \"auto\"}` with `disable_parallel_tool_use: true` at the top level of the body"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says \"Set `disable_parallel_tool_use: true` inside the `tool_choice` object.\"",
+        "a": "The flag belongs in the `tool_choice` object, and with the `auto` type \"Claude calls at most one tool per response\", so no two calls can overlap.",
         "d": "Ruled out because \"It is not a top-level request parameter.\"",
-        "b": "Ruled out because \"It is a field of the `tool_choice` object.\"",
+        "b": "Ruled out because \"Skipping a result leaves a `tool_use` without its answer, and the API rejects the next request\".",
         "c": "Ruled out because \"Prose in a prompt cannot switch parallel calls off\"."
       }
     },
@@ -198,16 +198,16 @@
       "stem": "A team plans to replace its hand-written tool loop with the SDK's tool runner. Which expectation about the runner is correct?",
       "options": {
         "a": "It is the documented choice for flows that need a person's approval",
-        "b": "It runs server tools on Anthropic's infrastructure on the team's behalf",
+        "b": "It builds each server tool's `tool_result` block on the team's behalf",
         "c": "It is a beta feature that bounds its cycles with `max_iterations`",
-        "d": "It keeps untrusted tool output out of the conversation history"
+        "d": "It sends a handler's exception back with `is_error` and the full stack trace"
       },
       "key": "c",
       "explanation": {
         "c": "The page says \"The tool runner is in beta\" and that it stops \"until it reaches `max_iterations`\".",
         "a": "Ruled out because \"When you need human-in-the-loop approval, custom logging, or conditional execution, use the manual loop\".",
-        "b": "Ruled out because on a server tool \"you never construct a `tool_result` block\", and the server runs it, not the runner.",
-        "d": "Ruled out because the runner \"manages the conversation state\", and the advice is to \"Keep untrusted content inside `tool_result` blocks\", which stay in the history."
+        "b": "Ruled out because for a server tool \"you never construct a `tool_result` block\": \"the server runs the loop and the result appears in the same response\".",
+        "d": "Ruled out because the runner sends the exception's message, \"not the full stack trace\"."
       }
     },
     {

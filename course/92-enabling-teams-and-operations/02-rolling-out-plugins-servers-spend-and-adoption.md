@@ -517,14 +517,14 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 2. Scenario: A platform team wants to show leadership that Claude Code is working. It sets a target of more accepted lines per developer each month and starts the rollout on Monday. By the measures this module teaches, what is the main weakness of the plan?
    - **a**: Accepted lines are not shown on the dashboard and cannot be tracked
    - **b**: Accepted lines need the GitHub app, which the plan has not set up
-   - **c**: It counts accepted lines where daily active users would show real use
-   - **d**: Engineers meet it by keeping more suggested edits while merges stay as slow
+   - **c**: It counts accepted lines where daily active users show an outcome
+   - **d**: It is met by taking extra suggestions while merges stay as slow
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. Seven thousand, eight thousand and six thousand add up to 21000, which is more than 20000. *a* is ruled out because "so the organisation limit would decide before the group limits did and nobody would know which one they were under". *c* is ruled out because "Both are checked as a boundary: a total of exactly 20000 passes and 20001 does not", so a total of 21000 fails whatever happens to unused budget. *d* is ruled out because the page's own example has "three groups with 6000, 8000 and 6000 against an organisation limit of 20000", so equal limits are not required.
-2. **d**. A target on an activity rewards the activity itself, so it can be met while pull requests merge no sooner, and nothing measured shows a result. *a* is ruled out because "The dashboard counts lines accepted as a usage metric". *c* is ruled out because the page lists "lines accepted, suggestions accepted, daily active users, sessions" together as usage metrics that measure activity, so daily active users show no more of a result. *b* is ruled out because the app is needed for "Contribution metrics (merged pull requests with assistance)", and lines accepted are not among them.
+2. **d**. A target on an activity rewards the activity itself, so it can be met while pull requests merge no sooner, and nothing measured shows a result. *a* is ruled out because "The dashboard counts lines accepted as a usage metric". *c* is ruled out because daily active users sit in the same list as lines accepted, "Usage metrics (lines accepted, suggestions accepted, daily active users, sessions)", which measure activity too and show no outcome. *b* is ruled out because "Contribution metrics need the GitHub app", and lines accepted are a usage metric, not one of those contribution metrics.
 
 </details>
 

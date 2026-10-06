@@ -498,13 +498,13 @@ These are the wrong answers the exam's options for this domain offer, each with 
 
 ## Quiz
 
-1. Scenario: Tern Payments' transfer tool writes its idempotency key to a keys table and then makes the transfer as a second, separate step. A crash falls between the two steps, and after the restart a retry returns the stored receipt although no money moved. What design prevents this?
+1. Scenario: Tern Payments' transfer tool writes its idempotency key to a keys table and then makes the transfer as its second step. A crash falls between the two steps, and after the restart a retry returns the stored receipt although no money moved. What design prevents this?
    - **a**: Delete stored keys that are older than a minute, so that a retry can proceed afresh
    - **b**: Make the agent confirm the account balance in its prompt before every retry
    - **c**: Write the transfer first and the key second, as two steps in that order
    - **d**: Save the payment and the record of its request together within a single transaction
 
-2. Scenario: Quillon Labs runs fifty tasks that depend on one search agent whose backend is down. Each task retries three times before failing. What limits the waste best?
+2. Scenario: Quillon Labs runs fifty tasks that depend on one search agent whose backend is down. Each task retries three times before failing. The plan's other agents are healthy. What limits the waste best?
    - **a**: A breaker that trips after repeated errors in a row and refuses calls for a pause
    - **b**: A larger retry count for each task, so the backend has more chances to come back
    - **c**: A faster model for the search agent, so that every failed call ends sooner
@@ -513,7 +513,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The key and the effect are recorded in one step, so neither can exist without the other. *a* is ruled out because "The tool keeps the keys it has seen", and deleting keys breaks the recognition of repeats. *b* is ruled out because "a control that must hold is enforced in code outside the model". *c* is ruled out because it only reverses the gap: "a crash between the two leaves an effect with no key, or a key with no effect".
+1. **d**. The key and the effect are recorded in one step, so neither can exist without the other. *a* is ruled out because a deleted key lets a late retry pay again in the very case the key exists for: "The case that needs the key is the one in which the action happened and the answer did not arrive". *b* is ruled out because "a control that must hold is enforced in code outside the model". *c* is ruled out because it only reverses the gap: "a crash between the two leaves an effect with no key, or a key with no effect".
 2. **a**. A breaker refuses calls at once while it is open and probes once after the cooldown. *b* is ruled out because each extra try adds one more wasted call for every task, and "an outage can last longer than any budget". *c* is ruled out because the waste is the count of calls, "a hundred and fifty wasted calls", which speed leaves in place. *d* is ruled out because the count belongs to one agent, and "an agent that is healthy must not be cut off by a failing neighbour".
 
 </details>

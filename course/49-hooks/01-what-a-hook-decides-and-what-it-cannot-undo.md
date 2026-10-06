@@ -369,15 +369,15 @@ These are the wrong answers that the exam's options for this task statement offe
    - **d**: The rewrite was applied, then undone by the session's permission mode
 
 2. A team adds a hook with the matcher `src/payments/*` to review every write under that folder. The hook never fires. What is the best fix?
-   - **a**: Switch the matcher to a regular expression that also lists every file in the folder
-   - **b**: Correct the spelling of the event key, since event names are case-sensitive
+   - **a**: Switch the matcher to a regular expression that lists every file in the folder
+   - **b**: Attach it to the Bash tool and read the folder from the command it runs
    - **c**: Attach it to the file-editing tools and test the path inside the callback
-   - **d**: Move the hook to the PostToolUse event, which evaluates paths after the write
+   - **d**: Move the hook to the PostToolUse event and match the path after the write
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. The answer is read only from its documented place. *b* is ruled out because a deferral discards the change: "the input is dropped". *c* is ruled out because callback hooks may change input too: "Pair `updatedInput` with `permissionDecision: 'allow'` to auto-approve the modified input". *d* is ruled out because nothing undoes a change that is applied: "the modified input still applies and flows through the normal permission evaluation".
-2. **c**. A matcher sees only the name of the tool, so the path is read from the input. *a* is ruled out because "Matchers only match tool names, not file paths or other arguments." *b* is ruled out because the event key is not at fault here, the matcher is: "the matcher must match the tool name exactly". *d* is ruled out because a post hook's matcher is read the same way: "For tool events it is tested against the tool name".
+2. **c**. A matcher sees only the name of the tool, so the path is read from the input. *a* is ruled out because "Matchers only match tool names, not file paths or other arguments." *b* is ruled out because a write under the folder is made by a file tool, not by a shell command, and `Write|Edit` is the matcher "which is how the SDK page registers its file guard". *d* is ruled out because a post hook's matcher is read the same way: "For tool events it is tested against the tool name".
 
 </details>

@@ -90,17 +90,17 @@ carrying settings over from an earlier model".
 ## Quiz
 
 1. A team changes one configuration value from an older id to Claude Opus 5.5 and every call starts failing with 400. Their
-   call sets a manual thinking budget. Which fix does the page back?
-   - **a**: Drop the settings that the new target rejects, and build per target
+   call sets `budget_tokens` under `thinking`. Which fix does the page back?
+   - **a**: Remove that field from the body, since the new model refuses it
    - **b**: Raise `max_tokens`, since a budget needs more room under the new id
    - **c**: Add retries, since a 400 on a fresh deployment is often transient
    - **d**: Set thinking to type `disabled`, so that no budget is sent
 
 2. A deprecated id is still called by a nightly job that nobody remembers. How can the team find it?
-   - **a**: Export usage per API key and model, which names the key behind it
+   - **a**: Pull the Console usage export, which ties that id to its calling key
    - **b**: Wait for the retirement email, which names each calling application
    - **c**: Watch the 400 rate, which climbs each time that id is called
-   - **d**: Check the alias list, which names every application that resolves it
+   - **d**: Look the id up on the Model deprecations page, which lists its callers
 
 3. A team calls one model on the Claude API and on Amazon Bedrock, and the model has a published retirement day. What
    happens to the Bedrock traffic?
@@ -112,8 +112,8 @@ carrying settings over from an earlier model".
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page says an item that is "rejected" returns a 400 error and that the guide lists what to remove: a manual `budget_tokens` is rejected on Opus 5.5. *b* is ruled out because "Sending thinking of type disabled, or a manual budget_tokens, is rejected", whatever the room. *c* is ruled out because a rejected setting fails every time, and a rising 400 rate is "the signal of a rejected parameter". *d* is ruled out because on Opus 5.5 "Thinking is adaptive and always on", and a `disabled` type is rejected too.
-2. **a**. The Usage page exports a CSV, and "usage broken down by API key and model" shows which key still calls which model. *b* is ruled out because the notice is about dates, "providing at least 60 days' notice before model retirement for publicly released models", and names no callers. *c* is ruled out because a deprecated model "is still functional but no longer recommended", so its calls succeed and raise no 400. *d* is ruled out because an alias is "a convenience pointer that resolves to the dated ID" and holds no list of callers.
+1. **a**. The page says an item that is "rejected" returns a 400 error, and a manual `budget_tokens` is on the Opus 5.5 list, so removing it ends the failures. *b* is ruled out because "Sending thinking of type disabled, or a manual budget_tokens, is rejected", whatever the room. *c* is ruled out because a rejected setting fails every time, and a rising 400 rate is "the signal of a rejected parameter". *d* is ruled out because on Opus 5.5 "Thinking is adaptive and always on", and a `disabled` type is rejected too.
+2. **a**. The Usage page exports a CSV, and "usage broken down by API key and model" shows which key still calls which model. *b* is ruled out because the notice is about dates, "providing at least 60 days' notice before model retirement for publicly released models", and names no callers. *c* is ruled out because a deprecated model "is still functional but no longer recommended", so its calls succeed and raise no 400. *d* is ruled out because "The Model deprecations page defines four states" and gives each model's dates, which say nothing about who calls it.
 3. **c**. The page says "Partner-operated platforms (Amazon Bedrock and Google Cloud) set their own retirement schedules". *b* is ruled out because the listed dates apply to "the Claude API, Claude Platform on AWS and Microsoft Foundry", and Bedrock is not among them. *a* is ruled out because the page's period is "at least 60 days' notice before model retirement", a warning ahead of a date and not time added after it. *d* is ruled out because the page names no aliasing on retirement: "Requests to retired models will fail."
 
 </details>
@@ -122,12 +122,13 @@ carrying settings over from an earlier model".
 
 This quiz covers the three pages of the module.
 
-1. A support product sends one request body, with `temperature` set to 0.2, to Haiku 4.5 and to Sonnet 5.5. Haiku answers
-   and Sonnet returns a 400. What explains the difference?
-   - **a**: The newer model has been retired, so every call to it fails
-   - **b**: The newer model refuses sampling values the older one accepts
-   - **c**: The newer id is an alias that resolves to an older snapshot
-   - **d**: The body overflows the newer model's window but fits the older
+1. A support router builds one request body, with `temperature` set to 0.2, and sends tickets under 150,000 tokens to Haiku
+   4.5 and larger ones, up to 400,000, to Sonnet 5.5. Only the larger tickets fail, each with a 400. Which change does the
+   module back?
+   - **a**: Send the larger tickets to Haiku 4.5 too, since it takes the shared body
+   - **b**: Strip `temperature` from the newer model's calls, since it rejects the value
+   - **c**: Pin Sonnet 5.5 by a dated id, since its dateless id may have moved
+   - **d**: Route the larger tickets to Opus 5.5, whose higher tier takes more settings
 
 2. A nightly bulk job and a chat feature both use a mid-size model. Finance asks which figure to track per feature. What
    does the module support?
@@ -136,26 +137,26 @@ This quiz covers the three pages of the module.
    - **c**: Cost per request, priced from usage with the multipliers applied
    - **d**: Output tokens only, since they carry the highest unit price
 
-3. A router moves a long conversation to a different target halfway through, and answer quality drops. Which
-   cause does the module name?
-   - **a**: The old model's cache stays behind, so the new one loses the history
-   - **b**: The new model has a different alias that resolves to an old snapshot
-   - **c**: The token counting endpoint rejected the longer conversation
-   - **d**: The new model sees the past turns but not the thinking behind them
+3. A router moves a long agent conversation from Opus 5.5 to Sonnet 5.5 halfway through, and answer quality drops. What
+   does Sonnet 5.5 work from for the earlier turns?
+   - **a**: A shortened history, since the old model's cache cannot move across
+   - **b**: The full turns and reasoning, read through an older snapshot of itself
+   - **c**: The latest turn alone, since the counting endpoint trims long input
+   - **d**: The previous messages, with none of the thinking blocks they carried
 
 4. A plan to move 20 percent of traffic to a replacement model on Monday and the rest at the end of the week is proposed. What
    should the team add before Monday?
-   - **a**: A second evaluation on the vendor's published benchmark suite
-   - **b**: An evaluation on its own cases, run ahead of the shift
+   - **a**: The vendor's published benchmark scores, compared across both models
+   - **b**: An evaluation on its own cases of quality, latency and task cost
    - **c**: The old model's effort level, carried over so behaviour matches
-   - **d**: A larger `max_tokens` on every request, to leave room for thinking
+   - **d**: A cost budget per feature, set from the old model's token counts
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The Sonnet 5.5 guide "returns the same list of 400-error settings", sampling parameters among them, while "Claude Haiku 4.5 predates these rules and still accepts sampling parameters". *a* is ruled out because Sonnet 5.5 is listed "as the recommended replacement" for a deprecated model, not as a retired one. *c* is ruled out because "Every Claude model ID is a pinned snapshot, including the dateless IDs used from the 4.6 generation on." *d* is ruled out because Haiku 4.5 has the smaller window, as "a 300,000-token input rules Haiku 4.5 out whatever its price", so a body that fits Haiku also fits Sonnet 5.5.
+1. **b**. The Sonnet 5.5 guide "returns the same list of 400-error settings", sampling parameters among them, while "Claude Haiku 4.5 predates these rules and still accepts sampling parameters", so only the body sent to Sonnet 5.5 must lose the value. *a* is ruled out because "a 300,000-token input rules Haiku 4.5 out whatever its price", and the larger tickets reach 400,000 tokens. *c* is ruled out because "Every Claude model ID is a pinned snapshot, including the dateless IDs used from the 4.6 generation on." *d* is ruled out because the Opus 5.5 guide sets the same rule: "Omit temperature, top_p, and top_k, or leave them at their defaults: any other value is rejected."
 2. **c**. The page gives the cost per request as a sum over the usage fields and says "These multipliers stack with other pricing modifiers such as the Batch API discount and data residency." *b* is ruled out because the tokenizer difference makes "the price per token a poor proxy for the price per task". *a* is ruled out because "The token count is an estimate" of input only, and output and cache split appear only in usage. *d* is ruled out because a usage has "four input-side fields at three prices", so output alone is incomplete.
-3. **d**. The page quotes "A router or fallback that moves a conversation from Claude Opus 5.5 to any other model runs those turns without them." *b* is ruled out because "Every Claude model ID is a pinned snapshot" and a dateless id is its own snapshot. *c* is ruled out because the endpoint rejects inputs such as "server tools like web search", not long conversations. *a* is ruled out because a cache changes only the price of input, and "the total input is the sum of the three input fields" whether read from a cache or not.
-4. **b**. The page says to evaluate "on your own cases" and warns that migrating on the retirement date "leaves no time to evaluate". *a* is ruled out because the page's step is an evaluation "on your own cases", not a published suite. *c* is ruled out because the Effort page says to "Run an effort sweep on your own evals rather than carrying settings over from an earlier model". *d* is ruled out because the page says "Re-measure instead of copying numbers" and gives no blanket increase.
+3. **d**. Thinking blocks are tied to the model that wrote them, and the page quotes "A router or fallback that moves a conversation from Claude Opus 5.5 to any other model runs those turns without them." *b* is ruled out because "Every Claude model ID is a pinned snapshot" and a dateless id is its own snapshot. *c* is ruled out because the endpoint only counts and rejects inputs such as "server tools like web search", and trims nothing. *a* is ruled out because a cache changes only the price of input, and "the total input is the sum of the three input fields" whether read from a cache or not.
+4. **b**. The page's step is to evaluate "on your own cases" and to "Compare quality, latency and cost per task, not per token", and it warns that migrating on the retirement date "leaves no time to evaluate". *a* is ruled out because, for whether a model can do the task, "only your own evaluation answers" it, not a published suite. *c* is ruled out because the Effort page says to "Run an effort sweep on your own evals rather than carrying settings over from an earlier model". *d* is ruled out because "A new tokenizer changes token counts", so the page says "Re-measure instead of copying numbers".
 
 </details>

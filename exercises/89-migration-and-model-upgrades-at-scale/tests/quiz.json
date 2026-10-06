@@ -5,19 +5,19 @@
       "id": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes#q1",
       "page": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes.md",
       "scope": "page",
-      "stem": "A deprecation table lists one of a company's models with a retirement of \"not sooner than\" a date nine weeks away. How should the team treat that entry?",
+      "stem": "A company runs forty applications, and most of them call a model that is still active. The deprecation table shows its retirement date nine weeks away, marked tentative. What should the platform team do?",
       "options": {
-        "a": "Plan against it as the earliest cut-off and begin early, since any slip would push it later",
-        "b": "Wait for the vendor to confirm a final cut-off before spending any effort on the move",
-        "c": "Treat it as a fixed cut-off that cannot move, and schedule the whole migration to end on that day",
-        "d": "Ignore it until the status changes to retired, because nothing breaks before that point"
+        "a": "Start testing the replacement now, so that the roll-out can end well ahead of the cut-off",
+        "b": "Hold the work until the date is confirmed final, so no effort goes on a date that may shift",
+        "c": "Switch every application to the replacement this week, since the date may still come sooner",
+        "d": "Plan to keep the model in use past that date, since a tentative date is not one that is enforced"
       },
       "key": "a",
       "explanation": {
-        "a": "The table can say \"not sooner than\" for a model that is still active, which marks a date that may move later.",
-        "b": "Ruled out because \"is never a date to wait for\".",
-        "c": "Ruled out because \"marks a date that may move later\".",
-        "d": "Ruled out because the move takes time before anything breaks, and \"a migration of forty applications can take longer than that\"."
+        "a": "The advice is to \"consider thorough testing of your applications with the new models well before the retirement date\", and \"Sixty days is the shortest warning, and a migration of forty applications can take longer than that\", so testing starts now and the plan ends well ahead of the date.",
+        "b": "Ruled out because a tentative date on an active model \"is never a date to wait for\".",
+        "c": "Ruled out because such a date \"marks a date that may move later\", not sooner, and the replacement is \"where to begin testing, and the decision is yours to make on your own tasks\".",
+        "d": "Ruled out because once the date arrives \"Requests to retired models will fail\"."
       }
     },
     {
@@ -81,16 +81,16 @@
       "id": "02-the-gate-the-roll-out-and-the-way-back#m1",
       "page": "02-the-gate-the-roll-out-and-the-way-back.md",
       "scope": "module",
-      "stem": "The new model costs about a third more per answer and fixes the refund errors. The product owner asks whether to move. Which message fits the architect's role?",
+      "stem": "The new model costs about a third more per answer and fixes the refund errors. The product owner asks whether to move. What should the architect reply?",
       "options": {
-        "a": "Recommend staying on the old model, because a third more per answer outweighs the refund fix",
-        "b": "Recommend the move, because the vendor has named the newer model as the replacement to use",
-        "c": "Ask them to choose between the better accuracy and the higher bill, because staying has an end too",
-        "d": "Defer the decision until the retirement date nears, because more evidence on cost arrives by then"
+        "a": "Show both figures and advise staying, because a third more per answer outweighs the refund fix",
+        "b": "Show both figures and advise moving, because the vendor named the newer model as the replacement",
+        "c": "Show both figures and let them decide, because staying put also ends on a fixed retirement date",
+        "d": "Show both figures and defer the choice, because more evidence on cost arrives as retirement nears"
       },
       "key": "c",
       "explanation": {
-        "c": "The decision is a trade the owner makes, and the architect states it with its date, since \"staying has a date that ends it\".",
+        "c": "The architect's job \"is to state the trade\", including \"the date that forces the choice\", and the owner decides, since \"staying has a date that ends it\".",
         "b": "Ruled out because \"A recommended replacement is a starting point, not a decision\".",
         "a": "Ruled out because \"A rise in cost is a number to put before the owner, not a verdict\".",
         "d": "Ruled out because \"Waiting for the retirement date hands the decision to the calendar, and gives up the rollback\"."
@@ -100,16 +100,16 @@
       "id": "02-the-gate-the-roll-out-and-the-way-back#m2",
       "page": "02-the-gate-the-roll-out-and-the-way-back.md",
       "scope": "module",
-      "stem": "After a migration, the parser reads the wrong field because the first content block of a reply is thinking text. Which step was missed?",
+      "stem": "After a migration, a parser that reads `content[0].text` breaks on some replies and works on others. Which step was missed?",
       "options": {
         "a": "Lowering max_tokens so that the thinking is cut off before the text of the reply begins",
-        "b": "Selecting what to process by its declared type, so a leading reasoning part is skipped",
+        "b": "Picking out the blocks to use by the kind that each one declares, on every answer received",
         "c": "Turning thinking off by sending the disabled setting, which the new model accepts as before",
         "d": "Dropping the first block of every reply before parsing, since it always holds only thinking"
       },
       "key": "b",
       "explanation": {
-        "b": "A reply may begin with thinking blocks, so the parser reads by type.",
+        "b": "With adaptive thinking on by default \"the first content block of a reply may be thinking text\", so the parser must \"Read content blocks by `type`\".",
         "a": "Ruled out because \"`max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens\", so a lower limit cuts the text as well.",
         "c": "Ruled out because the guide lists `thinking: {\"type\": \"disabled\"}` among the \"five settings that return a 400 error\".",
         "d": "Ruled out because \"A reply need not begin with thinking text either, so a rule that always drops the first block loses real text\"."
@@ -119,19 +119,19 @@
       "id": "02-the-gate-the-roll-out-and-the-way-back#m3",
       "page": "02-the-gate-the-roll-out-and-the-way-back.md",
       "scope": "module",
-      "stem": "On the day the new model went live, the team deleted the old model's id from its configuration to keep it tidy. Two days later errors spike. What did the cleanup take away?",
+      "stem": "On the day the new model took all traffic, the team deleted the old model's id from its configuration to keep it tidy. Two days later errors spike. What did the cleanup take away?",
       "options": {
-        "a": "Nothing, since the gate already approved the new model and a rollback is no longer needed",
-        "b": "The usage audit, which can only be run while the old model id is still configured",
-        "c": "The retirement alert, which is raised from the model id held in the configuration",
-        "d": "The way back, since traffic can no longer be sent to the version that served it before"
+        "a": "Nothing, since faults that surface after a passed gate are fixed forward on the new model",
+        "b": "The cost baseline, since a new baseline is set by billing the old model beside the new one",
+        "c": "The latency check, whose p95 limit the gate reads from the old model's live timings",
+        "d": "The way back, since no tested fallback remains to receive requests while the fault is fixed"
       },
       "key": "d",
       "explanation": {
         "d": "The page says \"the old model is the rollback, and it stays so until its own retirement date\".",
-        "a": "Ruled out because \"a suite predicts and traffic proves\", and an error found after the old model is gone has no way back.",
-        "b": "Ruled out because the audit is a Console export that shows \"usage broken down by API key and model\", so it does not depend on the configuration.",
-        "c": "Ruled out because the calendar sits next to the audit \"so that an alert is raised from the date\", not from the configuration."
+        "a": "Ruled out because \"When the limit is passed, the response is to send every request back to the previous model\", not to fix forward.",
+        "b": "Ruled out because a new baseline comes from the new model's own traffic: \"measure usage afresh, set a new baseline\".",
+        "c": "Ruled out because the gate's latency check takes \"the nearest-rank 95th percentile of the new timings, against a limit\"."
       }
     }
   ]

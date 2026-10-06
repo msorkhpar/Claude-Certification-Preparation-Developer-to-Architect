@@ -46,13 +46,13 @@
       "stem": "Verbose diagnostics are on in a deployed service. Credentials look masked in the output, but customers' messages show up in it. What should the team do?",
       "options": {
         "a": "Keep it on, because the SDK masks sensitive data in request and response bodies",
-        "b": "Switch that mode off for live traffic and record request ids instead",
+        "b": "Switch that mode off for live traffic so that request bodies stay out of it",
         "c": "Redact the headers further so that the output holds no credentials at all",
         "d": "Log only the failing calls so that less customer text reaches the output"
       },
       "key": "b",
       "explanation": {
-        "b": "In that mode \"all HTTP requests and responses are logged, including headers and bodies\", so it does not belong on live traffic, and request ids are the safe handle for a support ticket.",
+        "b": "In that mode \"all HTTP requests and responses are logged, including headers and bodies\", so it does not belong on live traffic, where those bodies are customer text.",
         "a": "Ruled out because \"sensitive data in request and response bodies may still be visible\".",
         "c": "Ruled out because \"headers are partly redacted, bodies are not\", and the leak is in the bodies.",
         "d": "Ruled out because failing calls carry customer text too, and \"customer text does not belong in a log by default\"."
@@ -67,12 +67,12 @@
         "a": "It is attempted once, because the SDK reads the cap and stops early",
         "b": "It is attempted once, because a 429 is never retried by the SDK",
         "c": "It is attempted three times, and the third attempt succeeds after a pause",
-        "d": "It is attempted three times in all, and every attempt fails"
+        "d": "It is attempted three times in all, and every one of the attempts fails"
       },
       "key": "d",
       "explanation": {
         "d": "Two retries after the first attempt make three, and for a spend-cap 429 \"every retry of it fails\".",
-        "b": "Ruled out because \"certain errors are automatically retried 2 times by default\".",
+        "b": "Ruled out because a spend-cap 429 is retried, and \"module 15 shows the SDK retrying one\".",
         "c": "Ruled out because the cap \"stays in force until the next month begins\", so no pause helps.",
         "a": "Ruled out because the retry default \"applies to every retryable failure, including ones that cannot succeed\", and the SDK does not inspect the cap."
       }
@@ -93,7 +93,7 @@
         "b": "Streaming keeps data moving: \"Bytes keep flowing, and the connection is not idle\".",
         "a": "Ruled out because \"there is no client-to-server traffic to carry\" in a model call, and a websocket is \"not what the API sends\".",
         "c": "Ruled out because \"Some networks may drop idle connections after a variable period of time\", so a longer timeout on your side does not help.",
-        "d": "Ruled out because \"the call is silent for as long as the generation takes\", and each of three connections would be silent while its own part is written."
+        "d": "Ruled out because \"Streaming or a batch is the documented fix\", and three non-streaming calls are each still silent while they are generated."
       }
     },
     {
@@ -140,16 +140,16 @@
       "scope": "module",
       "stem": "A service builds a new SDK client for every streamed call, and its latency and open-socket count grow under load. Which change is best?",
       "options": {
-        "a": "Make one instance at start-up and pass it to each request handler",
+        "a": "Make one instance at start-up so that each handler reuses its pool",
         "b": "Move the calls to a websocket so that one connection is kept open",
         "c": "Turn streaming off so that fewer sockets are used by each of the calls",
         "d": "Raise the output limit so that fewer calls are needed for the same work"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says to create one client and share it, because \"a new client means a new connection pool each time\".",
+        "a": "The page says to reuse connections, because each client \"has a connection pool and thread pools that are better shared\".",
         "b": "Ruled out because \"a websocket adds an upgrade, a session to restore and trouble at every proxy, and gives nothing in return\".",
-        "c": "Ruled out because streaming is what keeps long calls from being dropped as idle: \"Bytes keep flowing, and the connection is not idle\".",
+        "c": "Ruled out because the sockets come from the clients, not from streaming: \"a new client means a new connection pool each time\".",
         "d": "Ruled out because \"the cost shows up as latency and sockets\" and comes from the number of clients, which the output limit does not change."
       }
     },
@@ -162,14 +162,14 @@
         "a": "The code shows only that the reply began, so the end must be checked as well",
         "b": "The code is final, since the server sends it after the whole message is written",
         "c": "The events already received form a complete message and can be stored as the result",
-        "d": "The rest of the reply can be fetched later by the message id it already carries"
+        "d": "The stream resumes from its last event on reconnect, so the call will still finish"
       },
       "key": "a",
       "explanation": {
-        "a": "The page's second trap says \"a 200 does not mean the answer is complete\", so the end of the stream has to be checked as well.",
-        "b": "Ruled out because \"the connection stays open until the message is complete\", so the status comes first.",
-        "c": "Ruled out because \"a streamed reply can start with a 200 and still end with an error event\".",
-        "d": "Ruled out because \"the Messages API is stateless, so the history is yours\", and no stored reply waits to be fetched by its id."
+        "a": "\"A streamed reply can start with a 200 and still end with an error event\", so the 200 shows only that the reply began and the end of the stream has to be checked as well.",
+        "b": "Ruled out because \"the server answers with a normal HTTP response whose body is a stream\", so the status comes before the message is written.",
+        "c": "Ruled out because \"the connection stays open until the message is complete\", and this one dropped before it was.",
+        "d": "Ruled out because a reconnect for server-sent events means \"Start a new request\", not a resumed stream."
       }
     },
     {

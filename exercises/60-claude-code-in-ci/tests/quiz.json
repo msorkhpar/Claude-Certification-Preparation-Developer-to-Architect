@@ -9,15 +9,15 @@
       "options": {
         "a": "`--output-format text` with a prompt asking for a bulleted list",
         "b": "`--max-turns` with a high limit so that the list is complete",
-        "c": "`--output-format json` with a `--json-schema` for each finding's location",
-        "d": "`--bare` alone, which shapes every reply for a script to read"
+        "c": "`--output-format json` with a `--json-schema` for the findings",
+        "d": "`--bare` alone, so that the run prints nothing but the answer"
       },
       "key": "c",
       "explanation": {
         "c": "The schema makes the answer a validated object in `structured_output`.",
         "a": "Ruled out because text leaves the entries to be parsed from prose, and \"a decision made on prose is a guess\".",
-        "b": "Ruled out because a limit bounds the loop and does not shape the answer: \"The run exits with an error at the limit\".",
-        "d": "Ruled out because the flag controls what the run loads, with \"no hooks, skills, MCP servers, memory or CLAUDE.md\", and formats nothing."
+        "b": "Ruled out because a turn limit only bounds the loop, while the shape of the answer is \"The schema's, validated before the run ends\", so no limit makes the reply an object a script can post.",
+        "d": "Ruled out because the flag controls what the run loads, with \"no hooks, skills, MCP servers, memory or CLAUDE.md\", and does not shape the output."
       }
     },
     {
@@ -26,17 +26,17 @@
       "scope": "page",
       "stem": "A review run ends with the subtype `success`, yet the object holds no `structured_output`. What should the job do?",
       "options": {
-        "a": "Fail, since there is no answer to check",
-        "b": "Pass, since the run reports success",
-        "c": "Retry the same request until a value appears",
-        "d": "Pass, with a note that nothing was reported"
+        "a": "Fail and report it, leaving a person to decide the next step",
+        "b": "Pass the job, as the subtype says the run succeeded",
+        "c": "Retry the same request in the job until a value appears",
+        "d": "Parse the findings out of the `result` text instead"
       },
       "key": "a",
       "explanation": {
-        "a": "A run without a valid answer is a failure whatever its subtype says.",
+        "a": "A run without a valid answer is a failure whatever its subtype says, and the failure is reported so that a person or a scheduled run decides.",
         "b": "Ruled out because the documentation says \"Treat that case as a failure as well\".",
         "c": "Ruled out because \"Retrying inside the job repeats cost with no reason to expect a different result\".",
-        "d": "Ruled out because \"A job never passes by saying nothing\", and a silent pass cannot be told from a failed run."
+        "d": "Ruled out because the result text is prose, and \"a decision made on prose is a guess\"."
       }
     },
     {
@@ -45,14 +45,14 @@
       "scope": "page",
       "stem": "A review job runs on every push and keeps posting remarks that the author has already fixed. What fixes it?",
       "options": {
-        "a": "Raise the turn limit so that the run can compare with earlier comments",
-        "b": "Put earlier reports in the prompt and ask for new issues only",
+        "a": "Raise the turn limit so the run can compare with earlier comments",
+        "b": "Include the earlier comments in the prompt each time",
         "c": "Tell the reviewer to be more conservative about what it reports",
         "d": "Run the review inside the session that wrote the change"
       },
       "key": "b",
       "explanation": {
-        "b": "A run has no memory of the last one, so what was reported must be in the prompt.",
+        "b": "A run has no memory of the last one, so what was reported must be in the prompt, with the request to report only what is new.",
         "a": "Ruled out because \"A CI run does not remember the last one\", and a longer loop does not change that.",
         "c": "Ruled out because such wording does not change what a reviewer reports, since vague instructions \"leave the threshold unstated\".",
         "d": "Ruled out because the writing session is \"less effective at reviewing its own changes\" and still would not know what was said on earlier pushes."
@@ -62,19 +62,19 @@
       "id": "02-context-independence-and-the-practice#q2",
       "page": "02-context-independence-and-the-practice.md",
       "scope": "page",
-      "stem": "A job that drafts additional checks keeps proposing situations that are already exercised. What belongs in its prompt?",
+      "stem": "A job that drafts additional checks keeps proposing near-copies of checks that already exist. What belongs in its prompt?",
       "options": {
-        "a": "The earlier review findings, plus a request to report only new ones",
+        "a": "The earlier review findings, with a note to report only new ones",
         "b": "The production code alone, to keep the whole prompt short",
-        "c": "A note to be conservative, so that only important checks come back",
-        "d": "The test files that exist, plus a request to skip covered cases"
+        "c": "The testing standards file, with its fixture and location rules",
+        "d": "The suite's current test files, with a note not to repeat them"
       },
       "key": "d",
       "explanation": {
         "d": "The remedy is to show the run what the suite already covers.",
         "a": "Ruled out because earlier findings serve a different run, \"the review that follows new commits\", and they do not show which scenarios the tests cover.",
         "b": "Ruled out because without the tests the run cannot see what is covered: \"put the existing tests in the prompt\".",
-        "c": "Ruled out because a call for caution does not say what is covered, and such wording fails \"because they leave the threshold unstated\"."
+        "c": "Ruled out because the standards say what makes a test worth adding, \"a branch or an edge case that no existing test covers\", but not which cases the suite already has."
       }
     },
     {
@@ -84,15 +84,15 @@
       "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A team asks the same session that wrote a change to review it afterwards, and the verdicts are nearly always approvals. Which change fits?",
       "options": {
         "a": "Tell the session to find at least three problems before it approves",
-        "b": "Give the session the full history of the change to review against",
+        "b": "Hand the review to a new job that also reads the author's session notes",
         "c": "Move that step to its own job that starts from a fresh context",
         "d": "Ask the same session for a second pass over the diff before approving"
       },
       "key": "c",
       "explanation": {
         "c": "An independent run sees the change without the reasoning that produced it.",
-        "a": "Ruled out because a quota invents problems, since \"a reviewer asked to find gaps will usually report some\", and the session stays biased.",
-        "b": "Ruled out because more history adds to the bias: \"A session that wrote a change carries its reasoning\".",
+        "a": "Ruled out because a quota works against the advice to \"flag only what affects correctness or the stated requirements\", and the same session still reviews its own work.",
+        "b": "Ruled out because the notes bring back the author's reasoning, while an independent reviewer \"sees only the diff and the criteria you give it, not the reasoning that produced the change\".",
         "d": "Ruled out because \"the independent run is a separate invocation, not a second pass in the same conversation\"."
       }
     },
@@ -123,50 +123,50 @@
       "options": {
         "a": "It passes and leaves no comment on the change",
         "b": "It fails, because a high finding exists",
-        "c": "It passes and posts the low bug as a comment",
-        "d": "It fails, because a disabled category counts as an error"
+        "c": "It passes and posts both findings as comments",
+        "d": "It passes and posts the high style finding as a comment"
       },
       "key": "a",
       "explanation": {
         "a": "The high finding is dropped with its category and the low one falls below the floor, so nothing is kept.",
-        "b": "Ruled out because \"categories the team disabled are dropped\", so the high style finding cannot fail the job.",
+        "b": "Ruled out because only \"a kept finding at a failing severity\" fails the job, and the high finding is not kept.",
         "c": "Ruled out because \"findings below a floor are dropped\", and a low finding is below a medium floor.",
-        "d": "Ruled out because only \"a kept finding at a failing severity\" fails the job, and a disabled category is dropped before that."
+        "d": "Ruled out because \"categories the team disabled are dropped\", so the style finding is never posted."
       }
     },
     {
       "id": "03-running-unattended-and-on-a-rhythm#q1",
       "page": "03-running-unattended-and-on-a-rhythm.md",
       "scope": "page",
-      "stem": "A team wants a digest of the week's merged pull requests, ready every Monday at six, before anyone has opened a laptop. Which setup fits?",
+      "stem": "An engineer wants a nightly audit, for the next month, of configuration files that exist only as uncommitted changes on their workstation. The workstation is never switched off or put to sleep. Which setup fits?",
       "options": {
-        "a": "A fixed loop started by an engineer on Friday evening",
-        "b": "A routine with a schedule trigger set on the repository",
-        "c": "A desktop task on the laptop of one engineer on the team",
-        "d": "A monitor in a background session that watches for merges"
+        "a": "A fixed loop started in a terminal that stays open on the workstation",
+        "b": "A desktop task on that same machine, with the check as its saved prompt",
+        "c": "A routine holding the repository, with a nightly schedule trigger",
+        "d": "A monitor in a background session that watches the configuration files"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says routines \"keep working when your laptop is closed\", and a routine can carry a schedule trigger and its repositories.",
-        "a": "Ruled out because \"Tasks only fire while Claude Code is running and idle.\"",
-        "c": "Ruled out because a desktop task \"only fires while the app is open and your computer is awake\", and no laptop is open at six.",
-        "d": "Ruled out because a watch has \"5 minutes by default, at most 30 minutes\", and a background session runs on a machine and will \"stop if it shuts down\"."
+        "b": "The page says a desktop task \"runs on your machine with direct access to your files and tools\", and on a workstation that never sleeps it fires every night.",
+        "a": "Ruled out because recurring loop tasks \"expire 7 days after creation\", long before the month is over.",
+        "c": "Ruled out because \"Each run starts from a fresh clone of the repositories\", so a routine never sees changes that were not committed.",
+        "d": "Ruled out because \"Every watch Claude starts has a deadline\", at most 30 minutes, so a monitor is not a schedule that fires each night."
       }
     },
     {
       "id": "03-running-unattended-and-on-a-rhythm#q2",
       "page": "03-running-unattended-and-on-a-rhythm.md",
       "scope": "page",
-      "stem": "A migration has dozens of failing call sites. An engineer wants Claude to keep fixing them in the open session, however long that takes, and to stop by itself once `npm test` exits 0. Which fits?",
+      "stem": "A migration has dozens of failing call sites. An engineer wants Claude to keep fixing them in the open session, however long that takes, and to stop by itself once the suite is green and the build is clean. Which fits?",
       "options": {
-        "a": "A goal set with a passing `npm test` run as its condition",
+        "a": "A goal whose condition is a passing test run in its output",
         "b": "A fixed loop that re-sends the fix prompt every ten minutes",
         "c": "A monitor that streams compiler output until the build passes",
         "d": "A routine that runs the fix every hour until the tests pass"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says that after each turn \"a model checks whether the condition holds\" and that the goal clears when it is met.",
+        "a": "The page says that after each turn \"a model checks whether the condition holds\" and that the goal clears when it is met, so the condition must be something Claude's own output can show.",
         "b": "Ruled out because a loop's next turn starts when \"a time interval elapses\" and not when a check holds.",
         "c": "Ruled out because Monitor only \"feeds each output line back to Claude\" and has a deadline, so it neither continues the work nor stops on a condition.",
         "d": "Ruled out because \"Routines execute on Anthropic-managed cloud infrastructure\" and each run starts from a fresh clone, so they never continue the engineer's own session."
@@ -180,14 +180,14 @@
       "options": {
         "a": "Twenty minutes is too short an interval for a loop to launch a skill",
         "b": "That skill blocks model invocation, which a scheduled run requires",
-        "c": "A loop re-runs plain prompts and never starts a bundled skill",
+        "c": "A loop can re-run plain prompts only and never launches a skill",
         "d": "The fire landed while Claude was mid-response and was cut short"
       },
       "key": "b",
       "explanation": {
         "b": "The page says that skills marked `disable-model-invocation: true`, the bundled `/verify` among them, reach Claude as plain text, because \"A scheduled fire only runs skills that Claude is allowed to invoke on its own.\"",
         "a": "Ruled out because \"Any interval from one minute upwards is allowed\", and 20 minutes is well above it.",
-        "c": "Ruled out because a loop can run \"A prompt, or a skill\", for example `/review-pr 1234`, which Claude may invoke on its own.",
+        "c": "Ruled out because a loop can run \"A prompt, or a skill\", as in `/loop 20m /review-pr 1234`.",
         "d": "Ruled out because a due prompt \"fires between your turns, not while Claude is mid-response\", so no turn was cut short."
       }
     }

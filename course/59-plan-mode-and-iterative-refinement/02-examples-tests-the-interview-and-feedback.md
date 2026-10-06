@@ -401,7 +401,7 @@ This module has no practice. Its decisions are judged by the quiz, since the cho
 1. A conversion routine keeps being read in different ways, and each new version differs from the last. What should the next message contain?
    - **a**: A longer prose description that states each rule in turn
    - **b**: A request to write tests from the version it produced last
-   - **c**: Sample inputs, one an edge case, with their exact outputs
+   - **c**: A few sample inputs paired with the exact output for each
    - **d**: A fresh session that starts from the same description
 
 2. The requirements of a large feature are unclear, and the developer is present at the keyboard. How should the work start?
@@ -413,7 +413,7 @@ This module has no practice. Its decisions are judged by the quiz, since the cho
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Exact examples remove the ambiguity that causes inconsistent reading. *a* is ruled out because the guide's remedy for prose that is read in different ways is "concrete input and output examples". *b* is ruled out because tests drawn from a misread version encode the misreading, and "A test written from the same misunderstanding as the code verifies nothing". *d* is ruled out because a fresh start should come "with a prompt that holds what you learned", and the same description holds nothing new.
+1. **c**. Exact examples remove the ambiguity that causes inconsistent reading. *a* is ruled out because a rule stated in words can still be read several ways, just as a short instruction "can mean ten things", and "The cure is to show what was meant". *b* is ruled out because tests drawn from a misread version encode the misreading, and "A test written from the same misunderstanding as the code verifies nothing". *d* is ruled out because a fresh start should come "with a prompt that holds what you learned", and the same description holds nothing new.
 2. **a**. The interview surfaces the requirements before any code, and the spec carries them into a clean session. *b* is ruled out because "do not start with a long prompt that guesses" at what the requirements are. *c* is ruled out because stating its own assumptions is the fallback when "An unattended run cannot answer questions", and here a person is present to answer. *d* is ruled out because repair means repeated correction, and "after two failed corrections the context is cluttered with failed approaches".
 
 </details>
@@ -425,7 +425,7 @@ This quiz covers both pages of the module.
 1. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A scheduled job starts Claude Code with `-p` and `--permission-mode plan`. What happens when Claude tries to edit a source file?
    - **a**: It goes ahead, with permission modes skipped
    - **b**: It is refused, with the restriction still in force
-   - **c**: It goes ahead, with the scheduled run pre-approved
+   - **c**: It is refused, and so is every read-only command it runs
    - **d**: It is allowed, with plan mode treated as an instruction only
 
 2. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. After a refactor, one report lists a broken rounding rule, an invoice total that is wrong because of it, a misspelled column header and an unused import. How should the four be sent?
@@ -443,7 +443,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Plan mode keeps its blocks in runs that have no interactive terminal. *a* is ruled out because "Plan mode keeps its blocks wherever Claude Code runs without an interactive terminal". *c* is ruled out because "Edits stay blocked until you approve the plan", and scheduling a run approves no plan. *d* is ruled out because the exception is narrow: "in an interactive terminal session where bypass permissions are available the blocks are not enforced", and a `-p` run has no interactive terminal.
+1. **b**. The flag puts the scheduled run in plan mode, and with no person at a terminal nothing lifts the block on edits. *a* is ruled out because a headless run does not drop the mode it was given: "Plan mode keeps its blocks wherever Claude Code runs without an interactive terminal". *c* is ruled out because plan mode stops edits, not exploration: Claude "reads files, runs shell commands to explore, and writes a plan", and only "commands outside the read-only set ask for approval". *d* is ruled out because the exception is narrow: "in an interactive terminal session where bypass permissions are available the blocks are not enforced", and a `-p` run has no interactive terminal.
 2. **d**. Problems that interact travel together and independent ones go one at a time. *a* is ruled out because "Independent problems, such as a typo in a label and a null date, go one after another". *b* is ruled out because the rounding rule and the total interact, and "fixing one in isolation can undo the other". *c* is ruled out because the header and the import are independent, and sent one after another "each gets a clean result and a clean test run".
 3. **c**. After more than two failed corrections the documented fix is to clear the context and write a better first prompt, one that carries the broken checks and the lessons. *a* is ruled out because "after two failed corrections the context is cluttered with failed approaches", and a fourth correction adds to the clutter. *b* is ruled out because an instruction does not remove history from the context, and "a clean session with a better prompt does better". *d* is ruled out because "Corrections accumulate in the context", and a mode switch in the same session keeps them all.
 

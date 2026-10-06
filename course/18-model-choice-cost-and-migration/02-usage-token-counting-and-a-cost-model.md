@@ -431,8 +431,8 @@ $4 and 0.05. A router that breaks ties by list order gives an answer that depend
 3. In this module's practice, a request made only of cache reads costs the same on a model at $2 with a 0.1 read rate and on
    one at $4 with 0.05. What does the router return?
    - **a**: The one listed first, since order is the last signal left
-   - **b**: Sonnet 5.5, in whichever order the catalog lists the two
-   - **c**: The one with the larger window, kept as spare room
+   - **b**: Sonnet 5.5, since the tier settles it when the totals match
+   - **c**: The one with the larger context window, kept as spare headroom
    - **d**: Opus 5.5, since quality is worth having at equal spend
 
 <details>
@@ -440,6 +440,6 @@ $4 and 0.05. A router that breaks ties by list order gives an answer that depend
 
 1. **b**. The page prices a 5-minute cache write at "1.25 times input", so 4,000 written tokens are not ordinary input. *a* is ruled out because output tokens are "Tokens generated, thinking included", all priced at the output price. *c* is ruled out because `input_tokens` is "Input tokens that were not read from or written to a cache". *d* is ruled out because `cache_creation_input_tokens` are "Tokens written to the cache", while a tenth of input is the price of "Tokens read from the cache".
 2. **d**. The page says "The token count is an estimate" and "the real count may differ by a small amount", while "Token counting is free to use but subject to requests per minute rate limits based on your usage tier." *b* is ruled out because a trial request is a billed Messages call (the page calls counting "free to use"), while the page offers counting as a separate call with "separate and independent rate limits". *c* is ruled out because `usage` reports a call already made on another input, while the page counts the new prompt itself "to decide before paying". *a* is ruled out because the endpoint "takes the same structured input as a Messages request", tools, images and documents included, which a character ratio cannot see.
-3. **b**. Case `e6` is "built on a real tie", the $2 model being Sonnet 5.5, and the practice sends a tie down a tier "and the order of the catalog never matters". *a* is ruled out because a router that breaks ties by list order gives "an answer that depends on how the catalog was written". *c* is ruled out because the window is a filter, a model needs only "a context window that holds the task's input", and the rule never ranks windows. *d* is ruled out because "A cost tie goes to the lower tier", and Opus 5.5 is the higher one.
+3. **b**. Case `e6` is "built on a real tie", the $2 model being Sonnet 5.5, the lower of the two tiers, and the practice sends a tie down a tier "and the order of the catalog never matters". *a* is ruled out because a router that breaks ties by list order gives "an answer that depends on how the catalog was written". *c* is ruled out because the window is a filter, a model needs only "a context window that holds the task's input", and the rule never ranks windows. *d* is ruled out because "A cost tie goes to the lower tier", and Opus 5.5 is the higher one.
 
 </details>

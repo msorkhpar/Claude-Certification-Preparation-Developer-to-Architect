@@ -24,19 +24,19 @@
       "id": "01-the-error-result-and-what-the-loop-does-with-it#q2",
       "page": "01-the-error-result-and-what-the-loop-does-with-it.md",
       "scope": "page",
-      "stem": "A calendar service gets three requests: one asks for a function that it lacks, one gives a date as \"next Friday\" where a calendar date is needed, and one reaches a backend that answers 503. Which request alone is a protocol error?",
+      "stem": "A calendar service gets three requests: one asks for a function that it lacks, one gives a date as \"next Friday\" where a calendar date is needed, and one reaches a backend that answers 503. Which of them, if any, is a protocol error?",
       "options": {
         "a": "The one that has nowhere to be routed",
         "b": "The one whose date has the wrong format",
         "c": "The one that met the busy backend",
-        "d": "All three, because each of them ended in a failure"
+        "d": "None, as all three reached the server"
       },
       "key": "a",
       "explanation": {
         "a": "Only a request with nothing to run is a protocol error; the other two reached the tool.",
         "b": "Ruled out because \"an input validation failure\" is a tool execution error, which the model can repair.",
         "c": "Ruled out because a failed backend call is an \"API failure\" that comes back with the flag and a message that allows \"retry with adjusted parameters\".",
-        "d": "Ruled out because the specification wants execution errors passed on: \"Clients SHOULD provide tool execution errors to language models to enable self-correction.\""
+        "d": "Ruled out because reaching the server is not where the line falls: \"A request that names a tool the server does not have is a protocol error\"."
       }
     },
     {
@@ -45,7 +45,7 @@
       "scope": "page",
       "stem": "After a timeout, an agent's wrapper sends the same call again at once. Which call may it repeat without any check first?",
       "options": {
-        "a": "Calling a report tool that is annotated with `readOnlyHint`",
+        "a": "Running a tool vouched for only by its read-only hint",
         "b": "Emailing the customer a confirmation of the refund",
         "c": "Creating a support ticket for the case",
         "d": "Looking up the order record by its order number"
@@ -53,7 +53,7 @@
       "key": "d",
       "explanation": {
         "d": "A read changes nothing when it is repeated.",
-        "a": "Ruled out because a hint is not a guarantee: \"can still write to disk if that's what the handler does\".",
+        "a": "Ruled out because the hint is unverified: \"A hint is the tool author's claim; your retry policy has to rest on what the tool actually does\".",
         "b": "Ruled out because \"an email that left the outbox cannot be called back\".",
         "c": "Ruled out because \"a ticket created twice is two tickets\"."
       }
@@ -119,16 +119,16 @@
       "id": "02-a-call-with-an-unknown-outcome-retries-and-the-practice#m3",
       "page": "02-a-call-with-an-unknown-outcome-retries-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A wrapper retries any failed tool call twice; it rescues lookups when the order service is busy, but customers are being refunded twice after timeouts. Which change to the wrapper is best?",
+      "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A wrapper retries any failed tool call twice, and customers are being refunded twice after timeouts. Which change to the wrapper is best?",
       "options": {
         "a": "Retry only transient failures, and count every timeout as transient",
         "b": "Retry five times instead of twice, and double the wait between attempts",
         "c": "Retry no writes, and report a timed out write to the customer as failed",
-        "d": "Retry only reads, and writes sent with a key that the receiver honours"
+        "d": "Retry reads and keyed writes, and mark other timed out writes unknown"
       },
       "key": "d",
       "explanation": {
-        "d": "\"A retry is safe when repeating the call cannot do harm\", which holds for a read and for a write whose key makes the service \"perform the action once however often it receives the key\".",
+        "d": "\"A retry is safe when repeating the call cannot do harm\", which holds for a read and for a write whose key makes the service \"perform the action once however often it receives the key\", and any other timed out write is reported as unknown, so \"the tool does not call again\".",
         "a": "Ruled out because a timed out write is an unknown outcome, not a transient failure: \"The third row is the one that a loop must not fold into the second\".",
         "b": "Ruled out because more attempts and longer waits only multiply the duplicates: \"a refund sent twice refunds twice\".",
         "c": "Ruled out because the refund may have gone through: \"the money may have moved, and the agent will say the opposite of what happened\"."

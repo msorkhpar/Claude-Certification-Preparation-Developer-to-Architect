@@ -24,18 +24,18 @@
       "id": "01-templates-placement-and-instructions#q2",
       "page": "01-templates-placement-and-instructions.md",
       "scope": "page",
-      "stem": "A team keeps adding one sentence to the system prompt after every complaint, and answers to the original tasks now get worse. What best explains the drop?",
+      "stem": "A team keeps adding one sentence to the system prompt after every complaint, and answers to the original tasks now get worse. In this module's account, what best explains the drop?",
       "options": {
         "a": "The few vital rules are outweighed by the many lines added since",
         "b": "The model stops reading everything that follows the first paragraph",
-        "c": "Conditional complaint rules outrank the general rules for the tasks",
+        "c": "The longer prompt makes the model think less about the original tasks",
         "d": "Each newer rule cancels the older ones, so the earlier rules are lost"
       },
       "key": "a",
       "explanation": {
         "a": "The page says the rules that matter are \"a small share of the text\" when a prompt \"grows by accretion\".",
         "b": "Ruled out because the mechanism described is that the model \"weighs them against the thirty that do not\", not that it stops reading.",
-        "c": "Ruled out because a conditional is \"Silent on every case not listed\", so the complaint rules have no say over the original tasks.",
+        "c": "Ruled out because large prompts are linked to more thinking, not less: \"If you find the model thinking more often than you'd like, which can happen with large or complex system prompts\".",
         "d": "Ruled out because the page says that \"the rules compete and the cost of every request rises\", which is competition, not newer rules cancelling older ones."
       }
     },
@@ -100,19 +100,19 @@
       "id": "02-examples-reasoning-long-documents-and-chains#q3",
       "page": "02-examples-reasoning-long-documents-and-chains.md",
       "scope": "page",
-      "stem": "A team wants Claude Opus 5.5 to reason less on simple tickets. What does the page advise?",
+      "stem": "A team wants Claude Opus 5.5 to reason less on simple tickets. What should they change?",
       "options": {
         "a": "Add a line to the system prompt telling the model to think less",
         "b": "Send each of those requests with the effort setting turned down",
         "c": "Turn thinking off altogether with a parameter on the request",
-        "d": "Give the model a short step-by-step plan for the simple tickets"
+        "d": "Move the reasoning into a short field of the structured output"
       },
       "key": "b",
       "explanation": {
         "b": "The page says \"To get less thinking, lower the effort level first\".",
         "a": "Ruled out because the page says to \"Steer the amount with effort (module 19), not with words\".",
         "c": "Ruled out because \"thinking is always on and adaptive thinking is the only mode\" on Claude Opus 5.5.",
-        "d": "Ruled out because the page says to \"Prefer general instructions over prescriptive steps.\""
+        "d": "Ruled out because \"A property that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal.\""
       }
     },
     {
@@ -138,7 +138,7 @@
       "id": "02-examples-reasoning-long-documents-and-chains#m2",
       "page": "02-examples-reasoning-long-documents-and-chains.md",
       "scope": "module",
-      "stem": "A system prompt has grown to forty rules and a new model version handles the main task worse. What should the team do first?",
+      "stem": "A system prompt has grown to forty rules and a new model version handles the main task worse. By this module's advice on prompts that grow, what should the team do first?",
       "options": {
         "a": "Cut the lines whose deletion does not change eval results",
         "b": "Repeat the most important rule in capitals at the very end",
@@ -150,7 +150,7 @@
         "a": "The page says of a line \"If deleting it changes nothing on your evaluation set, it was not working.\"",
         "b": "Ruled out because the page advises to \"Say a rule once, in one place, so that two lines cannot disagree.\"",
         "c": "Ruled out because the page says to \"Delete before you add, and test the deletion.\"",
-        "d": "Ruled out because conditionals are \"Silent on every case not listed, and the list only grows\"."
+        "d": "Ruled out because the page keeps conditionals for the exact cases only: \"Use conditionals where behaviour must be exact and then check it in code (module 25), and use principles for the rest\"."
       }
     },
     {
@@ -159,7 +159,7 @@
       "scope": "module",
       "stem": "A pipeline has to confirm that each passage the model cites really occurs in the source. Which prompt design makes that check possible?",
       "options": {
-        "a": "A chain whose first call returns the cited quotes on their own",
+        "a": "A chain whose first call returns just the quotes for its answer",
         "b": "One prompt that reads the source and answers in a single step",
         "c": "Few-shot examples in which every passage is quoted correctly",
         "d": "A longer system prompt that asks the model for honest quoting"
@@ -169,7 +169,7 @@
         "a": "The page says a chain is useful \"when you need to inspect intermediate outputs or enforce a specific pipeline structure\".",
         "d": "Ruled out because asking for honesty gives no \"place to check a step's output in code\".",
         "b": "Ruled out because \"Each step is a separate API call so you can log, evaluate, or branch at any point\", which one large prompt lacks.",
-        "c": "Ruled out because examples shape a pattern and do not verify one: \"Diverse: Cover edge cases and vary enough that Claude doesn't pick up unintended patterns.\""
+        "c": "Ruled out because examples shape the model's approach and add no step that code can check: \"Worked examples in your prompt shape how Claude approaches similar problems in its own thinking blocks.\""
       }
     },
     {
@@ -181,14 +181,14 @@
         "a": "A longer list of examples placed in the system prompt",
         "b": "A lower sampling temperature set on the request",
         "c": "A tool whose input has an enum field listing the allowed values",
-        "d": "A second assistant turn placed before the user's message in the list"
+        "d": "A system instruction telling the model to answer without any preamble"
       },
       "key": "c",
       "explanation": {
         "c": "The page's table replaces forcing a label with \"Structured outputs, or a tool with an `enum` field\".",
         "a": "Ruled out because for an output format, \"an example is the weaker tool\".",
         "b": "Ruled out because the page says requests carry no \"non-default `temperature`, `top_p` or `top_k`, which these models reject\", so a lower temperature is not available as a way to force a label.",
-        "d": "Ruled out because \"What the rule does not touch is an assistant message elsewhere in the conversation\", and it does not restrict an answer."
+        "d": "Ruled out because the page's table gives \"Respond directly without preamble\" as the cure for skipping \"Here is...\", while forcing a label takes a schema or an `enum` tool."
       }
     }
   ]

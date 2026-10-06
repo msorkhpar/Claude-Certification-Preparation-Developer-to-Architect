@@ -113,22 +113,22 @@ R3  Input: any thread, when the model call fails with a 429, a 5xx or a timeout.
 
 1. A product owner asks that a new feature for writing customer emails must "sound professional". The team wants a
    requirement that a test can fail. Which version is best?
-   - **a**: Ninety percent of outputs in a fixed sample of forty tickets pass a tone rubric that a grader applies
-   - **b**: The support lead reads a handful of outputs before release and judges that they sound professional
-   - **c**: The prompt gives the instruction to write in a professional and courteous voice whenever it replies
-   - **d**: Customers rate each email after sending, and the feature stays while the ratings stay positive
+   - **a**: Ninety percent of outputs on a fixed set of forty tickets pass a tone rubric that a grader applies
+   - **b**: The support lead reads ten outputs before release and signs off that they sound professional
+   - **c**: The system prompt opens with five rules for a professional and courteous voice in every reply
+   - **d**: Customers rate each email in the first month, and the feature stays if most ratings are positive
 
 2. A draft spec for an invoice-extraction feature lists the fields to extract, the accepted file types and the
    expected accuracy. Which missing item should a reviewer ask the team to add first?
-   - **a**: The exact system prompt that the developers plan to use for the extraction
+   - **a**: The exact system prompt, examples and settings that the developers plan to use
    - **b**: One expected output string for each sample invoice, compared character by character
-   - **c**: What the screen shows the user when a call to the model errors, is refused or stops early
+   - **c**: What the screen shows the user when a model call errors, is refused or stops early
    - **d**: A recorded demo of the extraction running cleanly on a handful of sample invoices
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. It states a rate over a fixed sample and names a grader, which is what the page asks of a quality requirement: a number over that set. *b* is ruled out because "a requirement that only a person's impression can settle is a wish", and a read-through by one lead is only an impression. *c* is ruled out because a rule in a prompt "is only a request to the model", and a prompt line is not a test. *d* is ruled out because ratings after sending are an operational signal, while the acceptance criterion must be "written before the first prompt is tried".
-2. **c**. Failure behaviour is the row the page says teams forget, because a spec without it produces code without it. *a* is ruled out because the quality number is "written before the first prompt is tried", so the prompt is an implementation choice that comes after the spec. *b* is ruled out because quality "is stated as a rate over a set of examples, not as a single expected string". *d* is ruled out because a demo can be one that "impresses everyone and cannot say whether it is done", so it adds no line a test can fail.
+2. **c**. Failure behaviour is the row the page says teams forget, because a spec without it produces code without it. *a* is ruled out because the evaluation set is "rerun whenever the prompt, the model or the code changes", so the prompt is a part that changes under the spec, not a line of it. *b* is ruled out because quality "is stated as a rate over a set of examples, not as a single expected string". *d* is ruled out because a demo can be one that "impresses everyone and cannot say whether it is done", so it adds no line a test can fail.
 
 </details>

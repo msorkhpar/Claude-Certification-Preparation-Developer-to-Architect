@@ -661,23 +661,23 @@ The practice is in [`exercises/88-evaluation-and-optimisation`](../../exercises/
 
 ## Quiz
 
-1. A new prompt is tried on 80 live cases in each arm and scores five points higher than the current one. What should the team conclude?
+1. A new prompt is tried on 80 live cases in each arm and scores five points higher than the current one. What should the team do?
    - **a**: Adopt the new prompt, since five points is the larger number
-   - **b**: Too small a sample to tell, so gather the planned numbers
+   - **b**: Keep the test running until the planned sample is reached
    - **c**: Rerun the same 80 cases and average the two results
    - **d**: Extend the test only if the new prompt is behind
 
-2. A new model version matches the current one on overall accuracy in a shadow run. It gains answers in order status and loses answers in refunds, an area the team guards. What does the gate do?
-   - **a**: Ship it to everyone, as the gains in order status cover the refund losses
+2. A new model version matches the current one on overall accuracy in a shadow run. It gains answers in order status and loses answers in refunds, an area the team guards. What does the gate described on this page do?
+   - **a**: Hold it back until its overall accuracy is higher than the current version's
    - **b**: Average the accuracy of the two segments and ship if that average has risen
    - **c**: Ship it to half of the live traffic and watch whether any customers complain
-   - **d**: Hold the change back until that costly segment stops losing cases
+   - **d**: Hold the change back until the costly segment stops losing any of its cases
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. With 80 cases in an arm the gap is inside chance, so the verdict is that there are too few cases. *a* is ruled out because "The larger number is not the better version". *c* is ruled out because "Running the same cases again repeats the same sample and adds no information". *d* is ruled out because "Stopping or extending a test according to who is ahead produces false wins".
-2. **d**. The gate has a key for guarded segments, and a loss there blocks the change. *a* is ruled out because "A gain in one segment does not pay for a loss in another". *c* is ruled out because "A change that ships to half of the traffic exposes half of the users to the regression before anyone has measured it". *b* is ruled out because "An average of segment accuracies weights a rare segment like a common one and hides its price".
+1. **b**. With 80 cases in an arm the gap is inside chance, so the test runs on to the minimum sample set in advance. *a* is ruled out because "The larger number is not the better version". *c* is ruled out because "Running the same cases again repeats the same sample and adds no information". *d* is ruled out because "Stopping or extending a test according to who is ahead produces false wins".
+2. **d**. The gate has a key for guarded segments, and a loss there blocks the change. *a* is ruled out because a higher total can come from gains elsewhere while refunds still lose, and "A gain in one segment does not pay for a loss in another". *c* is ruled out because "A change that ships to half of the traffic exposes half of the users to the regression before anyone has measured it". *b* is ruled out because "An average of segment accuracies weights a rare segment like a common one and hides its price".
 
 </details>
 

@@ -7,10 +7,10 @@
       "scope": "page",
       "stem": "A product owner asks that a new feature for writing customer emails must \"sound professional\". The team wants a requirement that a test can fail. Which version is best?",
       "options": {
-        "a": "Ninety percent of outputs in a fixed sample of forty tickets pass a tone rubric that a grader applies",
-        "b": "The support lead reads a handful of outputs before release and judges that they sound professional",
-        "c": "The prompt gives the instruction to write in a professional and courteous voice whenever it replies",
-        "d": "Customers rate each email after sending, and the feature stays while the ratings stay positive"
+        "a": "Ninety percent of outputs on a fixed set of forty tickets pass a tone rubric that a grader applies",
+        "b": "The support lead reads ten outputs before release and signs off that they sound professional",
+        "c": "The system prompt opens with five rules for a professional and courteous voice in every reply",
+        "d": "Customers rate each email in the first month, and the feature stays if most ratings are positive"
       },
       "key": "a",
       "explanation": {
@@ -26,15 +26,15 @@
       "scope": "page",
       "stem": "A draft spec for an invoice-extraction feature lists the fields to extract, the accepted file types and the expected accuracy. Which missing item should a reviewer ask the team to add first?",
       "options": {
-        "a": "The exact system prompt that the developers plan to use for the extraction",
+        "a": "The exact system prompt, examples and settings that the developers plan to use",
         "b": "One expected output string for each sample invoice, compared character by character",
-        "c": "What the screen shows the user when a call to the model errors, is refused or stops early",
+        "c": "What the screen shows the user when a model call errors, is refused or stops early",
         "d": "A recorded demo of the extraction running cleanly on a handful of sample invoices"
       },
       "key": "c",
       "explanation": {
         "c": "Failure behaviour is the row the page says teams forget, because a spec without it produces code without it.",
-        "a": "Ruled out because the quality number is \"written before the first prompt is tried\", so the prompt is an implementation choice that comes after the spec.",
+        "a": "Ruled out because the evaluation set is \"rerun whenever the prompt, the model or the code changes\", so the prompt is a part that changes under the spec, not a line of it.",
         "b": "Ruled out because quality \"is stated as a rate over a set of examples, not as a single expected string\".",
         "d": "Ruled out because a demo can be one that \"impresses everyone and cannot say whether it is done\", so it adds no line a test can fail."
       }
@@ -47,31 +47,31 @@
       "options": {
         "a": "Stream every reply from the workers so that the first words of each label arrive sooner",
         "b": "Hand the whole job to the batch interface, which halves the price and runs unattended",
-        "c": "Move the workers to the fastest tier so that the overnight window is certain to be enough",
+        "c": "Move the workers to the fastest tier so that the overnight window is comfortably met",
         "d": "Chain a second call after each label that checks the label before the result is stored"
       },
       "key": "b",
       "explanation": {
         "b": "Nobody is waiting and volume is large, which the page assigns to a batch: \"most batches finishing in less than 1 hour while reducing costs by 50%\".",
         "a": "Ruled out because streaming \"does not shorten the total time\", and no reader is watching the words arrive.",
-        "c": "Ruled out because a faster tier is correct only \"if your evaluation set (page 1) says its quality holds\", and it does not change the cost.",
-        "d": "Ruled out because \"chaining calls multiplies latency\" and also cost, and the requirement gives no reason for a second call."
+        "c": "Ruled out because a faster tier still makes one interactive call per ticket, and \"an interactive call pays for latency you do not need\" when nobody is waiting.",
+        "d": "Ruled out because a second call per ticket doubles the calls, while the page's cost lever is that \"one call that returns three fields beats three calls that each return one\"."
       }
     },
     {
       "id": "02-budgets-and-matching-an-architecture#q2",
       "page": "02-budgets-and-matching-an-architecture.md",
       "scope": "page",
-      "stem": "A requirement says customer data may only be processed in the United States. A developer plans to use `claude-haiku-4-5-20251001` and set `inference_geo` to `\"us\"` on every request. What does the page predict?",
+      "stem": "A requirement says customer data may only be processed in the United States. A developer plans to use `claude-haiku-4-5-20251001` and set `inference_geo` to `\"us\"` on every request. What happens to the first request?",
       "options": {
-        "a": "The calls succeed and are billed at 1.1 times the standard rate for inference kept in the US",
-        "b": "The calls succeed and run in any region, because the unsupported setting is quietly dropped",
-        "c": "The calls fail with a 429 error, because the capacity inside the US for that model is limited",
-        "d": "The calls fail with a 400 error, because the setting is not supported on that model"
+        "a": "It succeeds, and the bill shows 1.1 times the standard rate for inference kept in the US",
+        "b": "It succeeds, with the unsupported setting dropped and the call run wherever capacity is free",
+        "c": "It is refused with a 429, because the capacity inside the US for that model is limited",
+        "d": "It is rejected, so meeting the residency rule needs a newer model that supports the setting"
       },
       "key": "d",
       "explanation": {
-        "d": "The page says a request that sets the geography on Claude Haiku 4.5 or an earlier model \"return a 400 error\".",
+        "d": "Requests that set the geography on Claude Haiku 4.5 or an earlier model \"return a 400 error\", so the residency rule can only be met by changing the model.",
         "a": "Ruled out because the 1.1 times price belongs to models where the setting is \"supported on Claude 4.6 and later\", which excludes this one.",
         "b": "Ruled out because the documentation says such requests \"return a 400 error\", so the setting is rejected and not dropped.",
         "c": "Ruled out because \"Rate limits are shared across all geos\", so the setting opens no separate US pool whose capacity could run out."
@@ -90,9 +90,9 @@
       },
       "key": "b",
       "explanation": {
-        "b": "An alias that moves \"changes behaviour under you\", and the routine is to pin an id and change it on purpose, with a regression run.",
+        "b": "An alias that moves \"changes behaviour under you\", while \"a pinned id changes when you change it\", so the update went live unplanned and untested.",
         "a": "Ruled out because the routine asks for \"a regression run of the evaluation set on every change\", and no set was run on this change at all, whatever its size.",
-        "c": "Ruled out because a missing spec is a separate fault, while the symptom is described by \"a silent change of model is a silent change of behaviour\".",
+        "c": "Ruled out because a written spec does not stop an alias moving, and the page's remedy for this exact symptom is \"Pin an id, and change it on purpose with a regression run\".",
         "d": "Ruled out because the request id is logged to \"include it when you contact support about a specific request\", which helps a trace but does not stop the change."
       }
     },
@@ -105,7 +105,7 @@
         "a": "Pin an older API version header to stop any new property from appearing in the reply body",
         "b": "Validate each reply against a strict schema and reject any reply that has extra fields",
         "c": "Wrap the parsing step in a retry with backoff so that a later reply parses cleanly",
-        "d": "Take only the properties the code needs and skip everything else in the reply"
+        "d": "Read only what the code uses and skip the rest, so unknown properties cannot break parsing"
       },
       "key": "d",
       "explanation": {
@@ -142,15 +142,15 @@
       "options": {
         "a": "Rerun the fixed evaluation set on the candidate id and compare it with the acceptance rate",
         "b": "Accept the lead's impression, since the replacement is the more recent release of the family",
-        "c": "Switch to the moving alias so that every later upgrade arrives without any change in the code",
-        "d": "Compare the monthly bill of the two models over a single representative week of production traffic"
+        "c": "Switch to the moving alias so that later upgrades arrive without a code change",
+        "d": "Compare the bills of the two models over one representative week of production traffic"
       },
       "key": "a",
       "explanation": {
         "a": "The maintain routine is to re-run the evaluation set against the new model and compare, so the change is judged on numbers.",
         "b": "Ruled out because \"a requirement that only a person's impression can settle is a wish\".",
         "c": "Ruled out because \"a silent change of model is a silent change of behaviour\".",
-        "d": "Ruled out because a bill covers cost alone, while the routine says to \"re-run the evaluation set against the new model\" for quality."
+        "d": "Ruled out because a bill says nothing about quality, and a model is \"correct only if your evaluation set (page 1) says its quality holds\"."
       }
     },
     {
@@ -181,14 +181,14 @@
         "a": "Chain three separate calls that draft, check and polish the reply before it is shown",
         "b": "Run an agent loop that explores the documents until the loop is satisfied with what it found",
         "c": "Retrieve the passages that match each question and send them with it in a single call",
-        "d": "Send each question in one streamed call and let the model answer from what it knows"
+        "d": "Send each question in one streamed call whose prompt says to answer only from company policy"
       },
       "key": "c",
       "explanation": {
         "c": "Answers that must come from the company's own documents point to retrieval followed by one call.",
         "b": "Ruled out because an agent loop is for when \"the path depends on what is found and cannot be listed in advance\".",
         "a": "Ruled out because a chain is for \"several dependent steps, each checkable\", and three calls would also cost latency.",
-        "d": "Ruled out because one call alone fits \"one answer from the input alone\", and for the company's documents \"the model's training does not contain them\"."
+        "d": "Ruled out because an instruction cannot supply policy text the model never saw, and for the company's documents \"the model's training does not contain them\"."
       }
     }
   ]

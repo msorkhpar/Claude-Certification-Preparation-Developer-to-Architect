@@ -5,7 +5,7 @@
       "id": "01-matching-a-tier-to-a-workload#q1",
       "page": "01-matching-a-tier-to-a-workload.md",
       "scope": "page",
-      "stem": "A team labels support tickets with one word each, and its tests show the cheapest tier is as accurate as the others. Which choice does the page back?",
+      "stem": "A team labels support tickets with one word each. On a sample of its hardest tickets, Haiku 4.5, Sonnet 5.5 and Opus 5.5 score within one point of each other. Which choice does the page back?",
       "options": {
         "a": "The newest release, since a later model has the lowest price",
         "b": "The most capable tier, because ticket text can always hide a hard case",
@@ -14,7 +14,7 @@
       },
       "key": "d",
       "explanation": {
-        "d": "The page's method is to move down \"until quality drops, and keep the last tier that held\", and the tests show nothing is lost at the cheapest tier.",
+        "d": "The page's method is to move down \"until quality drops, and keep the last tier that held\", and a sample that follows \"Test the cheap tier first on the hard cases\" shows no drop all the way down to Haiku 4.5, the cheapest of the three.",
         "b": "Ruled out because a tier above Opus is \"earned by failing an evaluation, not assumed\".",
         "c": "Ruled out because the method keeps \"the cheapest tier that passes\", not a tier in the middle.",
         "a": "Ruled out because \"A newer model can be cheaper than the one it replaces, and the reverse can happen\"."
@@ -26,9 +26,9 @@
       "scope": "page",
       "stem": "A job feeds 300,000 tokens to a model and expects a short answer. One model is cheapest by price per million. What rules it out first?",
       "options": {
-        "a": "Its context window is smaller than what is sent",
+        "a": "Its context window is smaller than the input it would receive",
         "b": "Its latency is the highest of all the models in the table",
-        "c": "Its tokenizer is older than the tokenizers of the others",
+        "c": "Its tokenizer is older than the tokenizers of the other models",
         "d": "Its max output is the lowest of the models in the table"
       },
       "key": "a",
@@ -103,13 +103,13 @@
       "stem": "In this module's practice, a request made only of cache reads costs the same on a model at $2 with a 0.1 read rate and on one at $4 with 0.05. What does the router return?",
       "options": {
         "a": "The one listed first, since order is the last signal left",
-        "b": "Sonnet 5.5, in whichever order the catalog lists the two",
-        "c": "The one with the larger window, kept as spare room",
+        "b": "Sonnet 5.5, since the tier settles it when the totals match",
+        "c": "The one with the larger context window, kept as spare headroom",
         "d": "Opus 5.5, since quality is worth having at equal spend"
       },
       "key": "b",
       "explanation": {
-        "b": "Case `e6` is \"built on a real tie\", the $2 model being Sonnet 5.5, and the practice sends a tie down a tier \"and the order of the catalog never matters\".",
+        "b": "Case `e6` is \"built on a real tie\", the $2 model being Sonnet 5.5, the lower of the two tiers, and the practice sends a tie down a tier \"and the order of the catalog never matters\".",
         "a": "Ruled out because a router that breaks ties by list order gives \"an answer that depends on how the catalog was written\".",
         "c": "Ruled out because the window is a filter, a model needs only \"a context window that holds the task's input\", and the rule never ranks windows.",
         "d": "Ruled out because \"A cost tie goes to the lower tier\", and Opus 5.5 is the higher one."
@@ -119,16 +119,16 @@
       "id": "03-pinning-ids-and-migrating-safely#q1",
       "page": "03-pinning-ids-and-migrating-safely.md",
       "scope": "page",
-      "stem": "A team changes one configuration value from an older id to Claude Opus 5.5 and every call starts failing with 400. Their call sets a manual thinking budget. Which fix does the page back?",
+      "stem": "A team changes one configuration value from an older id to Claude Opus 5.5 and every call starts failing with 400. Their call sets `budget_tokens` under `thinking`. Which fix does the page back?",
       "options": {
-        "a": "Drop the settings that the new target rejects, and build per target",
+        "a": "Remove that field from the body, since the new model refuses it",
         "b": "Raise `max_tokens`, since a budget needs more room under the new id",
         "c": "Add retries, since a 400 on a fresh deployment is often transient",
         "d": "Set thinking to type `disabled`, so that no budget is sent"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says an item that is \"rejected\" returns a 400 error and that the guide lists what to remove: a manual `budget_tokens` is rejected on Opus 5.5.",
+        "a": "The page says an item that is \"rejected\" returns a 400 error, and a manual `budget_tokens` is on the Opus 5.5 list, so removing it ends the failures.",
         "b": "Ruled out because \"Sending thinking of type disabled, or a manual budget_tokens, is rejected\", whatever the room.",
         "c": "Ruled out because a rejected setting fails every time, and a rising 400 rate is \"the signal of a rejected parameter\".",
         "d": "Ruled out because on Opus 5.5 \"Thinking is adaptive and always on\", and a `disabled` type is rejected too."
@@ -140,17 +140,17 @@
       "scope": "page",
       "stem": "A deprecated id is still called by a nightly job that nobody remembers. How can the team find it?",
       "options": {
-        "a": "Export usage per API key and model, which names the key behind it",
+        "a": "Pull the Console usage export, which ties that id to its calling key",
         "b": "Wait for the retirement email, which names each calling application",
         "c": "Watch the 400 rate, which climbs each time that id is called",
-        "d": "Check the alias list, which names every application that resolves it"
+        "d": "Look the id up on the Model deprecations page, which lists its callers"
       },
       "key": "a",
       "explanation": {
         "a": "The Usage page exports a CSV, and \"usage broken down by API key and model\" shows which key still calls which model.",
         "b": "Ruled out because the notice is about dates, \"providing at least 60 days' notice before model retirement for publicly released models\", and names no callers.",
         "c": "Ruled out because a deprecated model \"is still functional but no longer recommended\", so its calls succeed and raise no 400.",
-        "d": "Ruled out because an alias is \"a convenience pointer that resolves to the dated ID\" and holds no list of callers."
+        "d": "Ruled out because \"The Model deprecations page defines four states\" and gives each model's dates, which say nothing about who calls it."
       }
     },
     {
@@ -176,19 +176,19 @@
       "id": "03-pinning-ids-and-migrating-safely#m1",
       "page": "03-pinning-ids-and-migrating-safely.md",
       "scope": "module",
-      "stem": "A support product sends one request body, with `temperature` set to 0.2, to Haiku 4.5 and to Sonnet 5.5. Haiku answers and Sonnet returns a 400. What explains the difference?",
+      "stem": "A support router builds one request body, with `temperature` set to 0.2, and sends tickets under 150,000 tokens to Haiku 4.5 and larger ones, up to 400,000, to Sonnet 5.5. Only the larger tickets fail, each with a 400. Which change does the module back?",
       "options": {
-        "a": "The newer model has been retired, so every call to it fails",
-        "b": "The newer model refuses sampling values the older one accepts",
-        "c": "The newer id is an alias that resolves to an older snapshot",
-        "d": "The body overflows the newer model's window but fits the older"
+        "a": "Send the larger tickets to Haiku 4.5 too, since it takes the shared body",
+        "b": "Strip `temperature` from the newer model's calls, since it rejects the value",
+        "c": "Pin Sonnet 5.5 by a dated id, since its dateless id may have moved",
+        "d": "Route the larger tickets to Opus 5.5, whose higher tier takes more settings"
       },
       "key": "b",
       "explanation": {
-        "b": "The Sonnet 5.5 guide \"returns the same list of 400-error settings\", sampling parameters among them, while \"Claude Haiku 4.5 predates these rules and still accepts sampling parameters\".",
-        "a": "Ruled out because Sonnet 5.5 is listed \"as the recommended replacement\" for a deprecated model, not as a retired one.",
+        "b": "The Sonnet 5.5 guide \"returns the same list of 400-error settings\", sampling parameters among them, while \"Claude Haiku 4.5 predates these rules and still accepts sampling parameters\", so only the body sent to Sonnet 5.5 must lose the value.",
+        "a": "Ruled out because \"a 300,000-token input rules Haiku 4.5 out whatever its price\", and the larger tickets reach 400,000 tokens.",
         "c": "Ruled out because \"Every Claude model ID is a pinned snapshot, including the dateless IDs used from the 4.6 generation on.\"",
-        "d": "Ruled out because Haiku 4.5 has the smaller window, as \"a 300,000-token input rules Haiku 4.5 out whatever its price\", so a body that fits Haiku also fits Sonnet 5.5."
+        "d": "Ruled out because the Opus 5.5 guide sets the same rule: \"Omit temperature, top_p, and top_k, or leave them at their defaults: any other value is rejected.\""
       }
     },
     {
@@ -214,18 +214,18 @@
       "id": "03-pinning-ids-and-migrating-safely#m3",
       "page": "03-pinning-ids-and-migrating-safely.md",
       "scope": "module",
-      "stem": "A router moves a long conversation to a different target halfway through, and answer quality drops. Which cause does the module name?",
+      "stem": "A router moves a long agent conversation from Opus 5.5 to Sonnet 5.5 halfway through, and answer quality drops. What does Sonnet 5.5 work from for the earlier turns?",
       "options": {
-        "a": "The old model's cache stays behind, so the new one loses the history",
-        "b": "The new model has a different alias that resolves to an old snapshot",
-        "c": "The token counting endpoint rejected the longer conversation",
-        "d": "The new model sees the past turns but not the thinking behind them"
+        "a": "A shortened history, since the old model's cache cannot move across",
+        "b": "The full turns and reasoning, read through an older snapshot of itself",
+        "c": "The latest turn alone, since the counting endpoint trims long input",
+        "d": "The previous messages, with none of the thinking blocks they carried"
       },
       "key": "d",
       "explanation": {
-        "d": "The page quotes \"A router or fallback that moves a conversation from Claude Opus 5.5 to any other model runs those turns without them.\"",
+        "d": "Thinking blocks are tied to the model that wrote them, and the page quotes \"A router or fallback that moves a conversation from Claude Opus 5.5 to any other model runs those turns without them.\"",
         "b": "Ruled out because \"Every Claude model ID is a pinned snapshot\" and a dateless id is its own snapshot.",
-        "c": "Ruled out because the endpoint rejects inputs such as \"server tools like web search\", not long conversations.",
+        "c": "Ruled out because the endpoint only counts and rejects inputs such as \"server tools like web search\", and trims nothing.",
         "a": "Ruled out because a cache changes only the price of input, and \"the total input is the sum of the three input fields\" whether read from a cache or not."
       }
     },
@@ -235,17 +235,17 @@
       "scope": "module",
       "stem": "A plan to move 20 percent of traffic to a replacement model on Monday and the rest at the end of the week is proposed. What should the team add before Monday?",
       "options": {
-        "a": "A second evaluation on the vendor's published benchmark suite",
-        "b": "An evaluation on its own cases, run ahead of the shift",
+        "a": "The vendor's published benchmark scores, compared across both models",
+        "b": "An evaluation on its own cases of quality, latency and task cost",
         "c": "The old model's effort level, carried over so behaviour matches",
-        "d": "A larger `max_tokens` on every request, to leave room for thinking"
+        "d": "A cost budget per feature, set from the old model's token counts"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says to evaluate \"on your own cases\" and warns that migrating on the retirement date \"leaves no time to evaluate\".",
-        "a": "Ruled out because the page's step is an evaluation \"on your own cases\", not a published suite.",
+        "b": "The page's step is to evaluate \"on your own cases\" and to \"Compare quality, latency and cost per task, not per token\", and it warns that migrating on the retirement date \"leaves no time to evaluate\".",
+        "a": "is ruled out because, for whether a model can do the task, \"only your own evaluation answers\" it, not a published suite.",
         "c": "Ruled out because the Effort page says to \"Run an effort sweep on your own evals rather than carrying settings over from an earlier model\".",
-        "d": "Ruled out because the page says \"Re-measure instead of copying numbers\" and gives no blanket increase."
+        "d": "Ruled out because \"A new tokenizer changes token counts\", so the page says \"Re-measure instead of copying numbers\"."
       }
     }
   ]

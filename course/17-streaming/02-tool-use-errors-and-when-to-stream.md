@@ -84,7 +84,7 @@ code.
    - **a**: Protection from failures once the first byte has arrived
    - **b**: Tool calls that can run while their input is still arriving
    - **c**: An exemption from the limits that apply to other calls
-   - **d**: Readers see words while the rest is still being written
+   - **d**: Words on screen while the rest is still being written
 
 <details>
 <summary>Answer key</summary>
@@ -118,7 +118,7 @@ This quiz covers both pages of the module.
    - **d**: A very long answer that a plain call would refuse to start
 
 4. A stream holds a thinking block, a text block and a tool block. In which order does an assembler list them?
-   - **a**: By how many fragments each one received
+   - **a**: By the size of the content each one holds
    - **b**: By the moment at which each one finished
    - **c**: With thinking first, text next and tools last
    - **d**: By the index that the events give each one
@@ -129,6 +129,6 @@ This quiz covers both pages of the module.
 1. **a**. The input is not in the opening event at all: "the fragments are joined and parsed once, after the block stops". *b* is ruled out because, whatever the schema says, "A tool_use block starts with its id and name and an empty input". *c* is ruled out because "the fragment is not an object, and the object that comes is not final until the block ends". *d* is ruled out because the tool would still run on what the stream has not yet delivered, and "Running a tool on a partial input" is the mistake the page names.
 2. **c**. New event types are expected, since "the API may add new event types", while "A stream that ends without message_stop is an incomplete message". *b* is ruled out on both halves: an unknown type is not an error, and "Without message_stop there is no stop reason", so the second gives no result to return. *a* is ruled out because a cut stream must fail: "Raise, so that the caller can decide". *d* is ruled out because the page says to "ignore event types you do not know".
 3. **b**. The page says "Streamed calls count against the same limits as the others", so the share of the limit is unchanged. *a* is ruled out because "Events keep arriving, so a proxy never sees an idle connection". *c* is ruled out because "The first words appear at once". *d* is ruled out because "the SDKs refuse a non-streaming request that they expect to take longer than about ten minutes", which streaming avoids.
-4. **d**. The page says "content lists the blocks in index order". *b* is ruled out because the order is "not in the order they stopped". *c* is ruled out because "Blocks are never sorted by type". *a* is ruled out because blocks are "never sorted by type or by size", and a fragment count is a size.
+4. **d**. The page says "content lists the blocks in index order". *b* is ruled out because the order is "not in the order they stopped". *c* is ruled out because "Blocks are never sorted by type". *a* is ruled out because blocks are "never sorted by type or by size", so a larger block does not move ahead.
 
 </details>

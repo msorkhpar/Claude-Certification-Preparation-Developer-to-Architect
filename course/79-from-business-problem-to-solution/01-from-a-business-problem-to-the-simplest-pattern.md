@@ -86,17 +86,17 @@ These are the wrong answers the exam's options for this domain offer, each with 
    - **c**: A retrieval call that cites its source passages, plus a fixed workflow that fills a correspondence template
    - **d**: One model fine-tuned on both kinds of text, so that no policy lookup is needed at run time
 
-2. Scenario: Greywell Insurance's sponsor points to last quarter's records, where a routine claim took a handler 14 minutes on average, and says the claims project succeeds when that figure goes down. Which pillar does the sponsor want served?
+2. Scenario: Greywell Insurance's sponsor will judge the claims project by one figure, the 14 minutes a handler now spends on an average routine claim, and accepts that once the new service is paid for, each claim may cost no less than it does today. Which pillar does the sponsor want served?
    - **a**: Transformation, a capability that did not exist before the project
-   - **b**: Efficiency, the same output with less effort for each unit
-   - **c**: Cost, the whole process priced lower than before
+   - **b**: Efficiency, the same cases processed with a lighter workload behind each one
+   - **c**: Cost, a lower total price for each case that is completed
    - **d**: Performance service levels, agreed targets that are met
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. The two jobs have different shapes, so each gets the cheapest structure that fits and its own measures. *a* is ruled out because "Documents in common are not an architectural argument". *b* is ruled out because a single agent with every tool joins two risk profiles, and "two different shapes need two different structures". *d* is ruled out because the first job needs the current policy text: "The answer needs outside facts or one action".
-2. **b**. Handler minutes per claim against last quarter's figure is the efficiency pillar's measure: less effort for each unit. *a* is ruled out because transformation claims "Something that could not be done before", and routine claims were handled before. *c* is ruled out because cost counts "tokens, review time and rework, not model price alone" per task, and the sponsor named time. *d* is ruled out because that pillar's measures are "95th percentile latency, availability, accuracy by case type".
+2. **b**. Fewer handler minutes on the same routine claims is less effort for each unit of work, and the sponsor has set the price of a claim aside, so efficiency is the pillar served. *a* is ruled out because transformation claims "Something that could not be done before", and routine claims were handled before. *c* is ruled out because the cost pillar claims "Work costs less in total", measured as "Cost per completed task against the human baseline", and the sponsor accepts that this figure may not fall. *d* is ruled out because that pillar's measures are "95th percentile latency, availability, accuracy by case type".
 
 </details>
 

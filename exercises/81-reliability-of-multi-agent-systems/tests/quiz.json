@@ -5,7 +5,7 @@
       "id": "01-safe-retries-and-circuit-breakers#q1",
       "page": "01-safe-retries-and-circuit-breakers.md",
       "scope": "page",
-      "stem": "Scenario: Tern Payments' transfer tool writes its idempotency key to a keys table and then makes the transfer as a second, separate step. A crash falls between the two steps, and after the restart a retry returns the stored receipt although no money moved. What design prevents this?",
+      "stem": "Scenario: Tern Payments' transfer tool writes its idempotency key to a keys table and then makes the transfer as its second step. A crash falls between the two steps, and after the restart a retry returns the stored receipt although no money moved. What design prevents this?",
       "options": {
         "a": "Delete stored keys that are older than a minute, so that a retry can proceed afresh",
         "b": "Make the agent confirm the account balance in its prompt before every retry",
@@ -15,7 +15,7 @@
       "key": "d",
       "explanation": {
         "d": "The key and the effect are recorded in one step, so neither can exist without the other.",
-        "a": "Ruled out because \"The tool keeps the keys it has seen\", and deleting keys breaks the recognition of repeats.",
+        "a": "Ruled out because a deleted key lets a late retry pay again in the very case the key exists for: \"The case that needs the key is the one in which the action happened and the answer did not arrive\".",
         "b": "Ruled out because \"a control that must hold is enforced in code outside the model\".",
         "c": "Ruled out because it only reverses the gap: \"a crash between the two leaves an effect with no key, or a key with no effect\"."
       }
@@ -24,7 +24,7 @@
       "id": "01-safe-retries-and-circuit-breakers#q2",
       "page": "01-safe-retries-and-circuit-breakers.md",
       "scope": "page",
-      "stem": "Scenario: Quillon Labs runs fifty tasks that depend on one search agent whose backend is down. Each task retries three times before failing. What limits the waste best?",
+      "stem": "Scenario: Quillon Labs runs fifty tasks that depend on one search agent whose backend is down. Each task retries three times before failing. The plan's other agents are healthy. What limits the waste best?",
       "options": {
         "a": "A breaker that trips after repeated errors in a row and refuses calls for a pause",
         "b": "A larger retry count for each task, so the backend has more chances to come back",
@@ -64,26 +64,26 @@
       "scope": "page",
       "stem": "Scenario: Rowan Insights' search agent fails, and a cheaper backup agent answers the task. The runner keeps the backup's answer. What should it do with that result?",
       "options": {
-        "a": "Write it to the store of finished work, so that a later run does not repeat the same effort",
-        "b": "Use it marked as degraded and leave it unsaved, so that a later run can try the primary",
-        "c": "Discard it, because only the primary agent's answers may ever appear in a final report",
-        "d": "Use it and say nothing, because the reader of the report wants only the content of the answer"
+        "a": "Write it to the store of finished work, so that a later run does not spend effort on the task again",
+        "b": "Flag it as degraded and leave it out of the store, so that a later run tries the primary again",
+        "c": "Record it under the primary's idempotency key, so that a retry of the primary returns this answer",
+        "d": "Retry the backup until its answer matches the primary's, so that the report needs no flag on it"
       },
       "key": "b",
       "explanation": {
         "b": "A degraded result is used and flagged, and it is not stored, so a later run can try the primary again.",
         "a": "Ruled out because a stored answer makes the task look done: \"the weaker answer would become permanent by accident\".",
-        "c": "Ruled out because the fallback \"keeps the run moving\", and discarding it loses the point of having one.",
-        "d": "Ruled out because the task is listed as degraded \"so that the report and the caller know the answer is weaker than planned\"."
+        "c": "Ruled out because the fallback is a different attempt with a different effect, so \"it carries its own idempotency key (the primary's key with a suffix)\".",
+        "d": "Ruled out because the backup is not retried to a target and its weaker answer is flagged, not hidden: \"It is tried once, under its own key\"."
       }
     },
     {
       "id": "02-isolation-fallbacks-and-resuming-a-run#m1",
       "page": "02-isolation-fallbacks-and-resuming-a-run.md",
       "scope": "module",
-      "stem": "Scenario: Dovetail Labs sets a breaker threshold of three consecutive failures for each agent. Agent X fails, succeeds, fails, succeeds, and fails again. Agent Y fails three times running. Which breakers are open afterwards?",
+      "stem": "Scenario: Dovetail Labs sets a breaker threshold of three failures for each agent. Agent X fails, succeeds, fails, succeeds, and fails again. Agent Y fails three times running. Which breakers are open afterwards?",
       "options": {
-        "a": "Only Y's, since X's tally returns to zero whenever a call works",
+        "a": "Only Y's, since X's tally goes back to zero whenever one of its calls works",
         "b": "Both, since each agent has failed at least three times in all across the run",
         "c": "Only X's, since an agent that keeps alternating is the less stable of the two",
         "d": "Neither, because a breaker opens only after a cooldown has already passed"

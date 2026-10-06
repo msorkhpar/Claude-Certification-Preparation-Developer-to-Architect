@@ -582,18 +582,18 @@ handling and the Messages API's request shape, which the practices of modules 25
    - **c**: The instruction in the system prompt and the long text placed last
    - **d**: Tagged long text at the top, with the instruction at the very end
 
-3. A team wants Claude Opus 5.5 to reason less on simple tickets. What does the page advise?
+3. A team wants Claude Opus 5.5 to reason less on simple tickets. What should they change?
    - **a**: Add a line to the system prompt telling the model to think less
    - **b**: Send each of those requests with the effort setting turned down
    - **c**: Turn thinking off altogether with a parameter on the request
-   - **d**: Give the model a short step-by-step plan for the simple tickets
+   - **d**: Move the reasoning into a short field of the structured output
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The page says that Claude Sonnet 5.5 "rejects a prefilled last assistant turn with a 400 error". *a* is ruled out because only "Claude Sonnet 4.5, Claude Haiku 4.5, and older models accept one". *c* is ruled out because the page says that "Requests with prefilled assistant messages to these models return a 400 error", so no call succeeds. *d* is ruled out because on these models "the request fails with a 400 error", so no reply exists to cut off.
 2. **d**. The page says to "Place your long documents and inputs near the top of your prompt, above your query, instructions, and examples", and to wrap each in tags. *a* is ruled out because "Queries at the end can improve response quality by up to 30 percent in tests". *b* is ruled out because the rule is to "Place your long documents and inputs near the top of your prompt", not to interleave them. *c* is ruled out because the rule puts the long inputs "near the top of your prompt", not last.
-3. **b**. The page says "To get less thinking, lower the effort level first". *a* is ruled out because the page says to "Steer the amount with effort (module 19), not with words". *c* is ruled out because "thinking is always on and adaptive thinking is the only mode" on Claude Opus 5.5. *d* is ruled out because the page says to "Prefer general instructions over prescriptive steps."
+3. **b**. The page says "To get less thinking, lower the effort level first". *a* is ruled out because the page says to "Steer the amount with effort (module 19), not with words". *c* is ruled out because "thinking is always on and adaptive thinking is the only mode" on Claude Opus 5.5. *d* is ruled out because "A property that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal."
 
 </details>
 
@@ -607,14 +607,14 @@ This quiz covers both pages of the module.
    - **c**: Pass the pasted text in the user turn with no tags
    - **d**: Ask the model to quote the text first, then act on the quote
 
-2. A system prompt has grown to forty rules and a new model version handles the main task worse. What should the team do first?
+2. A system prompt has grown to forty rules and a new model version handles the main task worse. By this module's advice on prompts that grow, what should the team do first?
    - **a**: Cut the lines whose deletion does not change eval results
    - **b**: Repeat the most important rule in capitals at the very end
    - **c**: Add a rule that tells the model to ignore the older ones
    - **d**: Restate each rule as a conditional so its case is exact
 
 3. A pipeline has to confirm that each passage the model cites really occurs in the source. Which prompt design makes that check possible?
-   - **a**: A chain whose first call returns the cited quotes on their own
+   - **a**: A chain whose first call returns just the quotes for its answer
    - **b**: One prompt that reads the source and answers in a single step
    - **c**: Few-shot examples in which every passage is quoted correctly
    - **d**: A longer system prompt that asks the model for honest quoting
@@ -623,14 +623,14 @@ This quiz covers both pages of the module.
    - **a**: A longer list of examples placed in the system prompt
    - **b**: A lower sampling temperature set on the request
    - **c**: A tool whose input has an enum field listing the allowed values
-   - **d**: A second assistant turn placed before the user's message in the list
+   - **d**: A system instruction telling the model to answer without any preamble
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The page shows tags with a random id and says to "treat this as one guardrail alongside other prompt-injection defenses". *a* is ruled out because "data that sits in the system prompt gets the authority of an instruction". *c* is ruled out because "Wrapping each type of content in its own tag" is what marks where the customer's data starts and ends. *d* is ruled out because quoting exists for focus: "This helps Claude focus on the relevant content and ignore the rest of the document".
-2. **a**. The page says of a line "If deleting it changes nothing on your evaluation set, it was not working." *b* is ruled out because the page advises to "Say a rule once, in one place, so that two lines cannot disagree." *c* is ruled out because the page says to "Delete before you add, and test the deletion." *d* is ruled out because conditionals are "Silent on every case not listed, and the list only grows".
-3. **a**. The page says a chain is useful "when you need to inspect intermediate outputs or enforce a specific pipeline structure". *d* is ruled out because asking for honesty gives no "place to check a step's output in code". *b* is ruled out because "Each step is a separate API call so you can log, evaluate, or branch at any point", which one large prompt lacks. *c* is ruled out because examples shape a pattern and do not verify one: "Diverse: Cover edge cases and vary enough that Claude doesn't pick up unintended patterns."
-4. **c**. The page's table replaces forcing a label with "Structured outputs, or a tool with an `enum` field". *a* is ruled out because for an output format, "an example is the weaker tool". *b* is ruled out because the page says requests carry no "non-default `temperature`, `top_p` or `top_k`, which these models reject", so a lower temperature is not available as a way to force a label. *d* is ruled out because "What the rule does not touch is an assistant message elsewhere in the conversation", and it does not restrict an answer.
+2. **a**. The page says of a line "If deleting it changes nothing on your evaluation set, it was not working." *b* is ruled out because the page advises to "Say a rule once, in one place, so that two lines cannot disagree." *c* is ruled out because the page says to "Delete before you add, and test the deletion." *d* is ruled out because the page keeps conditionals for the exact cases only: "Use conditionals where behaviour must be exact and then check it in code (module 25), and use principles for the rest".
+3. **a**. The page says a chain is useful "when you need to inspect intermediate outputs or enforce a specific pipeline structure". *d* is ruled out because asking for honesty gives no "place to check a step's output in code". *b* is ruled out because "Each step is a separate API call so you can log, evaluate, or branch at any point", which one large prompt lacks. *c* is ruled out because examples shape the model's approach and add no step that code can check: "Worked examples in your prompt shape how Claude approaches similar problems in its own thinking blocks."
+4. **c**. The page's table replaces forcing a label with "Structured outputs, or a tool with an `enum` field". *a* is ruled out because for an output format, "an example is the weaker tool". *b* is ruled out because the page says requests carry no "non-default `temperature`, `top_p` or `top_k`, which these models reject", so a lower temperature is not available as a way to force a label. *d* is ruled out because the page's table gives "Respond directly without preamble" as the cure for skipping "Here is...", while forcing a label takes a schema or an `enum` tool.
 
 </details>

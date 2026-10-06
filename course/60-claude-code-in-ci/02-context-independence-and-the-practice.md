@@ -784,22 +784,22 @@ The practice is in [`exercises/60-claude-code-in-ci`](../../exercises/60-claude-
 ## Quiz
 
 1. A review job runs on every push and keeps posting remarks that the author has already fixed. What fixes it?
-   - **a**: Raise the turn limit so that the run can compare with earlier comments
-   - **b**: Put earlier reports in the prompt and ask for new issues only
+   - **a**: Raise the turn limit so the run can compare with earlier comments
+   - **b**: Include the earlier comments in the prompt each time
    - **c**: Tell the reviewer to be more conservative about what it reports
    - **d**: Run the review inside the session that wrote the change
 
-2. A job that drafts additional checks keeps proposing situations that are already exercised. What belongs in its prompt?
-   - **a**: The earlier review findings, plus a request to report only new ones
+2. A job that drafts additional checks keeps proposing near-copies of checks that already exist. What belongs in its prompt?
+   - **a**: The earlier review findings, with a note to report only new ones
    - **b**: The production code alone, to keep the whole prompt short
-   - **c**: A note to be conservative, so that only important checks come back
-   - **d**: The test files that exist, plus a request to skip covered cases
+   - **c**: The testing standards file, with its fixture and location rules
+   - **d**: The suite's current test files, with a note not to repeat them
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A run has no memory of the last one, so what was reported must be in the prompt. *a* is ruled out because "A CI run does not remember the last one", and a longer loop does not change that. *c* is ruled out because such wording does not change what a reviewer reports, since vague instructions "leave the threshold unstated". *d* is ruled out because the writing session is "less effective at reviewing its own changes" and still would not know what was said on earlier pushes.
-2. **d**. The remedy is to show the run what the suite already covers. *a* is ruled out because earlier findings serve a different run, "the review that follows new commits", and they do not show which scenarios the tests cover. *b* is ruled out because without the tests the run cannot see what is covered: "put the existing tests in the prompt". *c* is ruled out because a call for caution does not say what is covered, and such wording fails "because they leave the threshold unstated".
+1. **b**. A run has no memory of the last one, so what was reported must be in the prompt, with the request to report only what is new. *a* is ruled out because "A CI run does not remember the last one", and a longer loop does not change that. *c* is ruled out because such wording does not change what a reviewer reports, since vague instructions "leave the threshold unstated". *d* is ruled out because the writing session is "less effective at reviewing its own changes" and still would not know what was said on earlier pushes.
+2. **d**. The remedy is to show the run what the suite already covers. *a* is ruled out because earlier findings serve a different run, "the review that follows new commits", and they do not show which scenarios the tests cover. *b* is ruled out because without the tests the run cannot see what is covered: "put the existing tests in the prompt". *c* is ruled out because the standards say what makes a test worth adding, "a branch or an edge case that no existing test covers", but not which cases the suite already has.
 
 </details>
 
@@ -809,7 +809,7 @@ This quiz covers all three pages of the module.
 
 1. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A team asks the same session that wrote a change to review it afterwards, and the verdicts are nearly always approvals. Which change fits?
    - **a**: Tell the session to find at least three problems before it approves
-   - **b**: Give the session the full history of the change to review against
+   - **b**: Hand the review to a new job that also reads the author's session notes
    - **c**: Move that step to its own job that starts from a fresh context
    - **d**: Ask the same session for a second pass over the diff before approving
 
@@ -822,15 +822,15 @@ This quiz covers all three pages of the module.
 3. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. The policy keeps findings at medium severity or above, disables the style category, and fails the job on high findings. A valid run returns one high style finding and one low bug finding. What does the job do?
    - **a**: It passes and leaves no comment on the change
    - **b**: It fails, because a high finding exists
-   - **c**: It passes and posts the low bug as a comment
-   - **d**: It fails, because a disabled category counts as an error
+   - **c**: It passes and posts both findings as comments
+   - **d**: It passes and posts the high style finding as a comment
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. An independent run sees the change without the reasoning that produced it. *a* is ruled out because a quota invents problems, since "a reviewer asked to find gaps will usually report some", and the session stays biased. *b* is ruled out because more history adds to the bias: "A session that wrote a change carries its reasoning". *d* is ruled out because "the independent run is a separate invocation, not a second pass in the same conversation".
+1. **c**. An independent run sees the change without the reasoning that produced it. *a* is ruled out because a quota works against the advice to "flag only what affects correctness or the stated requirements", and the same session still reviews its own work. *b* is ruled out because the notes bring back the author's reasoning, while an independent reviewer "sees only the diff and the criteria you give it, not the reasoning that produced the change". *d* is ruled out because "the independent run is a separate invocation, not a second pass in the same conversation".
 2. **d**. Bare mode skips CLAUDE.md, so the criteria must be passed in by hand, with `--append-system-prompt-file`. *a* is ruled out because length is not the issue: "In a bare run the file is passed explicitly" and otherwise it is not read at all. *b* is ruled out because the rules never arrive, so their wording cannot matter: "a bare run without it reviews with no criteria at all, and nothing says so". *c* is ruled out because no header can help when a bare run loads "no hooks, skills, MCP servers, memory or CLAUDE.md".
-3. **a**. The high finding is dropped with its category and the low one falls below the floor, so nothing is kept. *b* is ruled out because "categories the team disabled are dropped", so the high style finding cannot fail the job. *c* is ruled out because "findings below a floor are dropped", and a low finding is below a medium floor. *d* is ruled out because only "a kept finding at a failing severity" fails the job, and a disabled category is dropped before that.
+3. **a**. The high finding is dropped with its category and the low one falls below the floor, so nothing is kept. *b* is ruled out because only "a kept finding at a failing severity" fails the job, and the high finding is not kept. *c* is ruled out because "findings below a floor are dropped", and a low finding is below a medium floor. *d* is ruled out because "categories the team disabled are dropped", so the style finding is never posted.
 
 </details>
 

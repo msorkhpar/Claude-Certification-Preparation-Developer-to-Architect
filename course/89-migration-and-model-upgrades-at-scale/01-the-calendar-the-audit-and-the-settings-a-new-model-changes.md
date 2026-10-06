@@ -691,11 +691,11 @@ roll-out at 100% with 50000 requests and 10 errors: complete
 
 ## Quiz
 
-1. A deprecation table lists one of a company's models with a retirement of "not sooner than" a date nine weeks away. How should the team treat that entry?
-   - **a**: Plan against it as the earliest cut-off and begin early, since any slip would push it later
-   - **b**: Wait for the vendor to confirm a final cut-off before spending any effort on the move
-   - **c**: Treat it as a fixed cut-off that cannot move, and schedule the whole migration to end on that day
-   - **d**: Ignore it until the status changes to retired, because nothing breaks before that point
+1. A company runs forty applications, and most of them call a model that is still active. The deprecation table shows its retirement date nine weeks away, marked tentative. What should the platform team do?
+   - **a**: Start testing the replacement now, so that the roll-out can end well ahead of the cut-off
+   - **b**: Hold the work until the date is confirmed final, so no effort goes on a date that may shift
+   - **c**: Switch every application to the replacement this week, since the date may still come sooner
+   - **d**: Plan to keep the model in use past that date, since a tentative date is not one that is enforced
 
 2. A model that several of a team's applications call is listed as legacy, with no retirement scheduled for it yet. The team asks whether its migration plan can wait. What should they decide?
    - **a**: Switch to the named replacement today, since a legacy listing comes with a successor and a date
@@ -706,7 +706,7 @@ roll-out at 100% with 50000 requests and 10 errors: complete
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The table can say "not sooner than" for a model that is still active, which marks a date that may move later. *b* is ruled out because "is never a date to wait for". *c* is ruled out because "marks a date that may move later". *d* is ruled out because the move takes time before anything breaks, and "a migration of forty applications can take longer than that".
+1. **a**. The advice is to "consider thorough testing of your applications with the new models well before the retirement date", and "Sixty days is the shortest warning, and a migration of forty applications can take longer than that", so testing starts now and the plan ends well ahead of the date. *b* is ruled out because a tentative date on an active model "is never a date to wait for". *c* is ruled out because such a date "marks a date that may move later", not sooner, and the replacement is "where to begin testing, and the decision is yours to make on your own tasks". *d* is ruled out because once the date arrives "Requests to retired models will fail".
 2. **c**. Legacy means "The model will no longer receive updates and may be deprecated in the future", and once a date is set "There is notice, and it is finite", so the plan starts before any retirement date exists. *a* is ruled out because the successor and the date belong to the deprecated state, where "Anthropic provides a recommended replacement and assigns a retirement date". *b* is ruled out because "Sixty days is the shortest warning, and a migration of forty applications can take longer than that". *d* is ruled out because "Requests to retired models will fail" describes the retired state, not legacy.
 
 </details>

@@ -132,10 +132,10 @@ prompt, since the documentation says that Sonnet "might also infer a reasonable 
    - **c**: Delete curly braces from every incoming customer message before filling anything
    - **d**: Substitute every placeholder in one pass and keep what was typed untouched
 
-2. A team keeps adding one sentence to the system prompt after every complaint, and answers to the original tasks now get worse. What best explains the drop?
+2. A team keeps adding one sentence to the system prompt after every complaint, and answers to the original tasks now get worse. In this module's account, what best explains the drop?
    - **a**: The few vital rules are outweighed by the many lines added since
    - **b**: The model stops reading everything that follows the first paragraph
-   - **c**: Conditional complaint rules outrank the general rules for the tasks
+   - **c**: The longer prompt makes the model think less about the original tasks
    - **d**: Each newer rule cancels the older ones, so the earlier rules are lost
 
 3. A nightly job classifies thousands of ambiguous tickets with nobody watching. What should the prompt tell the model to do when a ticket allows two readings?
@@ -148,7 +148,7 @@ prompt, since the documentation says that Sonnet "might also infer a reasonable 
 <summary>Answer key</summary>
 
 1. **d**. The page says to "Replace every `{{name}}` once, from left to right, and never scan the result again", so data stays data. *b* is ruled out because "never scan the result again" is the rule that keeps a customer's placeholder from being read as a template. *c* is ruled out because the page's fix is a single pass, and a value "must come out as those characters", not as edited text. *a* is ruled out because replacing name after name lets a later call reach the customer's text, and "A value that contains a placeholder is read again as a template."
-2. **a**. The page says the rules that matter are "a small share of the text" when a prompt "grows by accretion". *b* is ruled out because the mechanism described is that the model "weighs them against the thirty that do not", not that it stops reading. *c* is ruled out because a conditional is "Silent on every case not listed", so the complaint rules have no say over the original tasks. *d* is ruled out because the page says that "the rules compete and the cost of every request rises", which is competition, not newer rules cancelling older ones.
+2. **a**. The page says the rules that matter are "a small share of the text" when a prompt "grows by accretion". *b* is ruled out because the mechanism described is that the model "weighs them against the thirty that do not", not that it stops reading. *c* is ruled out because large prompts are linked to more thinking, not less: "If you find the model thinking more often than you'd like, which can happen with large or complex system prompts". *d* is ruled out because the page says that "the rules compete and the cost of every request rises", which is competition, not newer rules cancelling older ones.
 3. **c**. The page says the prompt should "tell the model to choose the likeliest reading and write the assumption in the output, where a reviewer can find it". *a* is ruled out because "A nightly batch has nobody to answer", so the question would go unanswered. *b* is ruled out because the model is asked to "make routine judgment calls yourself", and two labels leave the call to someone else. *d* is ruled out because the documented behaviour is to "state the assumption you made" and not to withhold a result.
 
 </details>

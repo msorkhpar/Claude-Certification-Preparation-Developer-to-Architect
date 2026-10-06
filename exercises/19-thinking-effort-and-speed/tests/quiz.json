@@ -24,19 +24,19 @@
       "id": "01-thinking-and-effort#q2",
       "page": "01-thinking-and-effort.md",
       "scope": "page",
-      "stem": "A response has a short visible reply and an `output_tokens` of 1,900. The `thinking_tokens` field reads 1,650. What is billed as output?",
+      "stem": "A team prices each call of a feature on Claude Opus 5.5. One response has a short visible reply, an `output_tokens` of 1,900 and a `thinking_tokens` of 1,650. How many tokens should the team price at the output rate?",
       "options": {
-        "a": "All 1,900 tokens, since thinking is charged even when it is not shown",
-        "b": "Only 250 tokens, since the thinking was hidden by the default display",
-        "c": "Only 250 tokens, since the thinking is charged at the input rate",
-        "d": "About 80 tokens, since billing follows the words that are returned"
+        "a": "1,900, the whole reported total with the hidden thinking inside it",
+        "b": "250, the visible reply, since the default display hid the thinking",
+        "c": "250, the visible reply, with the thinking moved to the input rate",
+        "d": "3,550, the reported total with the thinking added on top of it"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says \"You are billed for the full thinking process, not the thinking content visible in the response.\"",
-        "b": "Ruled out because the thinking tokens are \"billed as output tokens\", whether the display shows them or not.",
+        "a": "The 1,650 thinking tokens sit inside the 1,900, and \"`output_tokens` is the total that is billed\", so the whole 1,900 is priced as output.",
+        "b": "Ruled out because \"You are billed for the full thinking process, not the thinking content visible in the response.\"",
         "c": "Ruled out because \"Thinking tokens are output tokens\", so the 1,650 are not priced as input.",
-        "d": "Ruled out because the page says the visible text understates the bill: \"So the visible text understates the bill.\""
+        "d": "Ruled out because the thinking count \"is never more than `output_tokens`\": it is part of that total, not an extra on top of it."
       }
     },
     {
@@ -46,14 +46,14 @@
       "stem": "A request on Claude Haiku 4.5 puts `low` under `output_config` to save money. What should the team expect?",
       "options": {
         "a": "The model takes the setting only together with a manual budget",
-        "b": "The model treats `low` as its default, so the setting changes nothing",
-        "c": "The model lacks that control, so the setting buys no saving",
+        "b": "The model reads `low` as a smaller thinking budget, so thinking shrinks",
+        "c": "The model lacks that control, so the setting has nothing to steer",
         "d": "The model applies the setting to tool calls and ignores thinking"
       },
       "key": "c",
       "explanation": {
-        "c": "Effort is a control Haiku 4.5 does not have: the five levels are \"supported on Fable 5.1, Opus 5.5 and Sonnet 5.5\", and \"Haiku 4.5 does not support effort\", so a `low` value there cannot cut the bill.",
-        "b": "Ruled out because the default row names only Opus 5.5 and the models that support effort: \"The default is high on every model that supports effort except Opus 5.5\".",
+        "c": "Effort is a control Haiku 4.5 does not have: the five levels are \"supported on Fable 5.1, Opus 5.5 and Sonnet 5.5\", and \"Haiku 4.5 does not support effort\", so a `low` value there has no control to steer.",
+        "b": "Ruled out because effort is not a budget on any model: \"Effort is a behavioral signal, not a strict token budget.\"",
         "a": "Ruled out because the manual budget belongs to the thinking setting, and the page puts effort \"in output_config, not inside thinking\".",
         "d": "is ruled out because, where effort exists, it affects \"all tokens in the response\", thinking included, and Haiku 4.5 has no effort to apply."
       }
@@ -141,16 +141,16 @@
       "stem": "A helpdesk bot prints replies live for agents and also sends overnight jobs through the Batch API. Management wants the speed option on all of it. What should the team tell management?",
       "options": {
         "a": "It suits only the watched output, since the bulk path excludes it",
-        "b": "It suits neither, since it only lowers time to first token",
-        "c": "It suits neither, because only the cloud platforms offer it",
-        "d": "It suits both, at the standard price for the bulk jobs"
+        "b": "It suits only the bulk path, where the output volume is the largest",
+        "c": "It suits both, once the beta header is added to the bulk jobs",
+        "d": "It suits neither, since the premium price outweighs the gain on any job"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says \"Fast mode is not available with the Batch API.\" and the speed gain is for output people watch.",
-        "b": "Ruled out because \"Speed benefits are focused on output tokens per second (OTPS), not time to first token (TTFT).\"",
-        "c": "Ruled out because fast mode \"is available on the Claude API (first-party) only\".",
-        "d": "Ruled out because fast mode is never at the standard price: it costs \"twice the standard $4 and $20\"."
+        "a": "Live replies that agents watch are the case the page names, \"Use it for interactive, output-heavy work where a person watches the text arrive\", and the batch path cannot take the option.",
+        "b": "Ruled out because \"A batch is not waiting on anyone's screen, so there is nothing for it to speed up.\"",
+        "c": "Ruled out because no header changes the batch rule: \"Fast mode is not available with the Batch API.\"",
+        "d": "Ruled out because the page weighs the price per use, telling the team to \"measure whether the seconds saved are worth twice the price\", not to rule it out for every job."
       }
     },
     {
@@ -176,19 +176,19 @@
       "id": "02-fast-mode-tools-and-caching#m4",
       "page": "02-fast-mode-tools-and-caching.md",
       "scope": "module",
-      "stem": "A cost-conscious team wants cheaper answers on Opus 5.5 without losing the cache of a long conversation. Which plan fits?",
+      "stem": "A feature on Opus 5.5 handles short lookup questions, yet some replies stop with `stop_reason: \"max_tokens\"`. The usage shows long thinking before replies that a sentence would settle. What should the team change?",
       "options": {
-        "a": "Move to a smaller tier halfway through, once the context is cached",
-        "b": "Lower the top-level effort only on the turns that look simple",
-        "c": "Set a lower effort before the first turn and keep it throughout",
-        "d": "Turn thinking off after the first answer to cut the output tokens"
+        "a": "Raise `max_tokens` so the thinking has room to finish before the answer",
+        "b": "Send a manual `budget_tokens` that keeps the thinking below `max_tokens`",
+        "c": "Lower the effort so the model reasons less before each brief answer",
+        "d": "Drop `max_tokens` and let the effort level cap the length of each reply"
       },
       "key": "c",
       "explanation": {
-        "c": "Lowering the effort is the lever for a bill with quality headroom, and its cost is a cache restart only when it is changed mid-conversation, so the level is set before the first turn and held.",
-        "b": "Ruled out because a top-level effort change \"always discards the cached messages\".",
-        "a": "Ruled out because the design rule is to \"pick the model, the thinking mode, the effort and the speed once per conversation\".",
-        "d": "Ruled out because \"Fable 5.1 and Opus 5.5 always think adaptively and cannot be told otherwise\"."
+        "c": "The cut-off answers are simple ones that were over-thought, and the page's choice between the two remedies is to \"lower the effort if they were over-thought\".",
+        "b": "Ruled out because \"`disabled` and a manual budget return a 400 on the always-on models\", Opus 5.5 among them.",
+        "a": "Ruled out because the page keeps that remedy for answers that needed the depth: \"raise `max_tokens` if the truncated answers needed the reasoning\".",
+        "d": "Ruled out because \"Effort is a behavioral signal, not a strict token budget\", and only `max_tokens` is a hard ceiling."
       }
     }
   ]

@@ -715,29 +715,29 @@ The practice is in [`exercises/89-migration-and-model-upgrades-at-scale`](../../
 
 This quiz covers both pages of the module.
 
-1. The new model costs about a third more per answer and fixes the refund errors. The product owner asks whether to move. Which message fits the architect's role?
-   - **a**: Recommend staying on the old model, because a third more per answer outweighs the refund fix
-   - **b**: Recommend the move, because the vendor has named the newer model as the replacement to use
-   - **c**: Ask them to choose between the better accuracy and the higher bill, because staying has an end too
-   - **d**: Defer the decision until the retirement date nears, because more evidence on cost arrives by then
+1. The new model costs about a third more per answer and fixes the refund errors. The product owner asks whether to move. What should the architect reply?
+   - **a**: Show both figures and advise staying, because a third more per answer outweighs the refund fix
+   - **b**: Show both figures and advise moving, because the vendor named the newer model as the replacement
+   - **c**: Show both figures and let them decide, because staying put also ends on a fixed retirement date
+   - **d**: Show both figures and defer the choice, because more evidence on cost arrives as retirement nears
 
-2. After a migration, the parser reads the wrong field because the first content block of a reply is thinking text. Which step was missed?
+2. After a migration, a parser that reads `content[0].text` breaks on some replies and works on others. Which step was missed?
    - **a**: Lowering max_tokens so that the thinking is cut off before the text of the reply begins
-   - **b**: Selecting what to process by its declared type, so a leading reasoning part is skipped
+   - **b**: Picking out the blocks to use by the kind that each one declares, on every answer received
    - **c**: Turning thinking off by sending the disabled setting, which the new model accepts as before
    - **d**: Dropping the first block of every reply before parsing, since it always holds only thinking
 
-3. On the day the new model went live, the team deleted the old model's id from its configuration to keep it tidy. Two days later errors spike. What did the cleanup take away?
-   - **a**: Nothing, since the gate already approved the new model and a rollback is no longer needed
-   - **b**: The usage audit, which can only be run while the old model id is still configured
-   - **c**: The retirement alert, which is raised from the model id held in the configuration
-   - **d**: The way back, since traffic can no longer be sent to the version that served it before
+3. On the day the new model took all traffic, the team deleted the old model's id from its configuration to keep it tidy. Two days later errors spike. What did the cleanup take away?
+   - **a**: Nothing, since faults that surface after a passed gate are fixed forward on the new model
+   - **b**: The cost baseline, since a new baseline is set by billing the old model beside the new one
+   - **c**: The latency check, whose p95 limit the gate reads from the old model's live timings
+   - **d**: The way back, since no tested fallback remains to receive requests while the fault is fixed
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The decision is a trade the owner makes, and the architect states it with its date, since "staying has a date that ends it". *b* is ruled out because "A recommended replacement is a starting point, not a decision". *a* is ruled out because "A rise in cost is a number to put before the owner, not a verdict". *d* is ruled out because "Waiting for the retirement date hands the decision to the calendar, and gives up the rollback".
-2. **b**. A reply may begin with thinking blocks, so the parser reads by type. *a* is ruled out because "`max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens", so a lower limit cuts the text as well. *c* is ruled out because the guide lists `thinking: {"type": "disabled"}` among the "five settings that return a 400 error". *d* is ruled out because "A reply need not begin with thinking text either, so a rule that always drops the first block loses real text".
-3. **d**. The page says "the old model is the rollback, and it stays so until its own retirement date". *a* is ruled out because "a suite predicts and traffic proves", and an error found after the old model is gone has no way back. *b* is ruled out because the audit is a Console export that shows "usage broken down by API key and model", so it does not depend on the configuration. *c* is ruled out because the calendar sits next to the audit "so that an alert is raised from the date", not from the configuration.
+1. **c**. The architect's job "is to state the trade", including "the date that forces the choice", and the owner decides, since "staying has a date that ends it". *b* is ruled out because "A recommended replacement is a starting point, not a decision". *a* is ruled out because "A rise in cost is a number to put before the owner, not a verdict". *d* is ruled out because "Waiting for the retirement date hands the decision to the calendar, and gives up the rollback".
+2. **b**. With adaptive thinking on by default "the first content block of a reply may be thinking text", so the parser must "Read content blocks by `type`". *a* is ruled out because "`max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens", so a lower limit cuts the text as well. *c* is ruled out because the guide lists `thinking: {"type": "disabled"}` among the "five settings that return a 400 error". *d* is ruled out because "A reply need not begin with thinking text either, so a rule that always drops the first block loses real text".
+3. **d**. The page says "the old model is the rollback, and it stays so until its own retirement date". *a* is ruled out because "When the limit is passed, the response is to send every request back to the previous model", not to fix forward. *b* is ruled out because a new baseline comes from the new model's own traffic: "measure usage afresh, set a new baseline". *c* is ruled out because the gate's latency check takes "the nearest-rank 95th percentile of the new timings, against a limit".
 
 </details>
