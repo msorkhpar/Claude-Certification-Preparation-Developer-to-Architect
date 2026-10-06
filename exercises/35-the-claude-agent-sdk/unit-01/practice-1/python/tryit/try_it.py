@@ -7,6 +7,7 @@ logging.basicConfig(level=logging.DEBUG, format="%(levelname)s %(message)s")
 import asyncio
 import json
 import os
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -24,6 +25,9 @@ steps = [
     {"result": {"subtype": "success", "result": "All done.", "cost": 0.02, "turns": 3}},
 ]
 project = tempfile.mkdtemp()
+# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+fake = shutil.copy(fake, Path(project, "fake_claude.py"))
+os.chmod(fake, 0o755)
 script = Path(project, "script.json")
 script.write_text(json.dumps({"session_id": "s1", "turns": [steps]}))
 os.environ["FAKE_CLAUDE_SCRIPT"] = str(script)
