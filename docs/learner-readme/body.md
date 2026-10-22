@@ -17,6 +17,7 @@ Each level ends with a revision module that holds exam-style mock exams. The pag
 ### What you can do with it
 
 - **Read** every lesson in a browser, with the contents, an outline of the page and links to the previous and next page.
+- **Listen** to the lessons, if you like: an optional narrated site reads each page's prose aloud, passage by passage, at the speed you choose. It plays offline once the image is on your machine. See [Narration (optional)](#narration-optional).
 - **Pick a reading language**: examples and practices come in Python, TypeScript, Java and Kotlin, and a switch at the top of every page changes the language you read in. Where a topic needs the Agent SDK, only the SDK's own languages are offered.
 - **Answer quizzes** in the page: a short quiz on each page, a quiz at the end of each module, and each answer is explained whether you were right or wrong.
 - **Sit mock exams** in the exams' scenario style at the end of each level, with explanations after you finish.
