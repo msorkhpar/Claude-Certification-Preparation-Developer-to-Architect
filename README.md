@@ -163,6 +163,30 @@ Your answers, your progress and the editor's settings live in Docker volumes,
 so they survive a restart. `down` stops the course and keeps them; `down -v`
 deletes them too. Every setting is explained in [`course.env`](course.env).
 
+## Narration (optional)
+
+The site is complete without narration: a lesson with no recording shows no
+player. The recordings are not stored in this repository, because of their
+size: they are assets of this repository's release, and the pulled voiced
+site already has them. To hear the lessons read aloud, set
+`COURSE_NARRATION=with-narration` in `.env` (copy it from `course.env`), then:
+
+- **Pulled images**: `docker compose -f compose.pull.yaml up -d` pulls the voiced site. Leave the setting as it is for the site without narration.
+- **Building it yourself**: download the recordings from the course's release
+  first, then build:
+
+```
+sh .studyforge/narration-release/restore.sh
+docker compose up -d --build
+```
+
+  On Windows, run `pwsh .studyforge/narration-release/restore.ps1` instead of the first line.
+  The scripts are [`.studyforge/narration-release/restore.sh`](.studyforge/narration-release/restore.sh) and [`.studyforge/narration-release/restore.ps1`](.studyforge/narration-release/restore.ps1).
+  The script checks every download and every recording against the checksums
+  in this repository before it places anything, and deletes the downloads
+  afterwards. Set `NARRATION_LOCAL_DIR` to a directory holding the release's
+  volumes to read them from disk instead of downloading them.
+
 ## The exercises
 
 `exercises/` holds the course's authored exercises: each one's statement,

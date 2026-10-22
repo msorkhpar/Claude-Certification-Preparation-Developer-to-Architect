@@ -13,7 +13,11 @@
    command, and nothing here is ever an argument.
 
    ⭐ The words are the ones a lesson's code example says (`code-links.js`). One run is live at a
-   time and the server refuses a second, which the status says. */
+   time and the server refuses a second, which the status says.
+
+   ⭐ **A strip marked `data-example-program` runs the PROGRAM** (`run.codeRun`): its tab named
+   how it runs, so the panel shows every line it prints and the status says how it exited. A
+   strip without the mark runs the test, as it always did. */
 
 (function () {
   'use strict';
@@ -37,19 +41,25 @@
     var go = act(strip, 'run');
     var stop = act(strip, 'stop');
     var status = part(strip, 'status');
+    var program = strip.hasAttribute('data-example-program') && !!run.codeRun;
     go.addEventListener('click', function () {
       go.disabled = true;
       stop.hidden = false;
       output.textContent = '';
       output.hidden = false;
-      status.textContent = 'Running the test…';
-      run.codeTest(corpus, path, function (line) {
+      status.textContent = program ? 'Running the program…' : 'Running the test…';
+      (program ? run.codeRun : run.codeTest)(corpus, path, function (line) {
         output.textContent += line + '\n';
       }).then(function (verdict) {
+        if (program) {
+          status.textContent = verdict === 0 ? 'Finished.' : verdict === 'stopped' ? 'Stopped.'
+            : verdict === 'timeout' ? 'Timed out.' : 'Ended with exit status ' + verdict + '.';
+          return;
+        }
         status.textContent = verdict === 0 ? 'Passed.' : verdict === 'stopped' ? 'Stopped.'
           : verdict === 'timeout' ? 'Timed out.' : 'Failed.';
       }, function () {
-        status.textContent = 'The test could not be run.';
+        status.textContent = program ? 'The program could not be run.' : 'The test could not be run.';
       }).then(function () {
         go.disabled = false;
         stop.hidden = true;
