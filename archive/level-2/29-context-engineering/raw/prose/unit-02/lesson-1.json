@@ -152,6 +152,11 @@
       "text": "**On demand.** You send the conversation with `\"compaction\": {\"type\": \"summarize\"}`. The API returns \"a single `compaction` block\" and no reply, with `stop_reason` of `\"compaction\"`. The block holds the summary and a signature, and \"Send it in future requests exactly as it came.\" It goes first in `messages`, in place of the messages it summarizes. Three rules from the page: the block comes first; the summarized messages are removed, or the request returns a 400 error (`compaction_block_misplaced`); and exactly one block is sent per request. Two mistakes raise no error: summarized messages left after the block are sent to Claude again, and a later request that leaves the block out gives Claude no summary. A summary is produced only when the call ends normally with text; otherwise the response is a 200 with empty content, so check `stop_reason` first. A non-blank `instructions` string replaces the default summarization prompt."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant App as Your code\n    participant API as Messages API\n    App->>API: the conversation, compaction type summarize\n    API-->>App: one compaction block and no reply, stop_reason compaction\n    Note over App: Remove the summarized messages, put the block first\n    App->>API: next request, the block first, exactly as it came, then newer messages"
+    },
+    {
       "type": "para",
       "text": "**At a token threshold.** One parameter on ordinary requests: an edit of type `compact_20260112` in `context_management`, with a `trigger` of `input_tokens` (default 150,000, minimum 50,000), an optional `instructions`, and `pause_after_compaction`. When the threshold is reached the response carries a `compaction` block, and you \"must pass the `compaction` block back to the API on subsequent requests by appending the entire response content to your messages\". Usage needs care: the top-level `input_tokens` and `output_tokens` \"do **not** include compaction iteration usage\"; sum across the `usage.iterations` array to find what was billed."
     },
@@ -298,7 +303,7 @@
   "counts": {
     "headings": 9,
     "paras": 17,
-    "code": 0,
+    "code": 1,
     "tables": 3,
     "lists": 2,
     "images": 0,
@@ -308,5 +313,5 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "1c24ad98eab2a0e35b0a3e448df5e8c6171548b55c3b9b6514dbdea5b095c617"
+  "content_sha256": "053169df8a0b01cbb38b4101cf7c89bf873d3aa1de0f65de95e504fadd518441"
 }

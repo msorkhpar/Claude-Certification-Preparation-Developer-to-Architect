@@ -40,6 +40,15 @@ Every session follows one cycle.
 
 A turn happens without giving control back to your code. Five message types come out of the loop: the system message, the assistant message, the user message (the tool results, and any input you stream mid-loop), the stream event (only when partial messages are enabled) and the result message. A small number of trailing events can arrive after the result, so iterate the stream to the end instead of breaking at the result.
 
+```mermaid
+flowchart TD
+    A["Receive prompt, SystemMessage init"] --> B["Evaluate and respond, AssistantMessage"]
+    B --> C{"Tool calls?"}
+    C -->|yes| D["Execute tools, hooks may block, results fed back"]
+    D -->|next turn| B
+    C -->|no| E["Return result, ResultMessage"]
+```
+
 ### Limits and results
 
 Without limits, "the loop runs until Claude finishes on its own", which is fine for a narrow task and risky for an open-ended prompt. Two options bound it.

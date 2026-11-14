@@ -90,6 +90,11 @@
       ]
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    F[\"Find the first failure\"] --> S{\"Is there a status?\"}\n    S -->|\"yes, an error event\"| N[\"Name the origin, pick the recovery, note whether it recovered\"]\n    S -->|\"no, a dropped connection\"| SV[\"Service side\"]\n    SV --> N\n    S -->|\"a 200\"| SR{\"stop_reason a failure?\"}\n    SR -->|yes| N\n    SR -->|no| CT{\"Is the content there?\"}\n    CT -->|\"no, an empty end_turn\"| RQ[\"Look at the request before it\"]\n    RQ --> N\n    CT -->|yes| PS{\"Did your code read it?\"}\n    PS -->|no| N\n    PS -->|yes| TL[\"Check the tools: name offered, exception in your code\"]\n    TL --> N"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Integration or model: the question that decides"
@@ -473,7 +478,7 @@
   "counts": {
     "headings": 13,
     "paras": 16,
-    "code": 0,
+    "code": 1,
     "tables": 2,
     "lists": 5,
     "images": 0,
@@ -484,5 +489,5 @@
     "disclosures": 2,
     "examples": 1
   },
-  "content_sha256": "0be92dffb26018016306afa414eb2e1337e2c0f389ddebb194ed00167475609c"
+  "content_sha256": "dd0d6d1f6da8edbc26d3952db4a3218750ac4bc856017e814e0a5d4c5b105e2a"
 }

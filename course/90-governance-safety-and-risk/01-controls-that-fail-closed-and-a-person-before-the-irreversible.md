@@ -38,6 +38,18 @@ A refund paid, an account closed and a record deleted cannot be undone by a bett
 
 Two things make this real. First, **confidence is not evidence.** An answer whose quote is not in the source is held (`hold: unsupported`) even at confidence 99, because a model can be certain and wrong; module 69 shows the quote check. Second, **the threshold is a decision about error cost.** At 95 the example lets an answer through at exactly 95 and reviews one at 94. It is a design value, set so that the cost of reviewing the rest is below the cost of the errors in the part sent out (module 79 gives the arithmetic), and it is checked against a measured sample (module 88), not copied.
 
+```mermaid
+flowchart TD
+    A{"Screen down and high consequence?"} -->|yes| H1["hold: screen down"]
+    A -->|no, flagged unscreened if the screen is down| B{"Quote in the source?"}
+    B -->|no| H2["hold: unsupported"]
+    B -->|yes| C{"High-consequence action?"}
+    C -->|yes| HU["human"]
+    C -->|no| D{"Confidence at least 95?"}
+    D -->|yes| AU["auto"]
+    D -->|no| RV["review"]
+```
+
 ### Failure modes, and a control that exists
 
 The guide asks you to identify the failure modes of language-model systems. Four recur in every design review, and each gets a control, an owner and a stated residual.

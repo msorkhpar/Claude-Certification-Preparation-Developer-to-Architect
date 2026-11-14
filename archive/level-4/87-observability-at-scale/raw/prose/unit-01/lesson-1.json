@@ -113,6 +113,11 @@
       "text": "In a trace of agents, errors travel upward. The orchestrator reports that the research step failed because the researcher reported that its fetch tool failed. The span that reports an error is often only passing on the error of the span below it, and the first span to turn red is not the origin. The example's `root_cause` takes the failing spans and finds the one that no other failing span has as its parent: the deepest failure. It returns that span's layer (agent, model, tool or retrieval), its name, and the path of names from the root. When nothing failed, the answer is not \"nothing wrong\". Confident wrong answers follow a stale or empty retrieval, and the example blames a retrieval span that reported `stale` or `no-hits`. The exam's third sample item says as much: confident wrong answers after a document refresh, with model and latency unchanged, point to retrieval, \"for example a broken re-index or mismatched embeddings\" (module 85 builds that side)."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A{\"Any span failed?\"} -->|yes| B[\"Take the failing span that no failing span has as parent\"]\n    B --> C[\"Report its layer, name and path from the root\"]\n    A -->|no| D{\"Retrieval span reported stale or no-hits?\"}\n    D -->|yes| E[\"Blame that retrieval span\"]\n    D -->|no| F[\"No span failed\"]"
+    },
+    {
       "type": "para",
       "text": "The order matters in the other direction too. A failed span is a fact, and a stale retrieval is a suspicion. A system that blames the retrieval whenever it can will send engineers to the index while a tool is broken."
     },
@@ -293,7 +298,7 @@
   "counts": {
     "headings": 12,
     "paras": 14,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 4,
     "images": 0,
@@ -304,5 +309,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "1e6ec8daca1e7eabea6eccde02d54e9fa8e24377d219c296a23b5228c0b510a5"
+  "content_sha256": "8c3f0b94aee2e6e86142f08285e6a13d6698d818d2df74b6559cb8165572920e"
 }

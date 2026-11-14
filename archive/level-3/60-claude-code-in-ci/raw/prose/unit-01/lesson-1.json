@@ -148,6 +148,11 @@
       "text": "A job never passes by saying nothing. Retrying inside the job repeats cost with no reason to expect a different result, so the failure is reported and a person or a scheduled run decides. Only an answer that clears all five is read for findings, and then policy decides what a finding does: findings below a floor are dropped, categories the team disabled are dropped, and a kept finding at a failing severity (`high`, say) fails the job while lower ones only comment. This is the same fail-closed rule that module 48 applies to a workflow's gates."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A[\"claude -p exits\"] --> X{\"Exit status zero?\"}\n    X -->|no| F[\"Fail the job\"]\n    X -->|yes| J{\"Output a JSON object?\"}\n    J -->|no| F\n    J -->|yes| E{\"is_error unset and subtype success?\"}\n    E -->|no| F\n    E -->|yes| S{\"structured_output present?\"}\n    S -->|no| F\n    S -->|yes| V{\"Answer fits the schema?\"}\n    V -->|no| F\n    V -->|yes| P[\"Drop findings below the floor and in disabled categories\"]\n    P --> H{\"A kept finding at a failing severity?\"}\n    H -->|yes| F\n    H -->|no| C[\"Pass, findings posted as comments\"]"
+    },
+    {
       "type": "para",
       "text": "The schema has two jobs. It makes the answer checkable, and with closed enums for category and severity it makes the policy computable: a severity that is free text cannot be compared with a floor. Keep to the features structured outputs support (types, `enum`, `required`, nested objects and arrays); make a field optional only when the value can really be absent."
     },
@@ -307,7 +312,7 @@
   "counts": {
     "headings": 9,
     "paras": 12,
-    "code": 0,
+    "code": 1,
     "tables": 1,
     "lists": 3,
     "images": 0,
@@ -318,5 +323,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "932efb9b15d388847232ff76591819249a8b75204b61fc416586e8934e3887e8"
+  "content_sha256": "cd24fcbfc6e4493b9cd5705561536ab1f95f44c1d5e68e3fc686f63f4c8e7205"
 }

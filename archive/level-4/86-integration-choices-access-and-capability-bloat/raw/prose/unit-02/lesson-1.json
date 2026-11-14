@@ -89,6 +89,11 @@
       "text": "The tool search tool lets Claude \"work with hundreds or thousands of tools by discovering and loading them on demand\". The mechanics are short. You include a search tool in the `tools` list, and you mark the tools that should not load up front with `defer_loading: true`. Claude's context holds the search tool and the non-deferred tools. When it needs another tool it searches, the API returns the matches as references, expands them into full definitions, and Claude calls the tool. Four facts matter for a design."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant App as Your code\n    participant API as API\n    participant C as Claude\n    App->>API: tools list with search tool, others defer_loading true\n    API->>C: Context holds search tool and non-deferred tools\n    C->>API: Search for a tool it needs\n    API->>API: Expand matches into full definitions\n    API-->>C: The matching definitions\n    C->>API: Call the tool"
+    },
+    {
       "type": "list",
       "ordered": false,
       "items": [
@@ -353,7 +358,7 @@
   "counts": {
     "headings": 12,
     "paras": 14,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 5,
     "images": 0,
@@ -364,5 +369,5 @@
     "disclosures": 2,
     "examples": 1
   },
-  "content_sha256": "c0f65a4f9c2e79f911852a2213b5e30d488610c2f00d2ed695b65dcec0194f94"
+  "content_sha256": "e9cabfccc1d2d8ff459464054253a3c9d4bd59028cae6b7751f467b62997da0d"
 }

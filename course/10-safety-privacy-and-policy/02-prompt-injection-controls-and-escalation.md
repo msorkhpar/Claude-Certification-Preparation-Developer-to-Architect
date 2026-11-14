@@ -102,6 +102,24 @@ no qualified reviewer; two policies disagree; you cannot tell whether a use is a
    the work continue.
 5. **Write down what you asked and what was decided.** A decision you can show protects you and the next person.
 
+```mermaid
+flowchart TD
+    A["policy conflict"] --> B["stop at the edge"]
+    B --> C["read the written policy"]
+    C --> D{"what kind of conflict?"}
+    D -->|data question| E["manager and privacy owner"]
+    D -->|policy forbids a legitimate task| F["policy owner"]
+    D -->|suspected leak or injection| G["security or IT contact"]
+    D -->|technical limit| H["architects and developers"]
+    D -->|tool setting| I["Claude administrator"]
+    E --> J["offer a compliant alternative"]
+    F --> J
+    G --> J
+    H --> J
+    I --> J
+    J --> K["write down what was decided"]
+```
+
 The exam pattern: the best answer **raises the conflict with the person who owns the policy and proposes a compliant
 path**, and the wrong answers either comply silently with something unsafe, refuse everything, or quietly find a way around.
 

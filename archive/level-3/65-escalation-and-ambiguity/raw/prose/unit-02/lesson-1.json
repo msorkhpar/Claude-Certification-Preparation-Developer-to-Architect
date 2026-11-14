@@ -93,6 +93,11 @@
       "text": "The rules in `decide` have an order, and the order is part of the design: an explicit request for a person first, because nothing may delay it (not even an ambiguous match); then the ambiguous match, because without a customer there is no case to judge; then the policy gap; then the lack of progress; and otherwise the agent resolves, acknowledging frustration if there is any. Sentiment and the model's confidence appear nowhere in the order. Changing the order changes behaviour that customers feel, and so a test for it belongs next to a test for the rules."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A{\"Customer asked for a person?\"} -->|yes| E[\"escalate, with a hand-off summary\"]\n    A -->|no| B{\"Lookup matched several customers?\"}\n    B -->|yes| Q[\"Ask for a field that tells them apart\"]\n    B -->|no| C{\"Policy silent on the request?\"}\n    C -->|yes| E\n    C -->|no| D{\"No progress after the limit?\"}\n    D -->|yes| E\n    D -->|no| R[\"resolve, acknowledging frustration if any\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "The practice: an escalation policy"
@@ -249,7 +254,7 @@
   "counts": {
     "headings": 11,
     "paras": 12,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 3,
     "images": 0,
@@ -259,5 +264,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "f6c7967d738cb178701b34771b8ca4971d07eea566d9ab92daf7f84be3274527"
+  "content_sha256": "6ecd428d3b66914c0fecb5271bb5a29524b0e482c6cae4c6a87b53291f2481de"
 }

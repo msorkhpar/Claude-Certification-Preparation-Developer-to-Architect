@@ -78,6 +78,20 @@ the action "Read `stop_details` and retry on a fallback model." Asking again wit
 needs a larger limit, and a refusal is a decision, not a malformed answer. In the practice the statuses are `truncated` and
 `refused`, with no further call: this course's loop stops and reports, and the documented fallback model is a separate request, not a repeat of the same one. A reply that ends with `end_turn` goes on to the parse.
 
+```mermaid
+flowchart TD
+    A["Call the model"] --> B{"stop_reason"}
+    B -->|max_tokens| T["truncated, no further call"]
+    B -->|refusal| R["refused, no further call"]
+    B -->|end_turn| P["Parse, then validate(schema, value)"]
+    P --> Q{"Parse error or problems?"}
+    Q -->|none| OK["Accept the value"]
+    Q -->|some| M{"max_attempts calls made?"}
+    M -->|yes| F["failed, with the last problems"]
+    M -->|no| RE["Ask again: the reply as assistant, each problem with its path as user"]
+    RE --> A
+```
+
 For tool calls the same discipline gives a matching rule. A tool call whose input is invalid can be answered with a `tool_result`
 that has `is_error` set to `true`; the documentation says Claude "will retry 2-3 times with corrections before apologizing to the
 user", and that "To eliminate invalid tool calls entirely, use strict tool use". The next module builds this loop.

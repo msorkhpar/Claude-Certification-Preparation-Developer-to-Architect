@@ -110,6 +110,11 @@
       ]
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant C as Caller\n    participant G as Gateway\n    alt 95th percentile plus margin fits the timeout\n        C->>G: Request\n        G-->>C: Result, synchronous\n    else It does not fit, accept-and-poll\n        C->>G: Request\n        G-->>C: Identifier at once\n        G->>G: Do the work behind the scenes\n        C->>G: Poll with the identifier\n        G-->>C: Result\n    end"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Why accept-and-poll beats the alternatives"
@@ -278,7 +283,7 @@
   "counts": {
     "headings": 10,
     "paras": 11,
-    "code": 0,
+    "code": 1,
     "tables": 1,
     "lists": 4,
     "images": 0,
@@ -288,5 +293,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "9f4e5a47b6b536031b0c42039272004c63a8962cec520bca8f641453c9422c11"
+  "content_sha256": "91044394f02a81a9f87061af23afccf56b12ae428958481e520c670d139d4f18"
 }

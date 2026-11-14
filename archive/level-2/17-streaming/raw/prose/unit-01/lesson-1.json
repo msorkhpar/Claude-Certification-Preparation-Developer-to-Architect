@@ -125,6 +125,11 @@
       "text": "A stream that ends without `message_stop` is an incomplete message, not a short one. The stop reason arrives in `message_delta`, near the end, so a cut stream has none."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "stateDiagram-v2\n    [*] --> message_start\n    message_start --> content_block_start\n    content_block_start --> content_block_delta\n    content_block_delta --> content_block_delta : another piece\n    content_block_delta --> content_block_stop\n    content_block_stop --> content_block_start : next index\n    content_block_stop --> message_delta\n    message_delta --> message_stop\n    message_stop --> [*]\n    content_block_delta --> incomplete : error event or early end\n    incomplete --> [*]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "The example: one stream, read three ways"
@@ -343,7 +348,7 @@
   "counts": {
     "headings": 9,
     "paras": 13,
-    "code": 0,
+    "code": 1,
     "tables": 2,
     "lists": 4,
     "images": 0,
@@ -354,5 +359,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "f56f6ba9d03bb29d42b97cafb7cfd947f6482a7ab1b278570832046c5748dd6b"
+  "content_sha256": "edb1a5f8ec5a8fe76862ff40e21fef1cb4e1a835c01e6c35af7ec0116134faa0"
 }

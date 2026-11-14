@@ -57,6 +57,11 @@
       "text": "The coordinator retries once through an alternative and then stops. The limit is the course's design, and the reason is that one failure of a different query is a reason to try again, while a second suggests that the source or the service has a problem a third query will not fix. A second failure stays a failure, and the report says so, with both queries named. A failure of one subagent does not end the run: the other scopes are still worth reporting."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A[\"Subagent fails\"] --> B[\"Result with type, query, partial results, alternatives\"]\n    B --> C[\"Coordinator retries once through an alternative\"]\n    C --> D{\"Retry succeeds?\"}\n    D -->|yes| E[\"Use the new result\"]\n    D -->|no| F[\"Stays a failure, both queries named\"]\n    E --> G[\"Run goes on with the other scopes\"]\n    F --> G"
+    },
+    {
       "type": "para",
       "text": "Three tempting designs fail in different ways. A generic \"search unavailable\" after the retries leaves the coordinator nothing to decide with. An empty result marked as a success turns a gap into an apparent answer. And terminating the whole run on the first failure throws away every scope that worked."
     },
@@ -281,7 +286,7 @@
   "counts": {
     "headings": 11,
     "paras": 15,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 3,
     "images": 0,
@@ -291,5 +296,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "bc94e3dba15f4c2ce5dfeccdece1354f3e1939cb9689bb2cce5d337e92952bc1"
+  "content_sha256": "e84cd0c1f8011e3a6d687299905b1e38af2b1d58aa78dc4511eb336ae5cc5f2b"
 }

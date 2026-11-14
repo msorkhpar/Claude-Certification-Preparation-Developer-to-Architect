@@ -105,6 +105,11 @@
       "text": "Module 79 gave the ladder in prose: one call, an augmented call, a workflow, an agent, a team. The example turns it into a rule that is short enough to read in a minute. Three questions decide the rung. Is the task one step? Then it is a call, augmented if it needs outside facts. Is the path known? Then it is a workflow, and it costs one chat per step. Is the path open? Then it is an agent, and it becomes a team only when the parts are independent and the value pays for the team."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    T[\"Task\"] --> A{\"One step?\"}\n    A -->|yes| B{\"Needs outside facts?\"}\n    B -->|yes| AC[\"augmented call\"]\n    B -->|no| PC[\"plain call\"]\n    A -->|no| C{\"Path known?\"}\n    C -->|yes| W[\"workflow\"]\n    C -->|no| D{\"Independent parts and value pays?\"}\n    D -->|yes| M[\"multi-agent\"]\n    D -->|no| G[\"agent\"]"
+    },
+    {
       "type": "para",
       "text": "The price uses the multipliers from the article: a chat is the unit, an agent costs about 4 units and a team about 15. For a team to be worth building, the task's value has to be at least 15 chats. The last task in the example shows the failure the rule prevents: a trivia round-up has independent parts, so it looks like a fit for a team, but its value is below what even one agent costs, and so below the price of a team, and the output says `pays: False`. The answer is not a cheaper team. It is to ask whether the task is worth automating at all."
     },
@@ -289,7 +294,7 @@
   "counts": {
     "headings": 9,
     "paras": 12,
-    "code": 0,
+    "code": 1,
     "tables": 1,
     "lists": 3,
     "images": 0,
@@ -300,5 +305,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "a40d465b5ec4eaf1871f981aad024566cefc0103c051b0ccfbf6a67a5eee855a"
+  "content_sha256": "cef6acf8f764f0c3d38f07995505c1c512468555a560decb6bb0f52c8bf071a2"
 }

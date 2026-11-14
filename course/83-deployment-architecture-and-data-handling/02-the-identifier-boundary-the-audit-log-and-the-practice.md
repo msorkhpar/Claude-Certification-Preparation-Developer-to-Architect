@@ -23,6 +23,20 @@ The robust control is a layer that runs before the call. It finds identifiers an
 2. **The vault is local.** The map exists only inside the caller. The provider sees tokens and never the values.
 3. **Restoration happens after the reply.** The user sees the real values because the caller put them back, and the model never held them.
 
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant L as Layer before the call
+    participant V as Local vault
+    participant M as Model
+    U->>L: Text with identifiers
+    L->>V: Keep the map from token to value
+    L->>M: Tokenised text only
+    M-->>L: Reply that uses the tokens
+    L->>V: Look up each token
+    L-->>U: Reply with the real values restored
+```
+
 The example prints this in order: the text sent has `<EMAIL_1>` twice and `<MEMBER_1>` once, the reply uses the tokens, and the restored text has the real address and member number. Notice what this does and does not do. The model can still do its job (confirm the contact before reopening a claim). It cannot leak what it never had. And the control is auditable: a reviewer can test the layer with sample text, which cannot be done for an instruction.
 
 ### The gap, shown on purpose

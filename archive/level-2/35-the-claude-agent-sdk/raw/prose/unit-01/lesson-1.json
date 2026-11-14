@@ -115,6 +115,11 @@
       "text": "A turn happens without giving control back to your code. Five message types come out of the loop: the system message, the assistant message, the user message (the tool results, and any input you stream mid-loop), the stream event (only when partial messages are enabled) and the result message. A small number of trailing events can arrive after the result, so iterate the stream to the end instead of breaking at the result."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A[\"Receive prompt, SystemMessage init\"] --> B[\"Evaluate and respond, AssistantMessage\"]\n    B --> C{\"Tool calls?\"}\n    C -->|yes| D[\"Execute tools, hooks may block, results fed back\"]\n    D -->|next turn| B\n    C -->|no| E[\"Return result, ResultMessage\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Limits and results"
@@ -281,7 +286,7 @@
   "counts": {
     "headings": 9,
     "paras": 14,
-    "code": 0,
+    "code": 1,
     "tables": 3,
     "lists": 3,
     "images": 0,
@@ -291,5 +296,5 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "f6a7d537c0936cd6fb1f7e6372356722bfb1071fd656949b1990bfc64404aee7"
+  "content_sha256": "e90e8dabc88a2306decd61b35999d50925cbb2bc3c7e06e83bb4139ca05783a2"
 }

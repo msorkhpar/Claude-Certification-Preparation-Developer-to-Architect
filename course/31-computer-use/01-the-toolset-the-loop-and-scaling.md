@@ -44,6 +44,22 @@ The rule is to run the blocks in order and stop at the first failure. The docume
 
 Claude then sees which actions ran, which failed and which were skipped, and replans. Leaving a block unanswered is an `invalid_request_error`, "so an agent loop that reads only the first block fails on its next call". If your application asks a person to confirm risky actions, make that check before each block runs, because a batch can finish a multistep action inside one turn.
 
+```mermaid
+flowchart TD
+    A["One reply, several tool_use blocks"] --> B["Take the next block, in order"]
+    B --> CF["Confirmation check, if your app asks a person"]
+    CF --> X["Run the action"]
+    X --> Y{"Succeeded?"}
+    Y -->|yes| N["Normal result"]
+    N --> Z{"More blocks?"}
+    Z -->|yes| B
+    Y -->|no| ER["is_error true, with a description"]
+    ER --> SK["Every later block: is_error true, Not executed text"]
+    Z -->|no| S["One user message, one tool_result per block"]
+    SK --> S
+    S --> RP["Claude sees what ran and replans"]
+```
+
 ### Screenshots must fit, and coordinates are theirs
 
 A screen is usually larger than the picture a model may be sent, and the toolset does nothing about it. The documentation says "the toolset takes no display dimensions and the API doesn't downscale for you", and an oversized image in a `tool_result` is rejected with a validation error. So you resize each screenshot before returning it, and you keep the scale factor.

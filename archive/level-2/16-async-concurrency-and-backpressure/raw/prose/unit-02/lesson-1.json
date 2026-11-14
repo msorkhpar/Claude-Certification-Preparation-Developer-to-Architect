@@ -147,6 +147,11 @@
       "text": "The mechanism is the same in all three: **take the next item only when there is room for it**. A worker pool does exactly that. Each worker loops: take the next item from the source, run the work, store the result, repeat. There are at most `limit` workers, so at most `limit` items are in flight and at most `limit` items have been taken from the source."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    P[\"at most limit workers\"] --> A{\"next item in the source?\"}\n    A -->|yes| B[\"take one item\"]\n    B --> C[\"run the work\"]\n    C --> D[\"store the result\"]\n    D --> A\n    A -->|no| E[\"the worker ends\"]"
+    },
+    {
       "type": "heading",
       "level": 2,
       "text": "The practice: a bounded worker pool"
@@ -349,7 +354,7 @@
   "counts": {
     "headings": 11,
     "paras": 14,
-    "code": 0,
+    "code": 1,
     "tables": 2,
     "lists": 6,
     "images": 0,
@@ -359,5 +364,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "17b5dd0c08fdcf7621a937ccdfab88e3dce12a5c308bdf07db894537a06520dd"
+  "content_sha256": "24bd4ed7dc1cfdaab1c858a3c43ca41507ca1d20a341771cc01c27b455fe6e2f"
 }

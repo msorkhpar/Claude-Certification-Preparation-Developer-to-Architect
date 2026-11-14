@@ -108,6 +108,11 @@
       ]
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A{\"Was the evidence found?\"} -->|no| R[\"Retrieval fault, wording cannot fix it\"]\n    A -->|yes| B{\"Answer supported by the evidence?\"}\n    B -->|no| G[\"Grounding fault\"]\n    B -->|yes| C{\"Reply in the right shape?\"}\n    C -->|no| P[\"Format or instruction fault, fix the prompt\"]\n    C -->|yes| D{\"Fails on a stronger model too?\"}\n    D -->|yes| T[\"Task or prompt at fault\"]\n    D -->|no| M[\"Model mismatch, a price decision\"]"
+    },
+    {
       "type": "para",
       "text": "The order puts the model last because a model change is the most expensive fix and the one most often wrongly blamed. A larger model does not know a document it was never shown. Sampling settings change how an answer is worded and not what evidence it was given. Examples teach a format; they do not supply a missing fact. The example runs five invented cases through the order, one for each answer."
     },
@@ -363,7 +368,7 @@
   "counts": {
     "headings": 12,
     "paras": 14,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 6,
     "images": 0,
@@ -374,5 +379,5 @@
     "disclosures": 2,
     "examples": 1
   },
-  "content_sha256": "d4d29a635af4f745ef446f13fb9cf27487be585db63d69a4b3a1b888233f8dd4"
+  "content_sha256": "2552017c8a746726ae6bd4c924f249c7a5f9f6155aa9368d74db8fe91c6e9506"
 }

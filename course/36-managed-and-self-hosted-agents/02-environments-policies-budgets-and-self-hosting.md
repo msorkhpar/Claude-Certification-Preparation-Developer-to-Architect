@@ -44,6 +44,20 @@ The defaults differ by toolset: "the agent toolset defaults to `always_allow`, a
 
 A pause shows as `session.status_idle` with a stop reason of `requires_action`, and "The session waits indefinitely for a response." You answer with a `user.tool_confirmation` event that allows or denies each blocked call.
 
+```mermaid
+flowchart TD
+    C["Server-executed tool call"] --> P{"Permission policy"}
+    P -->|always_allow| RUN["Runs"]
+    P -->|always_ask| PA["Session pauses, session.status_idle, requires_action"]
+    P -->|auto| EV{"Server evaluates the call"}
+    EV -->|safe| RUN
+    EV -->|high risk| DEN["Denied, error result, no override"]
+    EV -->|cannot decide| PA
+    PA --> TC["You send user.tool_confirmation"]
+    TC -->|allow| RUN
+    TC -->|deny| DN["Denied"]
+```
+
 ### Credentials
 
 Secrets stay out of the sandbox through vaults: you register credentials once and reference them when you create a session. An `environment_variable` credential is stored in the sandbox "as an opaque placeholder", and the real value is substituted when the agent makes an outbound request, so "The agent never sees the secret value." MCP credentials (`mcp_oauth`, `static_bearer`) are injected for the server's URL. The values are write-only. Vaults are workspace-scoped, so any key with workspace access can reference them, and environment-variable credentials are not yet supported with self-hosted sandboxes.

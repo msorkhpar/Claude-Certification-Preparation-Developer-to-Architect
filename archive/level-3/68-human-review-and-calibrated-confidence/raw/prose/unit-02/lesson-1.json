@@ -87,6 +87,11 @@
       "text": "Raising the threshold to shrink the queue throws away the calibration that made the threshold mean something. Reviewing only what the staff can read and accepting the rest unseen does the same from the other side. Keep the threshold where the labelled data put it, queue what falls below it, and report the backlog."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    X[\"Extraction\"] --> C{\"Conflicting or ambiguous sources?\"}\n    C -->|yes| Q[\"Review queue\"]\n    C -->|no| L{\"Confidence below the calibrated threshold?\"}\n    L -->|yes| Q\n    L -->|no| A[\"Accepted automatically\"]\n    A --> S[\"Sampled by stratum\"]\n    Q --> O[\"Conflicts first, then lowest confidence\"]\n    O --> K{\"Within the day's capacity?\"}\n    K -->|yes| RV[\"Reviewed\"]\n    K -->|no| BL[\"Backlog, kept and shown\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "A checkpoint for what cannot be undone"
@@ -256,7 +261,7 @@
   "counts": {
     "headings": 10,
     "paras": 13,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 4,
     "images": 0,
@@ -266,5 +271,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "6602045e877a13373424b49e693a1ad2db584bb0b1933039d1e7fa48f88ec45b"
+  "content_sha256": "58cf5119d8da3416bfc3bba952d84dd454953b1b531d19846923c7c748998fea"
 }

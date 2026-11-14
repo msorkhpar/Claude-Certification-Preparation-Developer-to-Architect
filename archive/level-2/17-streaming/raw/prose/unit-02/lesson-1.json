@@ -66,6 +66,11 @@
       "text": "The status line of a streaming response is sent before the model has produced anything. If the service is overloaded partway, it cannot change that status; it sends an `error` event in the stream, with a body shaped like the usual error body. That is why an error can arrive after the 200 status line. The example of the previous page shows the SDK turning that event into an exception."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant App as your code\n    participant API as Messages API\n    App->>API: POST with stream set to true\n    API-->>App: 200 status line\n    API-->>App: message_start and content deltas\n    API-->>App: error event, service overloaded\n    Note over App: no message_stop, so a failure\n    App->>App: discard the partial output\n    App->>API: retry the whole request after back-off"
+    },
+    {
       "type": "para",
       "text": "Three consequences:"
     },
@@ -257,7 +262,7 @@
   "counts": {
     "headings": 9,
     "paras": 11,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 5,
     "images": 0,
@@ -267,5 +272,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "13f3371f56aef756473b7ad05ba211b53d3da7fc53af990e81af4e18a1a1861d"
+  "content_sha256": "5134244a39dec6f0a33ff6c49a9468e1ae47429f71d4b8a1acf7ca820ec33a3d"
 }

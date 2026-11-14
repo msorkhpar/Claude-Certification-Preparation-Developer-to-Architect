@@ -88,6 +88,11 @@
       "text": "When some subagents failed, the answer can still be useful, and the honest status is `partial`, because a partial answer looks like a full one unless the status says otherwise. The user-facing text should say which part is missing. Whether to retry a failed scope is the reviewer's decision: it can list the scope as a gap, and the cap on rounds keeps the retry bounded."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A[\"Subagents run their briefs, failures recorded per scope\"] --> B{\"Any findings at all?\"}\n    B -->|no| F[\"failed\"]\n    B -->|yes| C[\"Reviewer lists the gaps\"]\n    C --> D{\"Gaps left and rounds under the cap?\"}\n    D -->|yes| E[\"New briefs for the gaps only\"]\n    E --> A\n    D -->|no| S[\"Synthesize once\"]\n    S --> G{\"No gap left and nothing failed?\"}\n    G -->|yes| H[\"complete\"]\n    G -->|no| I[\"partial, with what is missing\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Hand large outputs over by reference"
@@ -268,7 +273,7 @@
   "counts": {
     "headings": 11,
     "paras": 14,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 5,
     "images": 0,
@@ -278,5 +283,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "6372d4ec15b0fdf4cde1eafff3cf75ec9c27a04d81d9b7ec8f6ba9f2792e4b7c"
+  "content_sha256": "6ddc0b0012e5ba603a666830e5cd9fe3438c304ab0dceda3b0587affd32bf54d"
 }

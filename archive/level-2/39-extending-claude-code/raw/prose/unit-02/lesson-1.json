@@ -162,6 +162,11 @@
       "text": "Exit 0 with a JSON object on standard output is the structured answer. For `PreToolUse`, put `hookSpecificOutput` with `hookEventName: \"PreToolUse\"`, `permissionDecision` as `allow`, `deny` or `ask`, and `permissionDecisionReason`. Both forms can block. The JSON form lets you say `ask` and carries a reason that is shown to the person."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant CC as Claude Code\n    participant H as Hook command\n    CC->>H: event data as JSON on stdin, PreToolUse\n    alt exit 2\n        H-->>CC: reason on stderr\n        Note over CC: Blocks the call, the reason goes to Claude\n    else exit 0 with JSON on stdout\n        H-->>CC: permissionDecision allow, deny or ask, with a reason\n    else exit 0 with no output\n        Note over CC: No objection\n    else any other exit code\n        Note over CC: Non-blocking error, the call proceeds\n    end"
+    },
+    {
       "type": "para",
       "text": "Several hooks can match one call, and they run in parallel. \"For `PreToolUse` permission decisions, the most restrictive answer applies, in the order `deny`, `defer`, `ask`, `allow`.\" A logging hook that exits 0 does not weaken a guard hook that denies. `defer` is a decision for programs that run `claude -p` and read its JSON output: it pauses the run at a tool call so the caller can collect an answer and resume, and Claude Code honors it only in that non-interactive mode and only when the turn makes a single tool call."
     },
@@ -334,7 +339,7 @@
   "counts": {
     "headings": 8,
     "paras": 16,
-    "code": 0,
+    "code": 1,
     "tables": 2,
     "lists": 3,
     "images": 0,
@@ -345,5 +350,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "c556a563f600fff903e6a5d8ac3d291a5754038c85054c33719cc18f0dbe6b64"
+  "content_sha256": "bc136c13a7ffffe2e64fffdac41507f96f4302d674f7fa56a95472dd5d644051"
 }

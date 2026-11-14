@@ -197,6 +197,11 @@
       "text": "A call can fail after you appended the user turn: a 529, a timeout, a 429. If the client leaves that turn in the history, the next request contains two user turns in a row, and the retry logic of module 15 will send a different conversation from the one the user saw. The rule is to **commit a turn only when the whole exchange succeeded**: append the user turn, call, and on any failure remove it before the error leaves the function. Case `e2` of the practice is exactly this."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A[\"append the user turn\"] --> B[\"call the API\"]\n    B --> C{\"whole exchange succeeded?\"}\n    C -->|yes| D[\"append the assistant turn as received\"]\n    C -->|\"no, a 529, timeout or 429\"| E[\"remove the user turn\"]\n    E --> F[\"the error leaves the function\"]"
+    },
+    {
       "type": "para",
       "text": "Two more defects in the same family, each a practice case:"
     },
@@ -420,7 +425,7 @@
   "counts": {
     "headings": 12,
     "paras": 14,
-    "code": 0,
+    "code": 1,
     "tables": 2,
     "lists": 5,
     "images": 0,
@@ -431,5 +436,5 @@
     "disclosures": 2,
     "examples": 1
   },
-  "content_sha256": "195bbc64fae03598c1c8c711ae4fcac5162427d5dc603ef8f7875b379faf64a5"
+  "content_sha256": "5b8ef59ff5a1019fda27e4712f3d6b4d9cd7d4040b964fa4ff5fbdfb9fa542c8"
 }

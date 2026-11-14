@@ -5,7 +5,7 @@
 # the course committed.
 ARG STUDYFORGE_NAMESPACE
 
-FROM ${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE-is-not-set}/studyforge-serve:0.1.0-91a90077811c5f4db68255d0564814927ceb0035dd7490ba8de0d8797c6ecf9b@sha256:4d32a5d97f19dacd0dbf7ab284ac19268ba37bb4255960c90cd6fe7a6fce06b1 AS without-narration
+FROM ${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE-is-not-set}/studyforge-serve:0.1.0-4345c945f8981d8c6a006a92ee069e8d666e936c8a6fc3110e7588be3d231432@sha256:4132e0e3a8b9e7cd00ea3e202a3af2bf85c4549045ef2adfae9a1c7e1519edb0 AS without-narration
 USER root
 RUN --mount=type=bind,source=.,target=/context \
     set -eu; mkdir -p /corpus; \
@@ -18,7 +18,7 @@ USER 1000:1000
 WORKDIR /corpus
 LABEL org.studyforge.course="claude-certification-preparation" org.studyforge.narration="without"
 
-FROM ${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE-is-not-set}/studyforge-serve:0.1.0-91a90077811c5f4db68255d0564814927ceb0035dd7490ba8de0d8797c6ecf9b@sha256:4d32a5d97f19dacd0dbf7ab284ac19268ba37bb4255960c90cd6fe7a6fce06b1 AS with-narration
+FROM ${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE-is-not-set}/studyforge-serve:0.1.0-4345c945f8981d8c6a006a92ee069e8d666e936c8a6fc3110e7588be3d231432@sha256:4132e0e3a8b9e7cd00ea3e202a3af2bf85c4549045ef2adfae9a1c7e1519edb0 AS with-narration
 USER root
 RUN --mount=type=bind,source=.,target=/context \
     set -eu; mkdir -p /corpus; \

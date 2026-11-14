@@ -66,6 +66,11 @@
       "text": "The host does not talk to a server itself. \"The MCP host accomplishes this by creating one MCP client for each MCP server.\" Each client \"maintains a dedicated connection with its corresponding MCP server\", so a host connected to a ticketing server and a file server holds two clients. The word \"server\" says nothing about where the program runs. A filesystem server that a desktop application launches on the same machine is a local server, and the documentation's example of a remote one is a vendor's server on that vendor's platform. Local servers that use the stdio transport typically serve a single client, and remote servers on Streamable HTTP will typically serve many."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    H[\"MCP host, such as Claude Code\"] --> C1[\"MCP client\"]\n    H --> C2[\"MCP client\"]\n    C1 <-->|dedicated connection| S1[\"Ticketing server\"]\n    C2 <-->|dedicated connection| S2[\"File server\"]"
+    },
+    {
       "type": "para",
       "text": "One boundary matters for the exam. MCP \"does not dictate how AI applications use LLMs or manage the provided context.\" The protocol moves context between a server and a client. What the model does with it, and what a person must approve, belongs to the host."
     },
@@ -245,7 +250,7 @@
   "counts": {
     "headings": 9,
     "paras": 15,
-    "code": 0,
+    "code": 1,
     "tables": 1,
     "lists": 5,
     "images": 0,
@@ -255,5 +260,5 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "4a7d5843d985dd9c0827ab9f229a8105f076a23aea78de897916d8abdf65df62"
+  "content_sha256": "52fe66d46a71f6166885e6ec7f4b5c0530f4edab4c792deef4a5a16be186c94a"
 }

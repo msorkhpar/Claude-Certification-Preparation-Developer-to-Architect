@@ -181,6 +181,11 @@
       "text": "The planner is given the goal and the steps done so far; take the history away and it cannot see what it has already done. An error in a step is the interesting case. Stopping the run on a failed step throws away a planner that could have chosen another route; ignoring it hides a fact the planner needs. Recording it as the step's result puts it where the planner reads, with the ground truth of the other steps."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    P[\"Ask the planner, with the goal and the steps so far\"] --> R{\"Reply is a plan?\"}\n    R -->|no| BP[\"bad_plan\"]\n    R -->|yes| D{\"Planner says done?\"}\n    D -->|yes| DONE[\"done\"]\n    D -->|no| N{\"A next step not run before?\"}\n    N -->|no| ST[\"stuck\"]\n    N -->|yes| LIM{\"Step limit reached?\"}\n    LIM -->|yes| SL[\"step_limit\"]\n    LIM -->|no| W[\"Worker runs the step\"]\n    W --> REC[\"Record the result, or ERROR\"]\n    REC --> P"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Open-ended work: map, rank, plan again"
@@ -366,7 +371,7 @@
   "counts": {
     "headings": 13,
     "paras": 19,
-    "code": 0,
+    "code": 1,
     "tables": 2,
     "lists": 5,
     "images": 0,
@@ -376,5 +381,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "8ed3d32dc8d5a1b63809d923207f0f80dff4d92e0cd4dd24c5e06948dfbbb9a3"
+  "content_sha256": "ebc4a4c8d51172fa98eeb991c6e8378e36c5d1ada51e1ed0e71220afb1ba5dee"
 }

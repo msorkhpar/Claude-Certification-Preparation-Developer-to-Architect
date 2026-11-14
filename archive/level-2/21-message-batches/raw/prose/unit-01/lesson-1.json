@@ -57,6 +57,11 @@
       "text": "Each element of the batch has two parts: a `custom_id` you choose, and `params`, which is an ordinary Messages request body. The `custom_id` \"Must be 1 to 64 characters and contain only alphanumeric characters, hyphens, and underscores\", and it must be unique in the batch. Because the results come back in any order (page 2), the `custom_id` is the only way to tie an answer to the question that produced it. Choose meaningful ones, such as a database key."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant App as your code\n    participant API as Message Batches API\n    App->>API: create a batch of custom_id and params pairs\n    Note over API: each request handled independently\n    loop until processing has ended\n        App->>API: poll the batch\n    end\n    App->>API: fetch the results file\n    API-->>App: answers in any order\n    App->>App: match each answer by custom_id"
+    },
+    {
       "type": "para",
       "text": "The page recommends a dry run: \"Dry run a single request shape with the Messages API to avoid validation errors.\" A shape that works synchronously will work in a batch, with the exceptions below."
     },
@@ -296,7 +301,7 @@
   "counts": {
     "headings": 10,
     "paras": 18,
-    "code": 0,
+    "code": 1,
     "tables": 3,
     "lists": 2,
     "images": 0,
@@ -306,5 +311,5 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "1be6900f07df1538be46c048bbf7704e1e34c3936fb5e2bdd3c032ae690ed31d"
+  "content_sha256": "a092e9389c93f9a0eabf2b4c20865b531f0f8ea2b2e5dcf3d5eca683e61a9f2f"
 }

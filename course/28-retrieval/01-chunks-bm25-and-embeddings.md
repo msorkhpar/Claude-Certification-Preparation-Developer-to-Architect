@@ -33,6 +33,20 @@ A retrieval pipeline has the same stages in most systems:
 
 Stages 1 to 5 can be tested without a model. The practice at the end of the next page builds them and grades them on recall.
 
+```mermaid
+flowchart TD
+    D["Documents"] --> C["Chunk into passages"]
+    C --> K["Keyword index"]
+    C --> E["Embedding index"]
+    K --> RK["Ranking by keywords"]
+    E --> RE["Ranking by embeddings"]
+    RK --> M["Merge into one ranking"]
+    RE --> M
+    M -->|optional| R["Rerank the best few"]
+    M --> G["Generate: chunks in the prompt, ask for citations"]
+    R --> G
+```
+
 ### Chunking
 
 A chunk is a window of words. The practice's `chunk(text, size, overlap)` returns windows of `size` words that start `size - overlap`

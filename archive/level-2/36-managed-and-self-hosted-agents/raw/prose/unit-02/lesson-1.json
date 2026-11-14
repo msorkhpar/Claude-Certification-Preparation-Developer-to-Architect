@@ -124,6 +124,11 @@
       "text": "A pause shows as `session.status_idle` with a stop reason of `requires_action`, and \"The session waits indefinitely for a response.\" You answer with a `user.tool_confirmation` event that allows or denies each blocked call."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    C[\"Server-executed tool call\"] --> P{\"Permission policy\"}\n    P -->|always_allow| RUN[\"Runs\"]\n    P -->|always_ask| PA[\"Session pauses, session.status_idle, requires_action\"]\n    P -->|auto| EV{\"Server evaluates the call\"}\n    EV -->|safe| RUN\n    EV -->|high risk| DEN[\"Denied, error result, no override\"]\n    EV -->|cannot decide| PA\n    PA --> TC[\"You send user.tool_confirmation\"]\n    TC -->|allow| RUN\n    TC -->|deny| DN[\"Denied\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Credentials"
@@ -457,7 +462,7 @@
   "counts": {
     "headings": 12,
     "paras": 20,
-    "code": 0,
+    "code": 1,
     "tables": 3,
     "lists": 3,
     "images": 0,
@@ -468,5 +473,5 @@
     "disclosures": 2,
     "examples": 1
   },
-  "content_sha256": "5771a23b687ba11250adefe89af23f8403218e628042b9c90a423b36df84c38a"
+  "content_sha256": "bed58a8630e6b5b4ac085cf9a4e31aa0c896e1bc45c7917741bf956d951e8f16"
 }

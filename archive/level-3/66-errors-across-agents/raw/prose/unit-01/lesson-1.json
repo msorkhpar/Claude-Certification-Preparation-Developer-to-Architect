@@ -109,6 +109,11 @@
       "text": "\"Search unavailable\" has none of them. The example's generic report loses the one item the timed-out source had already found and cannot say which sources to retry and which to give up on."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant C as Coordinator\n    participant S as Subagent\n    participant Src as Source\n    C->>S: brief\n    S->>Src: query\n    Src-->>S: timeout\n    S->>Src: retry, second attempt\n    Src-->>S: timeout\n    Note over S: tool calls and errors stay inside\n    S-->>C: final report with failure type, query, partial results, alternatives"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "An empty result is an answer"
@@ -292,7 +297,7 @@
   "counts": {
     "headings": 11,
     "paras": 11,
-    "code": 0,
+    "code": 1,
     "tables": 1,
     "lists": 3,
     "images": 0,
@@ -303,5 +308,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "81e98583937c01d6b4991dde72585e35d052fb7aff1361be7570297fc69374b7"
+  "content_sha256": "cac61b696ed22eba30f9cfbe856c024d95c6a91058bbe51f63d371a5ce63189d"
 }

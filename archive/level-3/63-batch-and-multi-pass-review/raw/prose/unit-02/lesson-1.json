@@ -123,6 +123,11 @@
       "text": "The same rule answers a question about processing time: independent checks cost more calls, and so the cheap first passes are batches and only the unconfirmed findings pay for a second look."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    L[\"Local pass per file, first batch\"] --> I[\"Integration pass over the set, second batch\"]\n    I --> M[\"merge_passes, a finding counts once per pass\"]\n    M --> Q{\"Two independent passes agree, neither unsure?\"}\n    Q -->|yes| A[\"Accepted\"]\n    Q -->|no| V[\"verify, another instance tries to refute it\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "The practice: a review pipeline"
@@ -279,7 +284,7 @@
   "counts": {
     "headings": 11,
     "paras": 15,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 5,
     "images": 0,
@@ -289,5 +294,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "5bcbf4192c79f67e83b5edfe141a48397b077d2d3cc2f13f7a8869bb99c2d3ab"
+  "content_sha256": "e7d2fba83a8b23de644cca792f3ef6b2e63bed8b46af945e1756a76ecd58ab82"
 }

@@ -42,6 +42,21 @@ The example is the middle of that design on one page: the part a request travels
 5. **Route.** A high-consequence action goes to a person; otherwise a confidence of at least 95 goes out and a lower one goes to review (page 1 of module 90).
 6. **Trace and keep.** The trace holds the request id, the chunk and its version, the outcome and the number of characters, and no text. Tail-based keeping stores every trace that was held or reached a person and leaves the rest to sampling (module 87).
 
+```mermaid
+flowchart TD
+    Q["Question"] --> T["Tokenise identifiers"]
+    T --> R["Remove unreadable documents, then rank"]
+    R -->|shares nothing with a readable document| NE["No evidence"]
+    R --> V{"Chunk from the current version?"}
+    V -->|no| HS["Held as stale evidence"]
+    V -->|yes| S{"Quote in the chunk?"}
+    S -->|no| HU["Held as unsupported"]
+    S -->|yes| RT["Route to a person, out or review"]
+    HS --> TR["Trace with ids, version, outcome and size"]
+    HU --> TR
+    RT --> TR
+```
+
 The example runs five requests. The first is answered. The second meets a stale index and is held. The third asks for a refund and goes to a person. The fourth asks about a partner commission, a document the reader may not read, and gets no evidence. The fifth carries an email address, which the output shows as a token, and is answered from the policy about reporting a claim. Three traces are kept: the held ones and the one that went to a person.
 
 ### The gate on the last line

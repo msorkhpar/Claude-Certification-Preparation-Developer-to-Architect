@@ -192,6 +192,11 @@
       "text": "When the status `max_turns` shows up often, the count is not the thing to change. A run that does not converge usually has a tool that keeps failing, a description the model cannot use or a task that is too big. The status is a signal to read the conversation, which the practice keeps whole for that reason."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A{\"Turn count reached?\"} -->|yes| MT[\"max_turns\"]\n    A -->|no| B[\"Call the model\"]\n    B --> C{\"stop_reason\"}\n    C -->|tool_use| D[\"Run the calls, send the results\"]\n    D --> A\n    C -->|\"end_turn or stop_sequence\"| E[\"done\"]\n    C -->|max_tokens| F[\"truncated\"]\n    C -->|refusal| G[\"refused\"]\n    C -->|\"any other value\"| H[\"unexpected\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "The example"
@@ -354,7 +359,7 @@
   "counts": {
     "headings": 10,
     "paras": 17,
-    "code": 0,
+    "code": 1,
     "tables": 2,
     "lists": 3,
     "images": 0,
@@ -365,5 +370,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "2c18b4824998e4f494153a1ff0658bb7b9de2bacec6326c2e5782fbfcff35d6f"
+  "content_sha256": "20a1972c31a5f45bb62962d19c8eae6ef70b17d0159da095a77bd98416612c4e"
 }

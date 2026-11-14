@@ -102,6 +102,11 @@
       "text": "Two things make this real. First, **confidence is not evidence.** An answer whose quote is not in the source is held (`hold: unsupported`) even at confidence 99, because a model can be certain and wrong; module 69 shows the quote check. Second, **the threshold is a decision about error cost.** At 95 the example lets an answer through at exactly 95 and reviews one at 94. It is a design value, set so that the cost of reviewing the rest is below the cost of the errors in the part sent out (module 79 gives the arithmetic), and it is checked against a measured sample (module 88), not copied."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A{\"Screen down and high consequence?\"} -->|yes| H1[\"hold: screen down\"]\n    A -->|no, flagged unscreened if the screen is down| B{\"Quote in the source?\"}\n    B -->|no| H2[\"hold: unsupported\"]\n    B -->|yes| C{\"High-consequence action?\"}\n    C -->|yes| HU[\"human\"]\n    C -->|no| D{\"Confidence at least 95?\"}\n    D -->|yes| AU[\"auto\"]\n    D -->|no| RV[\"review\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Failure modes, and a control that exists"
@@ -317,7 +322,7 @@
   "counts": {
     "headings": 12,
     "paras": 15,
-    "code": 0,
+    "code": 1,
     "tables": 1,
     "lists": 3,
     "images": 0,
@@ -328,5 +333,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "64936f50ae3876dc6148b244eff6dd1af82cc32ed26245e4c125744d4629efdb"
+  "content_sha256": "0c01e7e94c4f12c2ee2585c607f97759efe7fddcea6ab036ed5c9e3a5464a582"
 }

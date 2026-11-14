@@ -170,6 +170,11 @@
       "text": "The most important decision in the example is the first one. Before the model sees a message, code checks it in a fixed order: a signal of risk goes to a person, a request for a person is honoured, a stalled conversation is handed over after two misses, and otherwise the model answers. The order is the point: a message that asks for a human and also signals risk is a safety hand-off, and a conversation that has stalled is not allowed to keep a customer who asked to leave."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    M[\"Customer message\"] --> A{\"Signal of risk?\"}\n    A -->|yes| S[\"handoff:safety\"]\n    A -->|no| B{\"Asks for a person?\"}\n    B -->|yes| R[\"handoff:requested\"]\n    B -->|no| C{\"Two misses already?\"}\n    C -->|yes| T[\"handoff:stalled\"]\n    C -->|no| D[\"The model answers\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "The example"
@@ -346,7 +351,7 @@
   "counts": {
     "headings": 12,
     "paras": 13,
-    "code": 0,
+    "code": 1,
     "tables": 2,
     "lists": 2,
     "images": 0,
@@ -357,5 +362,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "45a480cdac2466af574c9f44fadf4947791c5e3cf5ff7fb450c742e664095f67"
+  "content_sha256": "23b38c7e8eed285c6e06fb2df6537cd8f7465c381658078a1b020e2e148450c6"
 }

@@ -153,6 +153,11 @@
       "text": "The order of remedies is the order of risk. A longer anchor changes only the occurrence you meant. `replace_all` changes every occurrence, which is right for a rename and wrong when only one of three similar lines should change. And Read plus Write, which is the guide's fallback, changes the file by rewriting all of it: the model writes every line again, a long file costs the tokens twice, and any line it drops or alters by accident is lost without a diff to show it. Use it only when no unique text exists, for example when a file is made of repeated blocks that differ only by position."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A[\"Edit call\"] --> R{\"File read in this conversation?\"}\n    R -->|no| RR[\"Read the file first\"]\n    R -->|yes| M{\"old_string matches exactly?\"}\n    M -->|no| RA[\"Claude reads the file again\"]\n    M -->|yes| U{\"Appears exactly once?\"}\n    U -->|yes| OK[\"Replaced\"]\n    U -->|no| L[\"A longer unique string\"]\n    L -->|\"every occurrence should change\"| RAL[\"replace_all: true\"]\n    L -->|\"no unique text exists\"| RW[\"Read plus Write, last\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "The example"
@@ -317,7 +322,7 @@
   "counts": {
     "headings": 9,
     "paras": 16,
-    "code": 0,
+    "code": 1,
     "tables": 1,
     "lists": 3,
     "images": 0,
@@ -328,5 +333,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "592b54f0b55462ad4f5e64e7a0d9a96c1dd462e4d4a76c20109e342aabe00cb0"
+  "content_sha256": "c82925478d4367838f8c0b7f66ba0c2b5b95cc363090c578c77f17022b7d1f4b"
 }

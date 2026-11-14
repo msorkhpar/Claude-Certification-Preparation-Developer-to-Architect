@@ -52,6 +52,17 @@ A conversation outgrows its window one turn at a time. The pipeline of module 64
 
 The most important decision in the example is the first one. Before the model sees a message, code checks it in a fixed order: a signal of risk goes to a person, a request for a person is honoured, a stalled conversation is handed over after two misses, and otherwise the model answers. The order is the point: a message that asks for a human and also signals risk is a safety hand-off, and a conversation that has stalled is not allowed to keep a customer who asked to leave.
 
+```mermaid
+flowchart TD
+    M["Customer message"] --> A{"Signal of risk?"}
+    A -->|yes| S["handoff:safety"]
+    A -->|no| B{"Asks for a person?"}
+    B -->|yes| R["handoff:requested"]
+    B -->|no| C{"Two misses already?"}
+    C -->|yes| T["handoff:stalled"]
+    C -->|no| D["The model answers"]
+```
+
 ### The example
 
 The example routes four messages, cuts a five-turn conversation to a twelve-word window with two pinned facts, and recalls the memory of two customers on one day. Ada has an address saved two weeks ago and a plan saved ten months ago, so the first is current and the second is marked to be verified. Bob has nothing stored, and the recall for him returns nothing and not Ada's facts.

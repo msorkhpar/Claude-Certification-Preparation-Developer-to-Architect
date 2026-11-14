@@ -57,6 +57,11 @@
       "text": "Cancellation has one more state. Right after a cancel call the status is `canceling`; poll again until it ends. \"Canceled batches end up with a status of ended and may contain partial results for requests that were processed before cancellation.\" Cancellation may not be instant, and the requests that had already run are still billed."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "stateDiagram-v2\n    [*] --> in_progress\n    in_progress --> ended : all requests finished\n    in_progress --> canceling : cancel call\n    canceling --> ended : may hold partial results\n    ended --> [*]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "The four result types"
@@ -492,7 +497,7 @@
   "counts": {
     "headings": 13,
     "paras": 21,
-    "code": 0,
+    "code": 1,
     "tables": 3,
     "lists": 3,
     "images": 0,
@@ -503,5 +508,5 @@
     "disclosures": 2,
     "examples": 1
   },
-  "content_sha256": "25518ef457c20f54c49a2908c6386fb45a152a23efa598d91d3059d43557920d"
+  "content_sha256": "6965ad5b8b730418c177467aff17eaf3663bdc7f23aa6d6b0d5d560855ab6af9"
 }

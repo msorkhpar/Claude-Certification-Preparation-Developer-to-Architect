@@ -49,6 +49,28 @@ A refused call still needs an answer. The API requires one: "Tool result blocks 
 
 The gate does not repair the call. It would be tempting to run the missing verification itself, but the customer's identity code is something the model must obtain from the customer, so the gate refuses and says what is missing. That keeps the conversation honest and keeps the gate small. In the example below, the model's recovery after the refusal takes three more calls and no extra code: it asks for the verification, looks up the order and tries the refund again.
 
+```mermaid
+sequenceDiagram
+    participant M as Model
+    participant G as Gate
+    participant B as Backend
+    M->>G: process_refund
+    Note over G: no verification in this session
+    G-->>M: is_error, BLOCKED identity_required
+    M->>G: verify_identity
+    G->>B: verify_identity
+    B-->>G: result
+    G-->>M: result
+    M->>G: lookup_order
+    G->>B: lookup_order
+    B-->>G: order
+    G-->>M: order
+    M->>G: process_refund
+    G->>B: process_refund
+    B-->>G: refund_id
+    G-->>M: result
+```
+
 The refusal must also not leak what it protects. A lookup of someone else's order says only that the order does not belong to the verified customer. It does not say whose it is.
 
 ### Where the gate sits in each tool

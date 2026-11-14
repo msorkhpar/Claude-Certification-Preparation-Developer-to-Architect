@@ -79,6 +79,11 @@
       "text": "The key belongs to the tool's design as much as the agent's. When a tool that changes things offers no key, the architect wraps it with one, or does not let an agent retry it."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant A as Agent\n    participant T as Tool\n    A->>A: Make the key once from order and action\n    A->>T: Refund with the key\n    T->>T: Save key and payment in one transaction\n    T--xA: Response lost\n    A->>T: Retry with the same key\n    T->>T: Key known, do not act again\n    T-->>A: The first result"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Retries have limits, and not every failure is a retry"
@@ -124,6 +129,11 @@
     {
       "type": "para",
       "text": "A success resets the count, so scattered failures do not open it. The count is of consecutive failures for one agent, not of all failures in the run: an agent that is healthy must not be cut off by a failing neighbour. When the breaker is open, the task fails fast with the reason `circuit open`, and the rest of the plan goes on (page 2)."
+    },
+    {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "stateDiagram-v2\n    state \"Half-open\" as HalfOpen\n    [*] --> Closed\n    Closed --> Closed: a success resets the count\n    Closed --> Open: set number of failures in a row\n    Open --> Open: calls refused at once\n    Open --> HalfOpen: after a cooldown\n    HalfOpen --> Closed: the probe succeeds\n    HalfOpen --> Open: the probe fails"
     },
     {
       "type": "heading",
@@ -284,7 +294,7 @@
   "counts": {
     "headings": 9,
     "paras": 12,
-    "code": 0,
+    "code": 2,
     "tables": 1,
     "lists": 3,
     "images": 0,
@@ -295,5 +305,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "135a440f1cc6b40ce59d65d86fc9bf0ee87f57d7f035ea6ddd3167fe82035957"
+  "content_sha256": "55e07f47f957b12e58c52e705f77734926bf3989be90987ea901d0495e1d776c"
 }

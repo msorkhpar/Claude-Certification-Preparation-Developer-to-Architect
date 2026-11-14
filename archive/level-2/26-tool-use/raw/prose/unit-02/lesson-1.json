@@ -68,6 +68,11 @@
       "text": "Each `tool_use` block carries an `id`, a `name` and an `input`. Each result carries the `tool_use_id` of its call, an optional `content` (a string, or a list of text, image, document or `search_result` blocks), and an optional `is_error`. The assistant's reply goes back unchanged: its text and all its blocks become one `assistant` message, so that the next request has the whole conversation."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant App as Your code\n    participant API as Messages API\n    participant T as Your tools\n    App->>API: tools array and the user message\n    loop while stop_reason is tool_use\n        API-->>App: stop_reason tool_use, tool_use blocks (id, name, input)\n        App->>T: run each call\n        T-->>App: outputs\n        App->>API: original messages, assistant reply, user message of tool_result blocks\n    end\n    API-->>App: any other stop_reason ends the loop"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "The formatting rules that cause 400 errors"
@@ -351,7 +356,7 @@
   "counts": {
     "headings": 12,
     "paras": 17,
-    "code": 0,
+    "code": 1,
     "tables": 1,
     "lists": 4,
     "images": 0,
@@ -362,5 +367,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "d3c0184c455a72bc65101bb227556948910fa60aea599745f581ef17f0911e35"
+  "content_sha256": "d68bbe270cd2255d3af45eeccaf2cd9c553bade88cce57017642a2ff745d8e89"
 }

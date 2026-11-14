@@ -68,6 +68,11 @@
       "text": "The prompt engineering overview supplies the guard on step 1: the techniques assume \"Some ways to empirically test against those criteria\". The same page supplies the guard on the whole loop: \"Not every success criteria or failing eval is best solved by prompt engineering.\" If the failing dimension is latency or price, the cure may be a different model, a smaller output or a cache, and the loop's report is how you notice that."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    B[\"Baseline: run the whole set, keep the report\"] --> C[\"Make one change\"]\n    C --> R[\"Run the whole set\"]\n    R --> P[\"Compare per case\"]\n    P --> K{\"Every dimension holds, no unaccepted regression?\"}\n    K -->|yes| KEEP[\"Keep, the new report is the baseline\"]\n    K -->|no| REV[\"Revert\"]\n    KEEP --> C\n    REV --> C"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "A run, a gate and a comparison"
@@ -481,7 +486,7 @@
   "counts": {
     "headings": 13,
     "paras": 18,
-    "code": 0,
+    "code": 1,
     "tables": 2,
     "lists": 6,
     "images": 0,
@@ -492,5 +497,5 @@
     "disclosures": 2,
     "examples": 1
   },
-  "content_sha256": "d5d6608da22144de07ad4a0bbb29564855901882eb5f94cc6a16813a5441828e"
+  "content_sha256": "4264765511dc025a1546502cea7523efe8aae83ee6b235faec2d216ce3ca6d6b"
 }

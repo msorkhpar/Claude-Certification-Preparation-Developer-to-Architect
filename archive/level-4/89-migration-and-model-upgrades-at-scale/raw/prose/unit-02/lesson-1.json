@@ -95,6 +95,11 @@
       ]
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    S[\"Stage of 1, 5, 25 or 100 percent\"] --> A{\"Fewer requests than the minimum?\"}\n    A -->|yes| H[\"Hold at the stage\"]\n    A -->|no| B{\"Errors per thousand over the limit?\"}\n    B -->|yes| RB[\"Roll back to zero\"]\n    B -->|no| C{\"At 100 percent?\"}\n    C -->|yes| CO[\"complete\"]\n    C -->|no| AD[\"Advance one stage\"]"
+    },
+    {
       "type": "para",
       "text": "The health check is not only the error rate. Use the signals of module 87: refusals, tokens per answer, the share of answers a user flagged, the tail latency. And use the drift habit of that page: compare each with the baseline of the old model, and expect cost and token counts to differ by design."
     },
@@ -354,7 +359,7 @@
   "counts": {
     "headings": 12,
     "paras": 14,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 5,
     "images": 0,
@@ -365,5 +370,5 @@
     "disclosures": 2,
     "examples": 1
   },
-  "content_sha256": "063862f1191a05f84b7cd23a073e0818f91d7eafaf8ab4086b748a239841159d"
+  "content_sha256": "7af56d345d642d8044043b629fd465258787115b4687838f8cd3dd20d93926b6"
 }

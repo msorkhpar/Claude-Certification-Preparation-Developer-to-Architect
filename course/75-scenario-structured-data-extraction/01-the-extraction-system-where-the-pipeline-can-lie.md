@@ -42,6 +42,19 @@ A model call returns a record. The pipeline owns everything that is about a docu
 3. **The measurement.** The accuracy of a run is the share of all documents whose delivered record is correct. A document that failed is a document the customer sent. The figure on the validated ones alone is a different figure and is always at least as high.
 4. **The route.** Some documents need a person: the absent, the conflicting, the failed. Which kinds of document may go without one is decided by evidence for each kind, never by the average.
 
+```mermaid
+flowchart TD
+    A["Model returns a record"] --> B{"Checks"}
+    B -->|all passed, no conflict| V["valid"]
+    B -->|only an absent value or a flagged conflict| N["needs_review"]
+    B -->|error a second look can fix| R["One retry with document, record and errors"]
+    R --> C{"Error survived the retry?"}
+    C -->|no| B
+    C -->|yes| F["failed"]
+    N --> P["A person"]
+    F --> P
+```
+
 ### The example
 
 The example runs six documents through a scripted model. Two are typed, two are scanned and two are handwritten. The first typed invoice comes back right. The second comes back with a total that does not match its lines, is retried with the error attached, and is right the second time. The first scanned invoice has no vendor, and the model invents one that the document never names; the retry returns null for the vendor, which is honest, and the document is valid. The second scanned invoice has no total anywhere, so there is nothing to retry and it goes to a person. The first handwritten form carries a total that disagrees with its lines, and the model flags the conflict, so it goes to a person without a retry. The last form keeps an invented vendor on the retry and fails after two attempts. The run ends with two figures and a line for each kind.

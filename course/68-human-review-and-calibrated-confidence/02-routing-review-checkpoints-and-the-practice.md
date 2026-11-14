@@ -30,6 +30,20 @@ When reviewers can read fewer items than are flagged, the order decides what is 
 
 Raising the threshold to shrink the queue throws away the calibration that made the threshold mean something. Reviewing only what the staff can read and accepting the rest unseen does the same from the other side. Keep the threshold where the labelled data put it, queue what falls below it, and report the backlog.
 
+```mermaid
+flowchart TD
+    X["Extraction"] --> C{"Conflicting or ambiguous sources?"}
+    C -->|yes| Q["Review queue"]
+    C -->|no| L{"Confidence below the calibrated threshold?"}
+    L -->|yes| Q
+    L -->|no| A["Accepted automatically"]
+    A --> S["Sampled by stratum"]
+    Q --> O["Conflicts first, then lowest confidence"]
+    O --> K{"Within the day's capacity?"}
+    K -->|yes| RV["Reviewed"]
+    K -->|no| BL["Backlog, kept and shown"]
+```
+
 ### A checkpoint for what cannot be undone
 
 Confidence is a statement about being right, and it does nothing about a deleted record, a sent payment or a closed account. For such actions the design puts a checkpoint in code that does not read the confidence at all: an action on the irreversible list always needs a person, and so does any action above a monetary or size limit. The practice's `checkpoint` returns `human` for the three irreversible actions at any amount, and for anything above its limit.

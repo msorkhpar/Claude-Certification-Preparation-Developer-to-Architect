@@ -79,6 +79,11 @@
       "text": "The pattern \"allows servers to request additional information without maintaining any server-side state\". The retry is a new request with a new JSON-RPC `id`. That is the point of the design: \"the requests in each step are completely independent: the server processing the retry does not need any information beyond what is directly present in the retry request.\" Whatever the server needs to remember travels in `requestState`."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant C as Client\n    participant S as Server\n    C->>S: tools/call with its parameters\n    S-->>C: input-required result, inputRequests and requestState\n    Note over C: Gather the answers, from the user or elsewhere\n    C->>S: retry tools/call, new id, inputResponses, requestState echoed exactly\n    S-->>C: final result\n    Note over S: Needs nothing beyond the retry request"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "What the server owes the state"
@@ -316,7 +321,7 @@
   "counts": {
     "headings": 11,
     "paras": 18,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 5,
     "images": 0,
@@ -327,5 +332,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "7a5a4c5265846344b1cec5748ce952080861395b74587cfbee7423360838e33a"
+  "content_sha256": "1e81c5713670dabec07e2b4518d36f159a33ef923187c1e4bb4426f143332e1d"
 }

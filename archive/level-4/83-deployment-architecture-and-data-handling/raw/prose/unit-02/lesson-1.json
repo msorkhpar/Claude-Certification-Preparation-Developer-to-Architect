@@ -71,6 +71,11 @@
       ]
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant U as User\n    participant L as Layer before the call\n    participant V as Local vault\n    participant M as Model\n    U->>L: Text with identifiers\n    L->>V: Keep the map from token to value\n    L->>M: Tokenised text only\n    M-->>L: Reply that uses the tokens\n    L->>V: Look up each token\n    L-->>U: Reply with the real values restored"
+    },
+    {
       "type": "para",
       "text": "The example prints this in order: the text sent has `<EMAIL_1>` twice and `<MEMBER_1>` once, the reply uses the tokens, and the restored text has the real address and member number. Notice what this does and does not do. The model can still do its job (confirm the contact before reopening a claim). It cannot leak what it never had. And the control is auditable: a reviewer can test the layer with sample text, which cannot be done for an instruction."
     },
@@ -339,7 +344,7 @@
   "counts": {
     "headings": 12,
     "paras": 13,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 4,
     "images": 0,
@@ -350,5 +355,5 @@
     "disclosures": 2,
     "examples": 1
   },
-  "content_sha256": "c5ce8ad8003f82c279693643dc7dc87543a21fdb6a9b6c24a52e8aa2ddb57a95"
+  "content_sha256": "06fe51fa0341731982bf4dcafd8348d2912411f95a1f02c3ca23faaec80820fa"
 }

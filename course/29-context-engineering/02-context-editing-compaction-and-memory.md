@@ -71,6 +71,16 @@ mistakes raise no error: summarized messages left after the block are sent to Cl
 out gives Claude no summary. A summary is produced only when the call ends normally with text; otherwise the response is a 200 with
 empty content, so check `stop_reason` first. A non-blank `instructions` string replaces the default summarization prompt.
 
+```mermaid
+sequenceDiagram
+    participant App as Your code
+    participant API as Messages API
+    App->>API: the conversation, compaction type summarize
+    API-->>App: one compaction block and no reply, stop_reason compaction
+    Note over App: Remove the summarized messages, put the block first
+    App->>API: next request, the block first, exactly as it came, then newer messages
+```
+
 **At a token threshold.** One parameter on ordinary requests: an edit of type `compact_20260112` in `context_management`, with a
 `trigger` of `input_tokens` (default 150,000, minimum 50,000), an optional `instructions`, and `pause_after_compaction`. When
 the threshold is reached the response carries a `compaction` block, and you "must pass the `compaction` block back to the API on

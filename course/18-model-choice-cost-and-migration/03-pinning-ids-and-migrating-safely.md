@@ -78,6 +78,19 @@ carrying settings over from an earlier model".
    rollback is a configuration change. Watch the 400 rate first: it is the signal of a rejected parameter.
 5. **Retire the old path** only after the old id has no traffic and its retirement date is not close.
 
+```mermaid
+flowchart TD
+    A["inventory usage by key and model"] --> B["read the migration guide, remove what it rejects"]
+    B --> C["evaluate on your own cases"]
+    C --> D["send a small share to the new model"]
+    D --> E{"quality, latency, cost and 400 rate fine?"}
+    E -->|no| R["roll back by changing the configured id"]
+    E -->|yes| F{"old id still has traffic?"}
+    F -->|yes| G["raise the share"]
+    G --> E
+    F -->|no| H["retire the old path"]
+```
+
 ## Traps
 
 1. **Swapping the id only.** The new model may reject a setting the old one took, and every request then fails. Change the

@@ -69,6 +69,11 @@
       "text": "Stages 1 to 5 can be tested without a model. The practice at the end of the next page builds them and grades them on recall."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    D[\"Documents\"] --> C[\"Chunk into passages\"]\n    C --> K[\"Keyword index\"]\n    C --> E[\"Embedding index\"]\n    K --> RK[\"Ranking by keywords\"]\n    E --> RE[\"Ranking by embeddings\"]\n    RK --> M[\"Merge into one ranking\"]\n    RE --> M\n    M -->|optional| R[\"Rerank the best few\"]\n    M --> G[\"Generate: chunks in the prompt, ask for citations\"]\n    R --> G"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Chunking"
@@ -233,7 +238,7 @@
   "counts": {
     "headings": 11,
     "paras": 17,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 4,
     "images": 0,
@@ -243,5 +248,5 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "585d8b68ba3238a327f75136f1684f4df551cd781388a94b315265ea8063814b"
+  "content_sha256": "50c1735705c9c1ee57cc8ce080a4ab989cdc3ef41565134adb4ef7bcda122229"
 }

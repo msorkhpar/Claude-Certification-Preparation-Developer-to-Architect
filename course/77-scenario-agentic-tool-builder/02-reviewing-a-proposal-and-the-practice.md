@@ -17,6 +17,17 @@ Page 1 divided the work: design, containment, permission, validation and audit. 
 
 The gate has four outcomes and one rule about their order: the most serious wins. A proposal with a refusal is refused, whatever else is true of it. Otherwise a proposal with findings is sent back for revision. Otherwise a proposal that declares a permission needing approval is approved behind a gate. Only a proposal with none of these is approved outright.
 
+```mermaid
+flowchart TD
+    P["Proposal"] --> A{"Any refusal?"}
+    A -->|yes| X["Refused"]
+    A -->|no| B{"Any findings?"}
+    B -->|yes| Y["Sent back for revision"]
+    B -->|no| C{"Declares a permission that needs approval?"}
+    C -->|yes| Z["approve_with_gate"]
+    C -->|no| W["Approved outright"]
+```
+
 A refusal comes before a revision, because a fix cannot make a forbidden call acceptable and a revision would invite the agent to try. A revision comes before a gate, because a person should be asked to approve a proposal that is worth reading and not one with a name that does not parse. The report keeps the findings of a refused proposal, so the agent, and the log, can see everything that was wrong and not only the first thing.
 
 ### What is refused, and what is only sent back

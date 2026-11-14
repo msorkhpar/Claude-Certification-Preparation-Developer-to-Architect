@@ -104,6 +104,11 @@
       "text": "The thresholds are a design choice, and the table says so: \"mostly valid\" in the guide has no number. What matters is that the rule is written down and testable. Half is a reasonable place to put the boundary, because a notice can correct a few files but cannot correct most of them, and new files do not count toward it, since they are not things the session believes. A session idle for a week is treated as stale whatever the digests say, because what the agent decided around the code (the plan, the open questions) may have moved on."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A{\"Saved session?\"} -->|no| F[\"Fresh\"]\n    A -->|yes| G[\"Recompute the digests and compare\"]\n    G --> B{\"Over half changed or gone, or idle over 7 days?\"}\n    B -->|yes| FS[\"Fresh, with a summary\"]\n    B -->|no| C{\"Any file changed, gone or new?\"}\n    C -->|yes| RN[\"Resume, with a notice\"]\n    C -->|no| R[\"Resume\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Tell the session what changed"
@@ -346,7 +351,7 @@
   "counts": {
     "headings": 15,
     "paras": 22,
-    "code": 2,
+    "code": 3,
     "tables": 1,
     "lists": 3,
     "images": 0,
@@ -356,5 +361,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "22830ec32e649c2ff86626f683d75df4d38720c90a04a0111d2188579cc4dcb7"
+  "content_sha256": "e0f33cbfcb2173e27462ace20e036847f8024f9ada4bdbf30cdc1d215375c27e"
 }

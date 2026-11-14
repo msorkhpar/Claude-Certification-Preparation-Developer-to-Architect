@@ -174,6 +174,11 @@
       "text": "Each refusal is a result that the agent can use (module 53): it says what is needed and who can give it, so the agent can pass the case on. A control the model could talk its way around is not a control. A note in the tool's description that asks for care is an instruction, a field in which the model states its reason is a claim by the model, not a check, and the place of a tool in the list is not a limit on what it can do. The hook of module 49 is the other place for the same logic: a PreToolUse hook that denies the call, with a reason, does the same job before the tool runs."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A[\"Tool call\"] --> P{\"Tool named by the policy?\"}\n    P -->|no| R1[\"Refused, default deny\"]\n    P -->|yes| N{\"Amount a valid number?\"}\n    N -->|no| R2[\"Refused, bad amount\"]\n    N -->|yes| O{\"For the verified customer?\"}\n    O -->|no| R3[\"Refused\"]\n    O -->|yes| C{\"Above the cap?\"}\n    C -->|yes| R4[\"Refused, sent to a person\"]\n    C -->|no| I{\"Irreversible?\"}\n    I -->|no| OK[\"Allowed\"]\n    I -->|yes| AP{\"Approved?\"}\n    AP -->|yes| OK\n    AP -->|no| R5[\"Needs an approval\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "The example"
@@ -425,7 +430,7 @@
   "counts": {
     "headings": 12,
     "paras": 20,
-    "code": 0,
+    "code": 1,
     "tables": 2,
     "lists": 5,
     "images": 0,
@@ -436,5 +441,5 @@
     "disclosures": 2,
     "examples": 1
   },
-  "content_sha256": "9ae5f0e9918baaf3cbcfd093dede79a9152e4f29ca6ce2f3d719e2a6dcb1a272"
+  "content_sha256": "254ee4ada85ef480bd865b5dcd3f806e09e401696fb739545c6fc4bb425c590e"
 }

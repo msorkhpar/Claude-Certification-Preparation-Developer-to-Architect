@@ -47,6 +47,18 @@ reads the cache entry, not from the end of its response." A four-minute stream l
 cache entry "only becomes available after the first response begins", so parallel requests that must share a cache follow the page's
 advice: "If you need cache hits for parallel requests, wait for the first response before sending subsequent requests."
 
+```mermaid
+sequenceDiagram
+    participant App as your code
+    participant API as Messages API
+    App->>API: request 1 with the prefix
+    Note over API: request 1 writes the entry
+    API-->>App: first response begins
+    Note over API: entry now available
+    App->>API: request 2 with the same prefix
+    API-->>App: reply with a cache read
+```
+
 The one-hour lifetime is requested with `{"type": "ephemeral", "ttl": "1h"}`. The page recommends it when prompts are used "less
 frequently than 5 minutes, but more frequently than every hour", for example a chat where the user may not reply within five minutes.
 It also notes that cache hits "are not deducted against your rate limit". "You can use both 1-hour and 5-minute cache controls in the same request", with one rule:
@@ -60,6 +72,16 @@ for an entry an earlier request wrote. It checks at most 20 positions, the break
 more than 20 blocks between two requests walks past its last write and misses. The remedy is a second breakpoint near the old
 position: "You can define up to 4 cache breakpoints". On the Claude API a run of consecutive `tool_use` blocks counts as one position, and so
 does a run of consecutive `tool_result` blocks.
+
+```mermaid
+flowchart TD
+    A["check the hash at the breakpoint"] --> B{"entry an earlier request wrote?"}
+    B -->|yes| H["cache hit"]
+    B -->|no| C{"20 positions checked?"}
+    C -->|no| D["walk back one block"]
+    D --> B
+    C -->|yes| M["cache miss"]
+```
 
 ### What empties a cache
 

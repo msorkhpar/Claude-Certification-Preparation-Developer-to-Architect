@@ -41,6 +41,18 @@ The exam names three kinds of fault: prompt failure, hallucination and model mis
 3. **Is the reply in the right shape?** Format and instruction failures are cheap to see and cheap to fix in the prompt.
 4. **Does the case fail on a stronger model too?** If it does, the task or the prompt is at fault and not the model. If it passes only on the stronger model, the model is a mismatch for that task, and the decision is a price decision (below).
 
+```mermaid
+flowchart TD
+    A{"Was the evidence found?"} -->|no| R["Retrieval fault, wording cannot fix it"]
+    A -->|yes| B{"Answer supported by the evidence?"}
+    B -->|no| G["Grounding fault"]
+    B -->|yes| C{"Reply in the right shape?"}
+    C -->|no| P["Format or instruction fault, fix the prompt"]
+    C -->|yes| D{"Fails on a stronger model too?"}
+    D -->|yes| T["Task or prompt at fault"]
+    D -->|no| M["Model mismatch, a price decision"]
+```
+
 The order puts the model last because a model change is the most expensive fix and the one most often wrongly blamed. A larger model does not know a document it was never shown. Sampling settings change how an answer is worded and not what evidence it was given. Examples teach a format; they do not supply a missing fact. The example runs five invented cases through the order, one for each answer.
 
 ### Optimising tokens, latency and cost without breaking quality

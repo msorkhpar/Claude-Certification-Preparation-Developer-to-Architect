@@ -136,6 +136,11 @@
       "text": "The gate does not repair the call. It would be tempting to run the missing verification itself, but the customer's identity code is something the model must obtain from the customer, so the gate refuses and says what is missing. That keeps the conversation honest and keeps the gate small. In the example below, the model's recovery after the refusal takes three more calls and no extra code: it asks for the verification, looks up the order and tries the refund again."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant M as Model\n    participant G as Gate\n    participant B as Backend\n    M->>G: process_refund\n    Note over G: no verification in this session\n    G-->>M: is_error, BLOCKED identity_required\n    M->>G: verify_identity\n    G->>B: verify_identity\n    B-->>G: result\n    G-->>M: result\n    M->>G: lookup_order\n    G->>B: lookup_order\n    B-->>G: order\n    G-->>M: order\n    M->>G: process_refund\n    G->>B: process_refund\n    B-->>G: refund_id\n    G-->>M: result"
+    },
+    {
       "type": "para",
       "text": "The refusal must also not leak what it protects. A lookup of someone else's order says only that the order does not belong to the verified customer. It does not say whose it is."
     },
@@ -351,7 +356,7 @@
   "counts": {
     "headings": 11,
     "paras": 17,
-    "code": 0,
+    "code": 1,
     "tables": 2,
     "lists": 4,
     "images": 0,
@@ -362,5 +367,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "677ef6e88ff61e89886c88c2da00732fe4164b9a8e28e9e255031fed65b37b01"
+  "content_sha256": "84bbbc3b586f11448700a3731cd8fb6506cdc1ebd659a5c6b62605cb19c2d2da"
 }

@@ -120,6 +120,11 @@
       "text": "The loop reads `stop_reason` before the body. The documentation's table gives the reaction to each value, and two of them end the loop. A reply that reached the `max_tokens` limit has the action \"Raise `max_tokens` or continue the response\", and a `refusal` has the action \"Read `stop_details` and retry on a fallback model.\" Asking again with an error list cannot fix either: a cut-off reply needs a larger limit, and a refusal is a decision, not a malformed answer. In the practice the statuses are `truncated` and `refused`, with no further call: this course's loop stops and reports, and the documented fallback model is a separate request, not a repeat of the same one. A reply that ends with `end_turn` goes on to the parse."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A[\"Call the model\"] --> B{\"stop_reason\"}\n    B -->|max_tokens| T[\"truncated, no further call\"]\n    B -->|refusal| R[\"refused, no further call\"]\n    B -->|end_turn| P[\"Parse, then validate(schema, value)\"]\n    P --> Q{\"Parse error or problems?\"}\n    Q -->|none| OK[\"Accept the value\"]\n    Q -->|some| M{\"max_attempts calls made?\"}\n    M -->|yes| F[\"failed, with the last problems\"]\n    M -->|no| RE[\"Ask again: the reply as assistant, each problem with its path as user\"]\n    RE --> A"
+    },
+    {
       "type": "para",
       "text": "For tool calls the same discipline gives a matching rule. A tool call whose input is invalid can be answered with a `tool_result` that has `is_error` set to `true`; the documentation says Claude \"will retry 2-3 times with corrections before apologizing to the user\", and that \"To eliminate invalid tool calls entirely, use strict tool use\". The next module builds this loop."
     },
@@ -353,7 +358,7 @@
   "counts": {
     "headings": 13,
     "paras": 17,
-    "code": 0,
+    "code": 1,
     "tables": 1,
     "lists": 5,
     "images": 0,
@@ -363,5 +368,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "9e39a74413293925f173dcda093e42571e52212452f596ab2c6145e3a9173273"
+  "content_sha256": "7f88ac63f22153ff60eebd6b29ad9d1f6177cf3c827508ca879a753824257e7b"
 }

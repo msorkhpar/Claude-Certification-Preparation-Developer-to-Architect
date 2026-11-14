@@ -126,6 +126,11 @@
       "text": "A retry policy has a budget, and it is part of the latency requirement of module 12. Four attempts with the delays above spend about 3.5 seconds on waiting alone, before counting how long each failed attempt took. Set two numbers from the feature's budget: **how many attempts**, and **how long in total**. A user-facing call may allow one retry and a deadline of two seconds; a nightly job may allow six attempts and a minute. When the budget is spent, fail with the information a person needs: the last status, the type, the number of attempts and the request id."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A[\"send the request\"] --> B{\"success?\"}\n    B -->|yes| C[\"return the reply\"]\n    B -->|no| D{\"retryable?\"}\n    D -->|\"400, 401, 403, 404, 413 or a spend-cap 429\"| G[\"fail with last status, type, attempts and request id\"]\n    D -->|\"connection lost, 408, 409, rate-limit 429, 500, 504, 529\"| E{\"attempts and time left?\"}\n    E -->|no| G\n    E -->|yes| F[\"wait the larger of back-off and retry-after\"]\n    F --> A"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Idempotency: when is a retry safe"
@@ -375,7 +380,7 @@
   "counts": {
     "headings": 12,
     "paras": 19,
-    "code": 0,
+    "code": 1,
     "tables": 2,
     "lists": 5,
     "images": 0,
@@ -386,5 +391,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "66bf9676d2a131666136ba3b1c63f622548b071dc23b9742173fd7a4256713ea"
+  "content_sha256": "70be1df2969cfd865d7610e6f1ad37b93d669e8895077fef7dd9ea3380b4c9b4"
 }

@@ -53,6 +53,22 @@ Page 1 of module 48 put the checks of an agent in the code that runs its tools. 
 6. **The order was looked up** before a refund (`order_not_checked`), and **the amount is within the limit**; above it the refusal is `needs_human`, which tells the model that the next step is to escalate.
 7. **The backend call**, and a result with a code, a flag for whether a retry can help, and a sentence. A retryable error (a timeout of the order service) is retried once by the loop, which is the loop's business, not the model's. A permanent error is never retried.
 
+```mermaid
+flowchart TD
+    A["Call the model asks for"] --> B{"escalate_to_human?"}
+    B -->|yes| H["Answered at once"]
+    B -->|no| C{"Same call three times in a row?"}
+    C -->|yes| S["Stop and escalate as stalled"]
+    C -->|no| D{"Needs a customer, none verified?"}
+    D -->|yes| R1["identity_required"]
+    D -->|no| E{"Order belongs to someone else?"}
+    E -->|yes| R2["order_not_owned"]
+    E -->|no| F{"Refund checks"}
+    F -->|order not looked up| R3["order_not_checked"]
+    F -->|above the limit| R4["needs_human"]
+    F -->|pass| G["Backend call, a retryable error retried once"]
+```
+
 Two properties hold the layers together. First, the state belongs to the case: the example builds a new desk for each conversation, so a customer's identity, the orders looked up and the refunds made cannot reach another case, which is the scope isolation that module 65 (Escalation and ambiguity) teaches against cross-customer contamination, and the reason a long-lived shared state is a defect. Second, the hand-off record is built from the desk's own state. It carries the trigger, the model's reason as one field, whether identity was verified, the orders checked, the refunds made and the refusals, so a person does not read the transcript to find out what happened (module 48, page 2).
 
 What stays outside the dispatcher is judgement. Whether a damaged-item claim deserves a refund, how to word a refusal kindly, and whether a request falls into a gap the policy does not cover are decisions for the model, guided by criteria and examples in the prompt, and above the limit for a person. The line between the two is the one module 48 drew: a rule with a right answer goes in code, and a judgement goes to the model.

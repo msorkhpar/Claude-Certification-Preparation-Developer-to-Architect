@@ -110,6 +110,11 @@
       "text": "Two of the refusals close the desk for the model: a refund over the limit, and a lock after repeated failed identity checks. The practice keeps one tool outside the gate, `escalate`, which is always allowed. This is a design rule for any gated agent: **the path to a person must not depend on a prerequisite that may be the thing that failed**. An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit (module 45). The lock matters for a second reason: without it, a person who is guessing at an identity code, or a model that is being led to guess, gets unlimited tries. Three failures in a row lock the desk, and a successful check resets the count, so ordinary typing mistakes do not lock anyone out."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A[\"process_refund\"] --> L{\"Desk locked?\"}\n    L -->|yes| LK[\"locked\"]\n    L -->|no| V{\"Identity verified?\"}\n    V -->|no| IR[\"identity_required\"]\n    V -->|yes| O{\"Order looked up?\"}\n    O -->|no| OC[\"order_not_checked\"]\n    O -->|yes| M{\"Positive whole number?\"}\n    M -->|no| BA[\"bad_amount\"]\n    M -->|yes| X{\"Within what is left on the order?\"}\n    X -->|no| EO[\"exceeds_order\"]\n    X -->|yes| H{\"Below the limit?\"}\n    H -->|no| NH[\"needs_human\"]\n    H -->|yes| B[\"Backend refunds\"]\n    LK --> ESC[\"escalate, always allowed\"]\n    NH --> ESC"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Several concerns in one message"
@@ -339,7 +344,7 @@
   "counts": {
     "headings": 13,
     "paras": 19,
-    "code": 1,
+    "code": 2,
     "tables": 1,
     "lists": 5,
     "images": 0,
@@ -349,5 +354,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "60cf93ef24f0ae586f8e85570de6c5ad211e0497c412023b4350854ce81b8d13"
+  "content_sha256": "a9d0669f570ab52e81489a96a2fc679fe0d246e84f78732652499e46999b2967"
 }

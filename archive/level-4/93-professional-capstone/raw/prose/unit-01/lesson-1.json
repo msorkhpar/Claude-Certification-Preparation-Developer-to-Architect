@@ -105,6 +105,11 @@
       ]
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    Q[\"Question\"] --> T[\"Tokenise identifiers\"]\n    T --> R[\"Remove unreadable documents, then rank\"]\n    R -->|shares nothing with a readable document| NE[\"No evidence\"]\n    R --> V{\"Chunk from the current version?\"}\n    V -->|no| HS[\"Held as stale evidence\"]\n    V -->|yes| S{\"Quote in the chunk?\"}\n    S -->|no| HU[\"Held as unsupported\"]\n    S -->|yes| RT[\"Route to a person, out or review\"]\n    HS --> TR[\"Trace with ids, version, outcome and size\"]\n    HU --> TR\n    RT --> TR"
+    },
+    {
       "type": "para",
       "text": "The example runs five requests. The first is answered. The second meets a stale index and is held. The third asks for a refund and goes to a person. The fourth asks about a partner commission, a document the reader may not read, and gets no evidence. The fifth carries an email address, which the output shows as a token, and is answered from the policy about reporting a claim. Three traces are kept: the held ones and the one that went to a person."
     },
@@ -277,7 +282,7 @@
   "counts": {
     "headings": 11,
     "paras": 10,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 4,
     "images": 0,
@@ -288,5 +293,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "0eb4edfd97b5cf1230743f9972746019d55ad6ccd090f73bc944a23e8beb7bb9"
+  "content_sha256": "a231160d7ee3b22c910ccf248b767f06adb522343dfdcb2243d570a371276bc9"
 }

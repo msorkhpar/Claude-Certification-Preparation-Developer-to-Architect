@@ -32,6 +32,19 @@ The fourth stage is the one most proposals omit. A pipeline that takes input, pr
 
 Module 79 gave the ladder in prose: one call, an augmented call, a workflow, an agent, a team. The example turns it into a rule that is short enough to read in a minute. Three questions decide the rung. Is the task one step? Then it is a call, augmented if it needs outside facts. Is the path known? Then it is a workflow, and it costs one chat per step. Is the path open? Then it is an agent, and it becomes a team only when the parts are independent and the value pays for the team.
 
+```mermaid
+flowchart TD
+    T["Task"] --> A{"One step?"}
+    A -->|yes| B{"Needs outside facts?"}
+    B -->|yes| AC["augmented call"]
+    B -->|no| PC["plain call"]
+    A -->|no| C{"Path known?"}
+    C -->|yes| W["workflow"]
+    C -->|no| D{"Independent parts and value pays?"}
+    D -->|yes| M["multi-agent"]
+    D -->|no| G["agent"]
+```
+
 The price uses the multipliers from the article: a chat is the unit, an agent costs about 4 units and a team about 15. For a team to be worth building, the task's value has to be at least 15 chats. The last task in the example shows the failure the rule prevents: a trivia round-up has independent parts, so it looks like a fit for a team, but its value is below what even one agent costs, and so below the price of a team, and the output says `pays: False`. The answer is not a cheaper team. It is to ask whether the task is worth automating at all.
 
 ### When a team earns its cost

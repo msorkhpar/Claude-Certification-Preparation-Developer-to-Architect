@@ -86,6 +86,16 @@ exactly that. Each worker loops: take the next item from the source, run the wor
 most `limit` workers, so at most `limit` items are in flight and at most `limit` items have been taken from the
 source.
 
+```mermaid
+flowchart TD
+    P["at most limit workers"] --> A{"next item in the source?"}
+    A -->|yes| B["take one item"]
+    B --> C["run the work"]
+    C --> D["store the result"]
+    D --> A
+    A -->|no| E["the worker ends"]
+```
+
 ## The practice: a bounded worker pool
 
 You write `map_bounded(items, work, limit)`: a function that runs work over an input with at most `limit` calls in flight,

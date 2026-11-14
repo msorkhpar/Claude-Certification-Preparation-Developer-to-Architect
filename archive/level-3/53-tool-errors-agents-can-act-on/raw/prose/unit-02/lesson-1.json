@@ -127,6 +127,11 @@
       "text": "What the agent does with `outcome_unknown` is ordinary: it calls a read tool that can tell, such as a lookup of the refunds on the order. If the refund is there, the work is done and the agent reports success. If it is not, the agent can repeat the call (with a key, if there is one) or escalate. The product's own behaviour after a crash is the same shape: the call is marked as cut off, and Claude \"is told to check whether it took effect before running it again\". The rule travels: wherever a write may have happened, the next step is a read."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A[\"Call times out after the request left\"] --> S{\"A read, idempotent, or carries a key?\"}\n    S -->|yes| RT[\"Retry\"]\n    S -->|no| U[\"outcome_unknown, next action verify_first\"]\n    U --> RD[\"A read tool checks the current state\"]\n    RD --> Q{\"Did it take effect?\"}\n    Q -->|yes| OK[\"Report success\"]\n    Q -->|no| AG[\"Repeat the call, or escalate\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Bounded retries, waits and the service's own advice"
@@ -327,7 +332,7 @@
   "counts": {
     "headings": 12,
     "paras": 19,
-    "code": 0,
+    "code": 1,
     "tables": 1,
     "lists": 5,
     "images": 0,
@@ -337,5 +342,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "9b36b2bc94407734d0333c3f63e4eeedc0723f52cfa8c2c5bc1adb1035e7b491"
+  "content_sha256": "8e6ebdb538bcfc62ec9a02475d4afddd3b17a92ab99b64ecf17197eca658f19a"
 }

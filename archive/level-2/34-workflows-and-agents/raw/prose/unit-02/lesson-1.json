@@ -57,6 +57,11 @@
       "text": "Three things go wrong in the plain version, and the practice grades them. The plan arrives as model text, so the program reads it defensively: it takes what lies between the first `[` and the last `]`, parses it, keeps the string items, drops empty ones and repeats and caps the count. When nothing is usable, the plan falls back to the task itself, and the result says that it did. A worker can fail, and one failure must not stop the others: the subtask is marked failed and the rest run. And when every worker failed, nothing is combined, because a synthesis over no results is a made-up answer. A partial result is reported as partial."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    T[\"Task\"] --> O[\"Orchestrator writes a plan\"]\n    O --> P[\"Read the plan defensively\"]\n    P --> U{\"Any usable subtasks?\"}\n    U -->|no| FB[\"Fall back to the task itself\"]\n    U -->|yes| W[\"Workers run the subtasks\"]\n    FB --> W\n    W --> F{\"Did every worker fail?\"}\n    F -->|yes| NC[\"Nothing is combined\"]\n    F -->|no| SY[\"Synthesize, partial if some failed\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Evaluator-optimizer"
@@ -68,6 +73,11 @@
     {
       "type": "para",
       "text": "The loop needs an exit, or two. A score at or above a threshold accepts the draft. Otherwise the loop ends after a maximum number of rounds, and the best draft wins, not the last one. When two drafts tie on score, the earliest of them wins, because a late revision can be worse. The judge's reply is model text too. If it cannot be read, the sound reading is a score of zero with a message that says so, and the loop goes on: treating an unreadable reply as a pass would accept an unchecked draft. If the writer itself throws, the loop stops at once and reports the best draft so far, which may be none."
+    },
+    {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    G[\"Writer produces a draft\"] --> J[\"Judge scores it\"]\n    G -->|writer throws| X[\"Stop, report the best draft so far\"]\n    J --> R{\"Judge reply readable?\"}\n    R -->|no| Z[\"Score 0, with a message\"]\n    R -->|yes| S{\"Score at or above threshold?\"}\n    S -->|yes| A[\"Accept the draft\"]\n    S -->|no| M{\"Maximum rounds reached?\"}\n    Z --> M\n    M -->|no| G\n    M -->|yes| B[\"Best draft wins, earliest on a tie\"]"
     },
     {
       "type": "heading",
@@ -286,7 +296,7 @@
   "counts": {
     "headings": 12,
     "paras": 15,
-    "code": 0,
+    "code": 2,
     "tables": 0,
     "lists": 3,
     "images": 0,
@@ -296,5 +306,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "6a91d85bffefee04ce3dacee1062a27ec011c41eed21761612a88ee2ca3da5fe"
+  "content_sha256": "c37c287e366e93516324b90627ee1631d1bdda7794ea2c547adc27f1c927522e"
 }

@@ -110,6 +110,11 @@
       "text": "Claude then sees which actions ran, which failed and which were skipped, and replans. Leaving a block unanswered is an `invalid_request_error`, \"so an agent loop that reads only the first block fails on its next call\". If your application asks a person to confirm risky actions, make that check before each block runs, because a batch can finish a multistep action inside one turn."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A[\"One reply, several tool_use blocks\"] --> B[\"Take the next block, in order\"]\n    B --> CF[\"Confirmation check, if your app asks a person\"]\n    CF --> X[\"Run the action\"]\n    X --> Y{\"Succeeded?\"}\n    Y -->|yes| N[\"Normal result\"]\n    N --> Z{\"More blocks?\"}\n    Z -->|yes| B\n    Y -->|no| ER[\"is_error true, with a description\"]\n    ER --> SK[\"Every later block: is_error true, Not executed text\"]\n    Z -->|no| S[\"One user message, one tool_result per block\"]\n    SK --> S\n    S --> RP[\"Claude sees what ran and replans\"]"
+    },
+    {
       "type": "heading",
       "level": 3,
       "text": "Screenshots must fit, and coordinates are theirs"
@@ -295,7 +300,7 @@
   "counts": {
     "headings": 9,
     "paras": 17,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 4,
     "images": 0,
@@ -306,5 +311,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "bc7004c942cf2de5ab6cb0bbfd4a2510a77d676300792b8bb4c600fb62871aff"
+  "content_sha256": "4ffc1892f18a654dd481cd634e4157547e58f951f72e75feca83a840b7ee8112"
 }

@@ -42,6 +42,23 @@ What the specification asks of the parties, in the order a connection meets them
 - **Every request.** The token goes in the `Authorization` header of every HTTP request, and "Access tokens MUST NOT be included in the URI query string".
 - **Audience.** "MCP servers MUST validate that access tokens were issued specifically for them as the intended audience". An invalid or expired token gets `401`.
 
+```mermaid
+sequenceDiagram
+    participant C as MCP client
+    participant S as MCP server
+    participant A as Authorization server
+    C->>S: request
+    S-->>C: 401 challenge, may carry scope
+    C->>S: read Protected Resource Metadata
+    S-->>C: which authorization server to use
+    C->>A: authorization request, resource and PKCE S256
+    C->>A: token request, resource
+    A-->>C: access token
+    C->>S: request, token in the Authorization header
+    S->>S: validate the token's audience
+    S-->>C: result, or 401 if invalid or expired
+```
+
 The last item has a name, token passthrough, and the security guide says "Token passthrough is explicitly forbidden in the authorization specification". A server that accepts tokens issued for another service, or forwards the client's token to a downstream API, breaks the security boundary, and it can become a confused deputy: the downstream API trusts the call as though the MCP server had validated it. The rule is short: "MCP servers MUST NOT accept or transit any other tokens." If the server needs to call a downstream API, it uses a token of its own for that API.
 
 Scope design is the last control. A server that lists every scope in `scopes_supported`, and a client that requests them all, gives a stolen token a wide reach and users a consent dialog nobody reads. The guidance is a progressive, least-privilege model: a small initial set of low-risk read operations, and more scope by a targeted challenge when a privileged operation is first attempted.

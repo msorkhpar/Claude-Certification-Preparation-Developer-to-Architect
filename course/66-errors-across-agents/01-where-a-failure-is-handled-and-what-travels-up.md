@@ -36,6 +36,20 @@ A report of a failure that a coordinator can act on has four parts:
 
 "Search unavailable" has none of them. The example's generic report loses the one item the timed-out source had already found and cannot say which sources to retry and which to give up on.
 
+```mermaid
+sequenceDiagram
+    participant C as Coordinator
+    participant S as Subagent
+    participant Src as Source
+    C->>S: brief
+    S->>Src: query
+    Src-->>S: timeout
+    S->>Src: retry, second attempt
+    Src-->>S: timeout
+    Note over S: tool calls and errors stay inside
+    S-->>C: final report with failure type, query, partial results, alternatives
+```
+
 ### An empty result is an answer
 
 A search that runs and finds nothing has succeeded. "No filings on this topic" is a finding, and a coordinator that is told so can write it into the report. The two ways to get this wrong are mirror images. Treat the empty result as a failure, and the system retries a search that already worked and may mark a covered topic as a gap. Treat a failure as an empty result, and the report states that nothing exists where in truth nobody looked. The second is the more harmful, because it is invisible: it is the silent suppression the guide names. The distinction is a field, not a sentence: `status: empty` and `status: failed` are different values with different handling.

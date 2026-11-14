@@ -52,6 +52,19 @@ A file that changed on disk since the last read can still be edited when `old_st
 
 The order of remedies is the order of risk. A longer anchor changes only the occurrence you meant. `replace_all` changes every occurrence, which is right for a rename and wrong when only one of three similar lines should change. And Read plus Write, which is the guide's fallback, changes the file by rewriting all of it: the model writes every line again, a long file costs the tokens twice, and any line it drops or alters by accident is lost without a diff to show it. Use it only when no unique text exists, for example when a file is made of repeated blocks that differ only by position.
 
+```mermaid
+flowchart TD
+    A["Edit call"] --> R{"File read in this conversation?"}
+    R -->|no| RR["Read the file first"]
+    R -->|yes| M{"old_string matches exactly?"}
+    M -->|no| RA["Claude reads the file again"]
+    M -->|yes| U{"Appears exactly once?"}
+    U -->|yes| OK["Replaced"]
+    U -->|no| L["A longer unique string"]
+    L -->|"every occurrence should change"| RAL["replace_all: true"]
+    L -->|"no unique text exists"| RW["Read plus Write, last"]
+```
+
 ### The example
 
 The example models three of these facts in all four languages. `edit` is the exact replacement with its three outcomes (replaced, not found, appears more than once). `plan_edit` chooses the remedy in the documented order. `tool_set` shows which of the six a session has on each platform and how the options bring Grep and Glob back. `covered_by` and `rule_tool` give the tools that a permission rule covers, which page 2 uses.

@@ -108,6 +108,11 @@
       "text": "The hooks reference puts the limit of the second row in its exit code table: for `PostToolUse` an exit of 2 \"Shows stderr to Claude; the tool already ran\". A post hook can tell the model that something went wrong. It cannot make the refund not have happened. A control that must prevent an effect therefore belongs in `PreToolUse`, and a team that writes its limit check as a post hook has written a log line. Use a post hook for what comes after: normalising the result (page 2), recording it, adding context for the next step."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant C as Claude\n    participant H as Harness\n    participant Pre as PreToolUse hook\n    participant T as Tool\n    participant Post as PostToolUse hook\n    C->>H: tool call\n    H->>Pre: event\n    alt deny\n        Pre-->>H: deny with a reason\n        H-->>C: the reason, the tool never runs\n    else allow\n        Pre-->>H: allow, or updatedInput\n        H->>T: run\n        T-->>H: output\n        H->>Post: event\n        Note over T,Post: the tool already ran\n        Post-->>H: replaced output or added context\n        H-->>C: result\n    end"
+    },
+    {
       "type": "para",
       "text": "There are more events: the list has ten that both SDKs share (the three above, `PostToolUseFailure`, `UserPromptSubmit`, `SubagentStart`, `SubagentStop`, `PreCompact`, `PermissionRequest` and `Notification`) and many that only TypeScript has. The page of the SDK says: \"Some hooks are available in both SDKs, while others are TypeScript-only.\" `SessionStart` and `SessionEnd` are in the second group, and so are `PostToolBatch`, `PostCompact` and `MessageDisplay`. In Python they exist only \"as shell command hooks defined in settings files such as `.claude/settings.json`\", and the documentation's advice for a Python callback is to use the first message of the stream as the trigger. An architect who plans a start-up step as a Python callback has planned something the SDK cannot register."
     },
@@ -326,7 +331,7 @@
   "counts": {
     "headings": 11,
     "paras": 18,
-    "code": 0,
+    "code": 1,
     "tables": 2,
     "lists": 4,
     "images": 0,
@@ -337,5 +342,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "416591210409c68e5a514763de2471903d00058092bcce6a98f47886e9c8017a"
+  "content_sha256": "c48bb0fa4c86920f022c8274c2c7031dd27fb713461ed76569d71413c473d015"
 }

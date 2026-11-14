@@ -36,6 +36,22 @@ The practice of this module is the four decisions of a gateway.
 3. **Showback.** Each team sees what it spent, computed from usage rows of input, cache-read and output tokens at the price of the row's model; this example's rows leave out cache writes, which a full bill prices too (page 1). Every token kind has its own price (cache reads are cheap, output is dear), so a bill that ignores either is wrong. The total is divided by a million and rounded **once**, at the end: rounding each row first gains or loses cents, so two rows of 0.4 cent are 1 cent together and 0 apart. The figure shown to a team is a whole number of cents. A row whose model has no price is refused, because a gateway never guesses a price.
 4. **Delivery.** Some callers cannot wait: a legacy system that times out after two seconds, a screen that cannot hold a connection open. The gateway compares the slow case (the 95th-percentile time plus a safety margin) with the caller's timeout. If it fits, the call is synchronous. If it does not, the gateway uses **accept-and-poll**: it takes the request, returns an identifier at once, does the work behind the scenes and lets the caller fetch the result by polling or receive it by callback. The constraint and the workload then coexist without cutting the work short.
 
+```mermaid
+sequenceDiagram
+    participant C as Caller
+    participant G as Gateway
+    alt 95th percentile plus margin fits the timeout
+        C->>G: Request
+        G-->>C: Result, synchronous
+    else It does not fit, accept-and-poll
+        C->>G: Request
+        G-->>C: Identifier at once
+        G->>G: Do the work behind the scenes
+        C->>G: Poll with the identifier
+        G-->>C: Result
+    end
+```
+
 ### Why accept-and-poll beats the alternatives
 
 Truncating the reasoning to fit two seconds sacrifices the task. Raising the legacy system's timeout is often not possible and moves the problem into a system nobody owns. A faster model may not exist for the quality needed. Decoupling submission from delivery is the design that respects both the limit and the work. It also pairs with the Batch API for work that can wait longer still, and with the retry and key discipline of module 81, since the identifier given to the caller is the key for the request.

@@ -35,6 +35,21 @@ Each `tool_use` block carries an `id`, a `name` and an `input`. Each result carr
 reply goes back unchanged: its text and all its blocks become one `assistant` message, so that the next request has the whole
 conversation.
 
+```mermaid
+sequenceDiagram
+    participant App as Your code
+    participant API as Messages API
+    participant T as Your tools
+    App->>API: tools array and the user message
+    loop while stop_reason is tool_use
+        API-->>App: stop_reason tool_use, tool_use blocks (id, name, input)
+        App->>T: run each call
+        T-->>App: outputs
+        App->>API: original messages, assistant reply, user message of tool_result blocks
+    end
+    API-->>App: any other stop_reason ends the loop
+```
+
 ### The formatting rules that cause 400 errors
 
 - "Tool result blocks must immediately follow their corresponding tool use blocks in the message history." No message may sit between

@@ -83,6 +83,11 @@
       "text": "\"By default, the cache has a 5-minute lifetime. The cache is refreshed for no additional cost each time the cached content is used.\" So a prompt used more often than every five minutes keeps its entry alive for free and never needs the dearer lifetime. Two details matter in practice. The clock runs from the start of the request: \"The lifetime is measured from the start of the request that writes or reads the cache entry, not from the end of its response.\" A four-minute stream leaves about a minute for the next request. And a cache entry \"only becomes available after the first response begins\", so parallel requests that must share a cache follow the page's advice: \"If you need cache hits for parallel requests, wait for the first response before sending subsequent requests.\""
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant App as your code\n    participant API as Messages API\n    App->>API: request 1 with the prefix\n    Note over API: request 1 writes the entry\n    API-->>App: first response begins\n    Note over API: entry now available\n    App->>API: request 2 with the same prefix\n    API-->>App: reply with a cache read"
+    },
+    {
       "type": "para",
       "text": "The one-hour lifetime is requested with `{\"type\": \"ephemeral\", \"ttl\": \"1h\"}`. The page recommends it when prompts are used \"less frequently than 5 minutes, but more frequently than every hour\", for example a chat where the user may not reply within five minutes. It also notes that cache hits \"are not deducted against your rate limit\". \"You can use both 1-hour and 5-minute cache controls in the same request\", with one rule: \"Cache entries with longer TTL must appear before shorter TTLs\". The usage object then splits the writes in `cache_creation.ephemeral_5m_input_tokens` and `cache_creation.ephemeral_1h_input_tokens`, which sum to `cache_creation_input_tokens`."
     },
@@ -94,6 +99,11 @@
     {
       "type": "para",
       "text": "On each request the system checks the hash at the breakpoint, and if nothing matches it walks backward one block at a time looking for an entry an earlier request wrote. It checks at most 20 positions, the breakpoint included. A growing conversation that adds more than 20 blocks between two requests walks past its last write and misses. The remedy is a second breakpoint near the old position: \"You can define up to 4 cache breakpoints\". On the Claude API a run of consecutive `tool_use` blocks counts as one position, and so does a run of consecutive `tool_result` blocks."
+    },
+    {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    A[\"check the hash at the breakpoint\"] --> B{\"entry an earlier request wrote?\"}\n    B -->|yes| H[\"cache hit\"]\n    B -->|no| C{\"20 positions checked?\"}\n    C -->|no| D[\"walk back one block\"]\n    D --> B\n    C -->|yes| M[\"cache miss\"]"
     },
     {
       "type": "heading",
@@ -385,7 +395,7 @@
   "counts": {
     "headings": 12,
     "paras": 17,
-    "code": 0,
+    "code": 2,
     "tables": 2,
     "lists": 3,
     "images": 0,
@@ -395,5 +405,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "f755a87fcace5b25571265059925327bcf1c07c8d9c03834e28342aa903e0eba"
+  "content_sha256": "eb9a5baa827ed2ffcf7ccbb4004eebadf4675ece0e072dfd5b6dc5c201e1cff8"
 }

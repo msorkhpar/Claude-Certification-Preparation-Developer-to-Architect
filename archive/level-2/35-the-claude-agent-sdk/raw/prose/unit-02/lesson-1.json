@@ -74,6 +74,11 @@
       "text": "When Claude requests a tool, the SDK checks in this order: hooks, deny rules, ask rules, the permission mode, allow rules and, last, the `canUseTool` callback. Each step can end the decision. Hooks run first, so a hook can deny a call outright, and the warning on the permissions page is plain that \"hooks run before every other step, and a hook deny applies even in bypassPermissions mode\". A deny rule blocks even in `bypassPermissions`. An allow rule approves a call before the callback is consulted. The callback sees only what nothing earlier decided. Among the rules, a deny is checked before an ask and an ask before an allow, and a call that no rule matches is left to the mode and then the callback; module 38 gives the same rule order for Claude Code."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    R[\"Claude requests a tool\"] --> H{\"Hooks\"}\n    H -->|deny| X[\"Denied\"]\n    H -->|no decision| DR{\"Deny rules\"}\n    DR -->|match| X\n    DR -->|no match| AR{\"Ask rules\"}\n    AR -->|match| CB[\"canUseTool callback\"]\n    AR -->|no match| PM{\"Permission mode\"}\n    PM -->|decides| MD[\"Approved or denied by the mode\"]\n    PM -->|falls through| AL{\"Allow rules\"}\n    AL -->|match| OK[\"Approved\"]\n    AL -->|no match| CB"
+    },
+    {
       "type": "para",
       "text": "Three consequences follow, and the documentation states each."
     },
@@ -214,7 +219,7 @@
   "counts": {
     "headings": 9,
     "paras": 13,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 5,
     "images": 0,
@@ -224,5 +229,5 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "a7c1490a6da3694ae38795cbd8dd6389d784f15d769d0d4608397febd4a3f6a8"
+  "content_sha256": "27c9295d2c8ff1fb0954a5ac5d089bbb43a1fe37026baf7df8bc4e9d01a79a5d"
 }

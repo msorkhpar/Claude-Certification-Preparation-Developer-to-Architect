@@ -102,6 +102,11 @@
       "text": "The screen of tool output works like this: \"Run each tool, pass its raw output to a small classifier call with Claude Haiku 4.5, and only return the content as a `tool_result` block if the screen reports no injection attempt.\" If the verdict is positive, \"return an error or a stripped summary in the `tool_result` block instead of the raw content, and consider surfacing the attempt to the user.\" A structured-output schema makes the verdict a value your code can branch on. The pattern screen of page 1 is the cheap first pass, and the classifier is the second."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "flowchart TD\n    T[\"Run the tool\"] --> S[\"Raw output to a classifier call, Claude Haiku 4.5\"]\n    S --> V{\"Injection attempt reported?\"}\n    V -->|no| R[\"Return the content as a tool_result block\"]\n    V -->|yes| E[\"Return an error or a stripped summary instead\"]\n    E --> U[\"Consider surfacing the attempt to the user\"]"
+    },
+    {
       "type": "para",
       "text": "Two cautions. First, each layer adds cost and latency, and a false positive blocks real work, so measure both. Second, the documentation advises to \"Red-team your own agent\": test with documents, emails and tool outputs that deliberately contain injection attempts, and confirm that \"Claude ignores them and that your screening and confirmation steps catch the rest.\" A control you have not attacked is a control you have only hoped for."
     },
@@ -323,7 +328,7 @@
   "counts": {
     "headings": 10,
     "paras": 13,
-    "code": 0,
+    "code": 1,
     "tables": 1,
     "lists": 4,
     "images": 0,
@@ -333,5 +338,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "bcc7c7ca61b4a91a95590ec3ed4317173e95f534a775bf98617e57a32d51fa0f"
+  "content_sha256": "9dc3e28835464a9f444cb01f7a3918ed441e00738987393cccd1c5b09021e35c"
 }

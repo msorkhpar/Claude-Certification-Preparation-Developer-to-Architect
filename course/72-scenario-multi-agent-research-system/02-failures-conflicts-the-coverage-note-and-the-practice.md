@@ -19,6 +19,17 @@ A subagent that fails returns a result, and the result has a shape the coordinat
 
 The coordinator retries once through an alternative and then stops. The limit is the course's design, and the reason is that one failure of a different query is a reason to try again, while a second suggests that the source or the service has a problem a third query will not fix. A second failure stays a failure, and the report says so, with both queries named. A failure of one subagent does not end the run: the other scopes are still worth reporting.
 
+```mermaid
+flowchart TD
+    A["Subagent fails"] --> B["Result with type, query, partial results, alternatives"]
+    B --> C["Coordinator retries once through an alternative"]
+    C --> D{"Retry succeeds?"}
+    D -->|yes| E["Use the new result"]
+    D -->|no| F["Stays a failure, both queries named"]
+    E --> G["Run goes on with the other scopes"]
+    F --> G
+```
+
 Three tempting designs fail in different ways. A generic "search unavailable" after the retries leaves the coordinator nothing to decide with. An empty result marked as a success turns a gap into an apparent answer. And terminating the whole run on the first failure throws away every scope that worked.
 
 ### Partial is information and it is not coverage

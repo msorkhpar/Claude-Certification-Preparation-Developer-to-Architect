@@ -66,6 +66,11 @@
       "text": "The property that matters is isolation. Each subagent runs in its own conversation, which \"starts fresh\" (unless it is a fork of the parent's). \"The only content you pass from parent to subagent is the Agent tool's prompt string\", so the instruction is to \"include any file paths, error messages, or decisions the subagent needs directly in that prompt.\" And in the other direction \"only its final message returns to the parent\": the intermediate tool calls and results stay inside the subagent. That is why a subagent keeps the coordinator's context small, and it is also why nothing is shared by accident. A subagent does not know the user's original question, the plan, the other subagents or what the coordinator learned a minute ago, unless the brief says so."
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant U as User\n    participant L as Lead agent\n    participant A as Subagent A\n    participant B as Subagent B\n    U->>L: query\n    Note over L: analyse, develop a strategy\n    par\n        L->>A: Agent tool prompt (the brief)\n    and\n        L->>B: Agent tool prompt (the brief)\n    end\n    Note over A,B: own tools, intermediate results stay inside\n    A-->>L: final message only\n    B-->>L: final message only\n    Note over L: synthesize\n    L-->>U: one answer"
+    },
+    {
       "type": "para",
       "text": "Two consequences follow, and they are the basis of the module."
     },
@@ -318,7 +323,7 @@
   "counts": {
     "headings": 10,
     "paras": 17,
-    "code": 0,
+    "code": 1,
     "tables": 1,
     "lists": 3,
     "images": 0,
@@ -329,5 +334,5 @@
     "disclosures": 1,
     "examples": 1
   },
-  "content_sha256": "0ce72bb3db293635533fb3bc9c907d7ae9e65142a846707ad2e8bf6c2d8e6112"
+  "content_sha256": "c44c6448b79083d55a267f18cacca7e8e8d69c57598ad65a9bbe167424542ad5"
 }

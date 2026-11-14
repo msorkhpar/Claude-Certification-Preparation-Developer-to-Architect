@@ -32,6 +32,16 @@ the previous context of text in the document". At run time it does exactly that,
 4. The loop repeats until the model emits a token that means "I am finished", or the output reaches the
    `max_tokens` limit you set, or the window is full.
 
+```mermaid
+flowchart TD
+    A["prompt converted to tokens"] --> B["score every token it knows"]
+    B --> C["choose one token"]
+    C --> D["append it to the sequence"]
+    D --> E{"finished token, max_tokens or window full?"}
+    E -->|no| B
+    E -->|yes| F["the answer ends"]
+```
+
 There is no plan stored somewhere and no lookup of a finished answer. An answer is a long chain of single
 choices, each made with everything before it in view. That is why wording early in an answer shapes
 everything after it, and why a model can commit to a wrong path and keep going convincingly.

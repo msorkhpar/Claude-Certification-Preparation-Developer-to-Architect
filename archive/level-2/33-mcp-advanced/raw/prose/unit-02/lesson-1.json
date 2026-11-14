@@ -103,6 +103,11 @@
       ]
     },
     {
+      "type": "code",
+      "lang": "mermaid",
+      "text": "sequenceDiagram\n    participant C as MCP client\n    participant S as MCP server\n    participant A as Authorization server\n    C->>S: request\n    S-->>C: 401 challenge, may carry scope\n    C->>S: read Protected Resource Metadata\n    S-->>C: which authorization server to use\n    C->>A: authorization request, resource and PKCE S256\n    C->>A: token request, resource\n    A-->>C: access token\n    C->>S: request, token in the Authorization header\n    S->>S: validate the token's audience\n    S-->>C: result, or 401 if invalid or expired"
+    },
+    {
       "type": "para",
       "text": "The last item has a name, token passthrough, and the security guide says \"Token passthrough is explicitly forbidden in the authorization specification\". A server that accepts tokens issued for another service, or forwards the client's token to a downstream API, breaks the security boundary, and it can become a confused deputy: the downstream API trusts the call as though the MCP server had validated it. The rule is short: \"MCP servers MUST NOT accept or transit any other tokens.\" If the server needs to call a downstream API, it uses a token of its own for that API."
     },
@@ -291,7 +296,7 @@
   "counts": {
     "headings": 10,
     "paras": 16,
-    "code": 0,
+    "code": 1,
     "tables": 0,
     "lists": 4,
     "images": 0,
@@ -301,5 +306,5 @@
     "html": 0,
     "disclosures": 2
   },
-  "content_sha256": "9c6e5eac417e459641c27f66d3ac593d77de525ca747070385d940d7d9aee0ba"
+  "content_sha256": "be73a3a80222cbd1e835e7a9f4174e59bc32cf1514da988ce8bbabe23ca0e2a1"
 }
