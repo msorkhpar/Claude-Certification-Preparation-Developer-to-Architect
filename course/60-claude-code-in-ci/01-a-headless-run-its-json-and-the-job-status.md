@@ -49,6 +49,24 @@ A job's status is a decision, and a decision made on prose is a guess. The gate 
 
 A job never passes by saying nothing. Retrying inside the job repeats cost with no reason to expect a different result, so the failure is reported and a person or a scheduled run decides. Only an answer that clears all five is read for findings, and then policy decides what a finding does: findings below a floor are dropped, categories the team disabled are dropped, and a kept finding at a failing severity (`high`, say) fails the job while lower ones only comment. This is the same fail-closed rule that module 48 applies to a workflow's gates.
 
+```mermaid
+flowchart TD
+    A["claude -p exits"] --> X{"Exit status zero?"}
+    X -->|no| F["Fail the job"]
+    X -->|yes| J{"Output a JSON object?"}
+    J -->|no| F
+    J -->|yes| E{"is_error unset and subtype success?"}
+    E -->|no| F
+    E -->|yes| S{"structured_output present?"}
+    S -->|no| F
+    S -->|yes| V{"Answer fits the schema?"}
+    V -->|no| F
+    V -->|yes| P["Drop findings below the floor and in disabled categories"]
+    P --> H{"A kept finding at a failing severity?"}
+    H -->|yes| F
+    H -->|no| C["Pass, findings posted as comments"]
+```
+
 The schema has two jobs. It makes the answer checkable, and with closed enums for category and severity it makes the policy computable: a severity that is free text cannot be compared with a floor. Keep to the features structured outputs support (types, `enum`, `required`, nested objects and arrays); make a field optional only when the value can really be absent.
 
 ### The example

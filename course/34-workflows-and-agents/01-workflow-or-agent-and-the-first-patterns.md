@@ -40,6 +40,15 @@ A task is split into a sequence of steps, "where each LLM call processes the out
 
 The failure to design for is a label that matches no route. The model's reply is text, so it may carry a capital letter, a full stop or a word nobody planned. The program normalizes the label, looks it up, and sends anything unknown to a default route.
 
+```mermaid
+flowchart TD
+    I["Input"] --> CL["Classify, by a model or a traditional classifier"]
+    CL --> N["Normalize the label"]
+    N --> L{"Label matches a route?"}
+    L -->|yes| SP["Specialized followup task"]
+    L -->|no| D["Default route"]
+```
+
 ### Parallelization: sectioning and voting
 
 When a program can run model calls at the same time and combine them in code, it has two variations.

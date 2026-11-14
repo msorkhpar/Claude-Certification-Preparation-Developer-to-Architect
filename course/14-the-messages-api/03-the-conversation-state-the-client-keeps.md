@@ -351,6 +351,15 @@ conversation from the one the user saw. The rule is to **commit a turn only when
 append the user turn, call, and on any failure remove it before the error leaves the function. Case `e2` of the
 practice is exactly this.
 
+```mermaid
+flowchart TD
+    A["append the user turn"] --> B["call the API"]
+    B --> C{"whole exchange succeeded?"}
+    C -->|yes| D["append the assistant turn as received"]
+    C -->|"no, a 529, timeout or 429"| E["remove the user turn"]
+    E --> F["the error leaves the function"]
+```
+
 Two more defects in the same family, each a practice case:
 
 - **Aliasing.** If the request body holds the client's own history list, a later turn changes earlier requests

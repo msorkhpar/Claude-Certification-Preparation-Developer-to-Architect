@@ -26,6 +26,21 @@ A scoped deny rule is different again. `disallowed_tools=["Bash(rm *)"]` leaves 
 
 When Claude requests a tool, the SDK checks in this order: hooks, deny rules, ask rules, the permission mode, allow rules and, last, the `canUseTool` callback. Each step can end the decision. Hooks run first, so a hook can deny a call outright, and the warning on the permissions page is plain that "hooks run before every other step, and a hook deny applies even in bypassPermissions mode". A deny rule blocks even in `bypassPermissions`. An allow rule approves a call before the callback is consulted. The callback sees only what nothing earlier decided. Among the rules, a deny is checked before an ask and an ask before an allow, and a call that no rule matches is left to the mode and then the callback; module 38 gives the same rule order for Claude Code.
 
+```mermaid
+flowchart TD
+    R["Claude requests a tool"] --> H{"Hooks"}
+    H -->|deny| X["Denied"]
+    H -->|no decision| DR{"Deny rules"}
+    DR -->|match| X
+    DR -->|no match| AR{"Ask rules"}
+    AR -->|match| CB["canUseTool callback"]
+    AR -->|no match| PM{"Permission mode"}
+    PM -->|decides| MD["Approved or denied by the mode"]
+    PM -->|falls through| AL{"Allow rules"}
+    AL -->|match| OK["Approved"]
+    AL -->|no match| CB
+```
+
 Three consequences follow, and the documentation states each.
 
 1. "Auto-approved tools never reach canUseTool." A call that `allowed_tools`, `acceptEdits` or `bypassPermissions` approved skips the callback, so a check placed there is silently bypassed for that tool. To gate every call, use a `PreToolUse` hook.

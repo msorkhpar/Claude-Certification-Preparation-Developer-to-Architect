@@ -58,6 +58,19 @@ Four rules decide whether a shared file works.
 3. **Some credential names read as empty toward a remote server.** "In a remote server's `url` and `headers`, Claude Code reads credential variables from your environment as empty rather than expanding them." The reason is that a repository's file must not be able to send your Claude Code or cloud credentials to a server it names. The covered names are Claude Code's own credentials such as `ANTHROPIC_API_KEY`, cloud provider credentials such as `AWS_BEARER_TOKEN_BEDROCK`, and others such as `HTTPS_PROXY` and `NPM_TOKEN`. A covered name is empty whether or not you set it, and a `:-` default on it is ignored. If you write `Bearer ${NPM_TOKEN}`, the server receives `Bearer ` with nothing after it and usually answers 401. The fix is to copy the secret into a variable with a name of your own and reference that name. A name outside the set, such as `API_KEY`, "expands as written".
 4. **`CLAUDE_PROJECT_DIR` needs a default in `command` and `args`.** Claude Code sets it "in the spawned server's environment to the project root", not in its own, so `${CLAUDE_PROJECT_DIR}` in a project file has nothing to expand from. The documentation's answer is a default such as `${CLAUDE_PROJECT_DIR:-.}`. The server itself can read the variable once it runs.
 
+```mermaid
+flowchart TD
+    A["A VAR reference in .mcp.json"] --> W{"In command, args, env, url or headers?"}
+    W -->|no| L["Text stays as written"]
+    W -->|yes| CR{"A covered credential name in a remote url or headers?"}
+    CR -->|yes| E["Read as empty, default ignored"]
+    CR -->|no| S{"VAR set?"}
+    S -->|yes| V["Value of VAR"]
+    S -->|no| D{"Has a default?"}
+    D -->|yes| DF["The default"]
+    D -->|no| LIT["Unexpanded text sent, warning in claude mcp list"]
+```
+
 ### Who approves a project server
 
 A server that came with a repository is code from somebody else. "Claude Code prompts for approval in interactive sessions before using project-scoped servers from `.mcp.json` files", and until you approve it `claude mcp list` shows it as pending. A cloned repository cannot approve its own servers: approvals committed to the project's `.claude/settings.json` are ignored in a folder you have not trusted. That prompt needs a person, and an unattended run has none. "In `claude -p` runs, Agent SDK sessions, and cloud sessions, Claude Code can't show that prompt: it loads project-scoped servers without asking." So a CI job or an SDK application that opens a freshly cloned repository loads whatever its `.mcp.json` names. To keep a server out anyway, list it in `disabledMcpjsonServers`, exclude project settings with `--setting-sources` or the SDK's `settingSources`, or start the session with `--strict-mcp-config` and pass only the servers you want with `--mcp-config`. A change to `.mcp.json` in a pull request deserves the review of a change to code.

@@ -34,6 +34,17 @@ The course's plan (the practice builds it) uses these rules:
 
 The thresholds are a design choice, and the table says so: "mostly valid" in the guide has no number. What matters is that the rule is written down and testable. Half is a reasonable place to put the boundary, because a notice can correct a few files but cannot correct most of them, and new files do not count toward it, since they are not things the session believes. A session idle for a week is treated as stale whatever the digests say, because what the agent decided around the code (the plan, the open questions) may have moved on.
 
+```mermaid
+flowchart TD
+    A{"Saved session?"} -->|no| F["Fresh"]
+    A -->|yes| G["Recompute the digests and compare"]
+    G --> B{"Over half changed or gone, or idle over 7 days?"}
+    B -->|yes| FS["Fresh, with a summary"]
+    B -->|no| C{"Any file changed, gone or new?"}
+    C -->|yes| RN["Resume, with a notice"]
+    C -->|no| R["Resume"]
+```
+
 ### Tell the session what changed
 
 When the plan says resume with a notice, the first prompt begins with the notice and then the task. Name the files that differ, so the session re-reads only those:

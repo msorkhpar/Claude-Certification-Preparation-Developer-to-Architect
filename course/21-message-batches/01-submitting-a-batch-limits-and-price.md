@@ -28,6 +28,20 @@ Each element of the batch has two parts: a `custom_id` you choose, and `params`,
 unique in the batch. Because the results come back in any order (page 2), the `custom_id` is the only way to tie an answer to the
 question that produced it. Choose meaningful ones, such as a database key.
 
+```mermaid
+sequenceDiagram
+    participant App as your code
+    participant API as Message Batches API
+    App->>API: create a batch of custom_id and params pairs
+    Note over API: each request handled independently
+    loop until processing has ended
+        App->>API: poll the batch
+    end
+    App->>API: fetch the results file
+    API-->>App: answers in any order
+    App->>App: match each answer by custom_id
+```
+
 The page recommends a dry run: "Dry run a single request shape with the Messages API to avoid validation errors." A shape that
 works synchronously will work in a batch, with the exceptions below.
 

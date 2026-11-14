@@ -29,6 +29,15 @@ The documentation ends its list with a section on chaining: "Combine strategies 
 
 The screen of tool output works like this: "Run each tool, pass its raw output to a small classifier call with Claude Haiku 4.5, and only return the content as a `tool_result` block if the screen reports no injection attempt." If the verdict is positive, "return an error or a stripped summary in the `tool_result` block instead of the raw content, and consider surfacing the attempt to the user." A structured-output schema makes the verdict a value your code can branch on. The pattern screen of page 1 is the cheap first pass, and the classifier is the second.
 
+```mermaid
+flowchart TD
+    T["Run the tool"] --> S["Raw output to a classifier call, Claude Haiku 4.5"]
+    S --> V{"Injection attempt reported?"}
+    V -->|no| R["Return the content as a tool_result block"]
+    V -->|yes| E["Return an error or a stripped summary instead"]
+    E --> U["Consider surfacing the attempt to the user"]
+```
+
 Two cautions. First, each layer adds cost and latency, and a false positive blocks real work, so measure both. Second, the documentation advises to "Red-team your own agent": test with documents, emails and tool outputs that deliberately contain injection attempts, and confirm that "Claude ignores them and that your screening and confirmation steps catch the rest." A control you have not attacked is a control you have only hoped for.
 
 ### Reducing prompt leaks

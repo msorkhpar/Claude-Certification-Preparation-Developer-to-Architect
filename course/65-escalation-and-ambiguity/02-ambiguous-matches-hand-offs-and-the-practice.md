@@ -33,6 +33,18 @@ When the agent does hand a case over, the person on the other side has seconds, 
 
 The rules in `decide` have an order, and the order is part of the design: an explicit request for a person first, because nothing may delay it (not even an ambiguous match); then the ambiguous match, because without a customer there is no case to judge; then the policy gap; then the lack of progress; and otherwise the agent resolves, acknowledging frustration if there is any. Sentiment and the model's confidence appear nowhere in the order. Changing the order changes behaviour that customers feel, and so a test for it belongs next to a test for the rules.
 
+```mermaid
+flowchart TD
+    A{"Customer asked for a person?"} -->|yes| E["escalate, with a hand-off summary"]
+    A -->|no| B{"Lookup matched several customers?"}
+    B -->|yes| Q["Ask for a field that tells them apart"]
+    B -->|no| C{"Policy silent on the request?"}
+    C -->|yes| E
+    C -->|no| D{"No progress after the limit?"}
+    D -->|yes| E
+    D -->|no| R["resolve, acknowledging frustration if any"]
+```
+
 ### The practice: an escalation policy
 
 The practice is in [`exercises/65-escalation-and-ambiguity`](../../exercises/65-escalation-and-ambiguity/unit-01/practice-1/statement.md). You write the decision (resolve, clarify or escalate, with its reason), the choice of the fields to ask about when several records match, and the text of a hand-off. It is graded in Python, TypeScript, Java and Kotlin; the statement lists nine cases, each saying what you should see when it works.

@@ -43,6 +43,15 @@ The share is taken from a number computed from the trace id alone, so every serv
 
 In a trace of agents, errors travel upward. The orchestrator reports that the research step failed because the researcher reported that its fetch tool failed. The span that reports an error is often only passing on the error of the span below it, and the first span to turn red is not the origin. The example's `root_cause` takes the failing spans and finds the one that no other failing span has as its parent: the deepest failure. It returns that span's layer (agent, model, tool or retrieval), its name, and the path of names from the root. When nothing failed, the answer is not "nothing wrong". Confident wrong answers follow a stale or empty retrieval, and the example blames a retrieval span that reported `stale` or `no-hits`. The exam's third sample item says as much: confident wrong answers after a document refresh, with model and latency unchanged, point to retrieval, "for example a broken re-index or mismatched embeddings" (module 85 builds that side).
 
+```mermaid
+flowchart TD
+    A{"Any span failed?"} -->|yes| B["Take the failing span that no failing span has as parent"]
+    B --> C["Report its layer, name and path from the root"]
+    A -->|no| D{"Retrieval span reported stale or no-hits?"}
+    D -->|yes| E["Blame that retrieval span"]
+    D -->|no| F["No span failed"]
+```
+
 The order matters in the other direction too. A failed span is a fact, and a stale retrieval is a suspicion. A system that blames the retrieval whenever it can will send engineers to the index while a tool is broken.
 
 ### What must not be logged

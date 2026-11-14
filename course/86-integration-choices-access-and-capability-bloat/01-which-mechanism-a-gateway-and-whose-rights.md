@@ -26,6 +26,16 @@ A platform team owns four capabilities: ticket search, refunds, deploy status an
 
 The order in which the example asks is the order of the decision. First the counterpart: another agent is reached agent-to-agent, whatever else is true. Then the path: when it is known, the code calls, because "Workflows are systems where LLMs and tools are orchestrated through predefined code paths", and a model that is asked whether to call a function it must always call adds a failure mode and no value. Only for a path the model chooses does the number of clients decide between a tool of one application and an MCP server that several share. MCP, in its own words, is "an open-source standard for connecting AI applications to external systems", the "USB-C port" that lets one capability plug into many hosts. That is the argument for it and also its price: a server is infrastructure.
 
+```mermaid
+flowchart TD
+    A{"Counterpart is another agent?"} -->|yes| B["Agent-to-agent"]
+    A -->|no| C{"Path known?"}
+    C -->|yes| D["Direct call in code"]
+    C -->|no| E{"Several clients reuse it?"}
+    E -->|yes| F["MCP server"]
+    E -->|no| G["Custom tool in that application"]
+```
+
 ### A gateway: one place for credentials, limits and records
 
 When many developers or many agents call a model, the credentials, the limits and the records can live in each client or in one place. A gateway is the one place: a proxy your organisation runs between the clients and the provider. The Claude Code documentation lists what it gives you: "the provider key stays server-side; developers hold gateway credentials instead", usage attributed by developer or team, "enforce budgets and rate limits in one place", "log every model request for compliance" and a provider that can be changed in one configuration. Two kinds of credential are involved: each developer holds their own, which the gateway issues, and the gateway holds one for the provider account, which all the forwarded traffic uses. Offboarding a developer revokes one credential, and a leaked developer credential is not a leaked provider key.

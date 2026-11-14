@@ -35,6 +35,17 @@ Passing a suite is a prediction about traffic, and traffic is where it is tested
 - **Roll back when the limit is passed.** The errors per thousand requests, taken as a whole number rounded down, are compared with a limit (5 in the example). Over it, the share goes back to zero.
 - **Otherwise advance.** One stage up, and `complete` at 100 percent.
 
+```mermaid
+flowchart TD
+    S["Stage of 1, 5, 25 or 100 percent"] --> A{"Fewer requests than the minimum?"}
+    A -->|yes| H["Hold at the stage"]
+    A -->|no| B{"Errors per thousand over the limit?"}
+    B -->|yes| RB["Roll back to zero"]
+    B -->|no| C{"At 100 percent?"}
+    C -->|yes| CO["complete"]
+    C -->|no| AD["Advance one stage"]
+```
+
 The health check is not only the error rate. Use the signals of module 87: refusals, tokens per answer, the share of answers a user flagged, the tail latency. And use the drift habit of that page: compare each with the baseline of the old model, and expect cost and token counts to differ by design.
 
 ### Rolling back, and how long you can

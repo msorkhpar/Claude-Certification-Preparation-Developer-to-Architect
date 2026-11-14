@@ -60,6 +60,21 @@ Under the versioning policy the API may add new event types, so ignore event typ
 A stream that ends without `message_stop` is an incomplete message, not a short one. The stop reason arrives in
 `message_delta`, near the end, so a cut stream has none.
 
+```mermaid
+stateDiagram-v2
+    [*] --> message_start
+    message_start --> content_block_start
+    content_block_start --> content_block_delta
+    content_block_delta --> content_block_delta : another piece
+    content_block_delta --> content_block_stop
+    content_block_stop --> content_block_start : next index
+    content_block_stop --> message_delta
+    message_delta --> message_stop
+    message_stop --> [*]
+    content_block_delta --> incomplete : error event or early end
+    incomplete --> [*]
+```
+
 ### The example: one stream, read three ways
 
 The program feeds a hand-written stream through the real SDK from a scripted transport. The stream has one text block (in

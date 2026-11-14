@@ -60,6 +60,21 @@ Two points of order carry the grading. The planner is asked once more after the 
 
 The planner is given the goal and the steps done so far; take the history away and it cannot see what it has already done. An error in a step is the interesting case. Stopping the run on a failed step throws away a planner that could have chosen another route; ignoring it hides a fact the planner needs. Recording it as the step's result puts it where the planner reads, with the ground truth of the other steps.
 
+```mermaid
+flowchart TD
+    P["Ask the planner, with the goal and the steps so far"] --> R{"Reply is a plan?"}
+    R -->|no| BP["bad_plan"]
+    R -->|yes| D{"Planner says done?"}
+    D -->|yes| DONE["done"]
+    D -->|no| N{"A next step not run before?"}
+    N -->|no| ST["stuck"]
+    N -->|yes| LIM{"Step limit reached?"}
+    LIM -->|yes| SL["step_limit"]
+    LIM -->|no| W["Worker runs the step"]
+    W --> REC["Record the result, or ERROR"]
+    REC --> P
+```
+
 ### Open-ended work: map, rank, plan again
 
 The guide's example is a task with no natural steps: add comprehensive tests to a legacy codebase. The plan it describes has a shape that you can use for any such task.

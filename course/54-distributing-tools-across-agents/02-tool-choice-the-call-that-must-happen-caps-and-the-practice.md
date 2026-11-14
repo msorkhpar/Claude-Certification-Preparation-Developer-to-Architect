@@ -61,6 +61,23 @@ The last part of the task statement is about tools that cannot be undone: a refu
 
 Each refusal is a result that the agent can use (module 53): it says what is needed and who can give it, so the agent can pass the case on. A control the model could talk its way around is not a control. A note in the tool's description that asks for care is an instruction, a field in which the model states its reason is a claim by the model, not a check, and the place of a tool in the list is not a limit on what it can do. The hook of module 49 is the other place for the same logic: a PreToolUse hook that denies the call, with a reason, does the same job before the tool runs.
 
+```mermaid
+flowchart TD
+    A["Tool call"] --> P{"Tool named by the policy?"}
+    P -->|no| R1["Refused, default deny"]
+    P -->|yes| N{"Amount a valid number?"}
+    N -->|no| R2["Refused, bad amount"]
+    N -->|yes| O{"For the verified customer?"}
+    O -->|no| R3["Refused"]
+    O -->|yes| C{"Above the cap?"}
+    C -->|yes| R4["Refused, sent to a person"]
+    C -->|no| I{"Irreversible?"}
+    I -->|no| OK["Allowed"]
+    I -->|yes| AP{"Approved?"}
+    AP -->|yes| OK
+    AP -->|no| R5["Needs an approval"]
+```
+
 ### The example
 
 The example is the same program as on page 1, and the part that belongs here is the rest of its output: the turn whose first call must be `extract_metadata` on a model that accepts forcing and on one that does not, with what each costs in caching; what the loop does with three replies; and five refund decisions.

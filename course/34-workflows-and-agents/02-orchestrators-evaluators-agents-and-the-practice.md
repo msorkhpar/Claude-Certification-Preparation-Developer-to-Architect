@@ -19,11 +19,38 @@ In this workflow "a central LLM dynamically breaks down tasks, delegates them to
 
 Three things go wrong in the plain version, and the practice grades them. The plan arrives as model text, so the program reads it defensively: it takes what lies between the first `[` and the last `]`, parses it, keeps the string items, drops empty ones and repeats and caps the count. When nothing is usable, the plan falls back to the task itself, and the result says that it did. A worker can fail, and one failure must not stop the others: the subtask is marked failed and the rest run. And when every worker failed, nothing is combined, because a synthesis over no results is a made-up answer. A partial result is reported as partial.
 
+```mermaid
+flowchart TD
+    T["Task"] --> O["Orchestrator writes a plan"]
+    O --> P["Read the plan defensively"]
+    P --> U{"Any usable subtasks?"}
+    U -->|no| FB["Fall back to the task itself"]
+    U -->|yes| W["Workers run the subtasks"]
+    FB --> W
+    W --> F{"Did every worker fail?"}
+    F -->|yes| NC["Nothing is combined"]
+    F -->|no| SY["Synthesize, partial if some failed"]
+```
+
 ### Evaluator-optimizer
 
 In this workflow "one LLM call generates a response while another provides evaluation and feedback in a loop." It fits "when we have clear evaluation criteria, and when iterative refinement provides measurable value". The article names two signs of a good fit: model output can be demonstrably improved when a person states feedback, and the model can give that feedback. Literary translation is its example, and so are searches where the evaluator decides whether another round is worth it.
 
 The loop needs an exit, or two. A score at or above a threshold accepts the draft. Otherwise the loop ends after a maximum number of rounds, and the best draft wins, not the last one. When two drafts tie on score, the earliest of them wins, because a late revision can be worse. The judge's reply is model text too. If it cannot be read, the sound reading is a score of zero with a message that says so, and the loop goes on: treating an unreadable reply as a pass would accept an unchecked draft. If the writer itself throws, the loop stops at once and reports the best draft so far, which may be none.
+
+```mermaid
+flowchart TD
+    G["Writer produces a draft"] --> J["Judge scores it"]
+    G -->|writer throws| X["Stop, report the best draft so far"]
+    J --> R{"Judge reply readable?"}
+    R -->|no| Z["Score 0, with a message"]
+    R -->|yes| S{"Score at or above threshold?"}
+    S -->|yes| A["Accept the draft"]
+    S -->|no| M{"Maximum rounds reached?"}
+    Z --> M
+    M -->|no| G
+    M -->|yes| B["Best draft wins, earliest on a tie"]
+```
 
 ### The earlier patterns, side by side
 

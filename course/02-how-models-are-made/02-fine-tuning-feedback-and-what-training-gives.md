@@ -53,6 +53,24 @@ trains in two phases:
    is trained from this dataset of AI preferences. That preference model then supplies the reward signal
    for reinforcement learning, the role human rankings play in RLHF.
 
+```mermaid
+flowchart TD
+    P["the constitution, a list of principles"]
+    subgraph SL["supervised phase"]
+        A["sample from an initial model"] --> B["self-critique against the principles"]
+        B --> C["revise the answers"]
+        C --> D["finetune on the revised responses"]
+    end
+    subgraph RL["reinforcement learning phase, RLAIF"]
+        E["refined model produces answer pairs"] --> F["a model judges which is better"]
+        F --> G["preference model trained on AI preferences"]
+        G --> H["reward signal for reinforcement learning"]
+    end
+    D --> E
+    P -.-> B
+    P -.-> F
+```
+
 The research page states the consequence for harmlessness: no human labels are needed for it, and "the
 only human oversight is provided through a list of rules or principles."
 

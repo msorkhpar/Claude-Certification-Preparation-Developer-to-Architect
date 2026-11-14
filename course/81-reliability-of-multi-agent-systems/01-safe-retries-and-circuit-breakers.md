@@ -27,6 +27,19 @@ Three details decide whether the key works.
 
 The key belongs to the tool's design as much as the agent's. When a tool that changes things offers no key, the architect wraps it with one, or does not let an agent retry it.
 
+```mermaid
+sequenceDiagram
+    participant A as Agent
+    participant T as Tool
+    A->>A: Make the key once from order and action
+    A->>T: Refund with the key
+    T->>T: Save key and payment in one transaction
+    T--xA: Response lost
+    A->>T: Retry with the same key
+    T->>T: Key known, do not act again
+    T-->>A: The first result
+```
+
 ### Retries have limits, and not every failure is a retry
 
 A retry helps with failures that pass: a timeout, a rate limit, a response that was lost. It does not help with one that does not: a refused request, a missing permission, an invalid input. The first kind is **transient**, the second **fatal**. A runner retries the first kind up to a fixed number of calls and then fails the task with a clear reason, and it never retries the second. An unlimited retry is a way to spend money while nothing changes.
@@ -42,6 +55,18 @@ Suppose an agent's backend is down. Every task that needs it retries, waits and 
 | **Half-open** | One probe call goes through | A success closes it; a failure opens it again |
 
 A success resets the count, so scattered failures do not open it. The count is of consecutive failures for one agent, not of all failures in the run: an agent that is healthy must not be cut off by a failing neighbour. When the breaker is open, the task fails fast with the reason `circuit open`, and the rest of the plan goes on (page 2).
+
+```mermaid
+stateDiagram-v2
+    state "Half-open" as HalfOpen
+    [*] --> Closed
+    Closed --> Closed: a success resets the count
+    Closed --> Open: set number of failures in a row
+    Open --> Open: calls refused at once
+    Open --> HalfOpen: after a cooldown
+    HalfOpen --> Closed: the probe succeeds
+    HalfOpen --> Open: the probe fails
+```
 
 ### The example
 

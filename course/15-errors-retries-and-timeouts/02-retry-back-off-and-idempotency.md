@@ -69,6 +69,18 @@ numbers from the feature's budget: **how many attempts**, and **how long in tota
 and a deadline of two seconds; a nightly job may allow six attempts and a minute. When the budget is spent, fail with
 the information a person needs: the last status, the type, the number of attempts and the request id.
 
+```mermaid
+flowchart TD
+    A["send the request"] --> B{"success?"}
+    B -->|yes| C["return the reply"]
+    B -->|no| D{"retryable?"}
+    D -->|"400, 401, 403, 404, 413 or a spend-cap 429"| G["fail with last status, type, attempts and request id"]
+    D -->|"connection lost, 408, 409, rate-limit 429, 500, 504, 529"| E{"attempts and time left?"}
+    E -->|no| G
+    E -->|yes| F["wait the larger of back-off and retry-after"]
+    F --> A
+```
+
 ### Idempotency: when is a retry safe
 
 A retry is safe when doing the operation twice has the same effect as doing it once. Applied to a Claude call:

@@ -21,6 +21,26 @@ In a hub-and-spoke design one agent, the coordinator or lead, owns the task, and
 
 The property that matters is isolation. Each subagent runs in its own conversation, which "starts fresh" (unless it is a fork of the parent's). "The only content you pass from parent to subagent is the Agent tool's prompt string", so the instruction is to "include any file paths, error messages, or decisions the subagent needs directly in that prompt." And in the other direction "only its final message returns to the parent": the intermediate tool calls and results stay inside the subagent. That is why a subagent keeps the coordinator's context small, and it is also why nothing is shared by accident. A subagent does not know the user's original question, the plan, the other subagents or what the coordinator learned a minute ago, unless the brief says so.
 
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant L as Lead agent
+    participant A as Subagent A
+    participant B as Subagent B
+    U->>L: query
+    Note over L: analyse, develop a strategy
+    par
+        L->>A: Agent tool prompt (the brief)
+    and
+        L->>B: Agent tool prompt (the brief)
+    end
+    Note over A,B: own tools, intermediate results stay inside
+    A-->>L: final message only
+    B-->>L: final message only
+    Note over L: synthesize
+    L-->>U: one answer
+```
+
 Two consequences follow, and they are the basis of the module.
 
 1. **The brief is the whole interface.** If a fact is not in the brief, the subagent does not have it, and a vague brief produces vague work.

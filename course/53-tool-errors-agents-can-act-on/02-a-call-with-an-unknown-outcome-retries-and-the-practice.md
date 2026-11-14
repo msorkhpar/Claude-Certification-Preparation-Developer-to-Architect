@@ -44,6 +44,17 @@ Annotations do not decide this. The Agent SDK table lists `readOnlyHint` and `id
 
 What the agent does with `outcome_unknown` is ordinary: it calls a read tool that can tell, such as a lookup of the refunds on the order. If the refund is there, the work is done and the agent reports success. If it is not, the agent can repeat the call (with a key, if there is one) or escalate. The product's own behaviour after a crash is the same shape: the call is marked as cut off, and Claude "is told to check whether it took effect before running it again". The rule travels: wherever a write may have happened, the next step is a read.
 
+```mermaid
+flowchart TD
+    A["Call times out after the request left"] --> S{"A read, idempotent, or carries a key?"}
+    S -->|yes| RT["Retry"]
+    S -->|no| U["outcome_unknown, next action verify_first"]
+    U --> RD["A read tool checks the current state"]
+    RD --> Q{"Did it take effect?"}
+    Q -->|yes| OK["Report success"]
+    Q -->|no| AG["Repeat the call, or escalate"]
+```
+
 ### Bounded retries, waits and the service's own advice
 
 Retries for a `transient` failure follow three rules that the tests check one by one.

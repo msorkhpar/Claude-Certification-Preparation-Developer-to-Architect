@@ -33,6 +33,20 @@ A subagent can fail by throwing, by returning nothing, or by being cut short. Th
 
 When some subagents failed, the answer can still be useful, and the honest status is `partial`, because a partial answer looks like a full one unless the status says otherwise. The user-facing text should say which part is missing. Whether to retry a failed scope is the reviewer's decision: it can list the scope as a gap, and the cap on rounds keeps the retry bounded.
 
+```mermaid
+flowchart TD
+    A["Subagents run their briefs, failures recorded per scope"] --> B{"Any findings at all?"}
+    B -->|no| F["failed"]
+    B -->|yes| C["Reviewer lists the gaps"]
+    C --> D{"Gaps left and rounds under the cap?"}
+    D -->|yes| E["New briefs for the gaps only"]
+    E --> A
+    D -->|no| S["Synthesize once"]
+    S --> G{"No gap left and nothing failed?"}
+    G -->|yes| H["complete"]
+    G -->|no| I["partial, with what is missing"]
+```
+
 ### Hand large outputs over by reference
 
 A coordinator that receives every subagent's full output through its own context pays for each token twice, once when the subagent writes it and once when the coordinator reads it, and loses detail at every summary. The research article recommends the other route: "Rather than requiring subagents to communicate everything through the lead agent, implement artifact systems where specialized agents can create outputs that persist independently." Its reason: "This prevents information loss during multi-stage processing and reduces token overhead from copying large outputs through conversation history." A subagent writes its output to a store and returns a short reference and a summary; the coordinator, or a later subagent, reads the part it needs. The same article has the lead save its plan outside its context too: it begins "by thinking through the approach and saving its plan to Memory to persist the context, since if the context window exceeds 200,000 tokens it will be truncated." The plan, the references and the status are state that survives a long run; the full texts need not be in the coordinator's window.

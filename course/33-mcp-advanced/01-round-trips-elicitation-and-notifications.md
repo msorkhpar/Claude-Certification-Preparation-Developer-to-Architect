@@ -29,6 +29,18 @@ Only three client requests can be answered this way: `tools/call`, `resources/re
 
 The pattern "allows servers to request additional information without maintaining any server-side state". The retry is a new request with a new JSON-RPC `id`. That is the point of the design: "the requests in each step are completely independent: the server processing the retry does not need any information beyond what is directly present in the retry request." Whatever the server needs to remember travels in `requestState`.
 
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    C->>S: tools/call with its parameters
+    S-->>C: input-required result, inputRequests and requestState
+    Note over C: Gather the answers, from the user or elsewhere
+    C->>S: retry tools/call, new id, inputResponses, requestState echoed exactly
+    S-->>C: final result
+    Note over S: Needs nothing beyond the retry request
+```
+
 ### What the server owes the state
 
 The state crosses a client that the server does not control, so the specification says "servers MUST treat requestState as an attacker-controlled input". If it influences authorization, access or business logic, the server must protect its integrity (an HMAC, or authenticated encryption) and reject state that fails verification. To stop replay the server should put three things inside the protected payload and check each on receipt: the authenticated principal, "rejecting state presented by a different principal"; a short expiry; and an identifier of the originating request, such as the method name and a digest of its parameters. The specification adds a limit: these measures "bound the replay window and prevent cross-user and cross-request reuse, but do not by themselves guarantee single-use". A one-time redemption must be enforced on the server side. The practice on the next page builds exactly this.

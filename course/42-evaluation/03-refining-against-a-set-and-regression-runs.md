@@ -25,6 +25,18 @@ The loop has five steps, and the order is what makes it work.
 
 The prompt engineering overview supplies the guard on step 1: the techniques assume "Some ways to empirically test against those criteria". The same page supplies the guard on the whole loop: "Not every success criteria or failing eval is best solved by prompt engineering." If the failing dimension is latency or price, the cure may be a different model, a smaller output or a cache, and the loop's report is how you notice that.
 
+```mermaid
+flowchart TD
+    B["Baseline: run the whole set, keep the report"] --> C["Make one change"]
+    C --> R["Run the whole set"]
+    R --> P["Compare per case"]
+    P --> K{"Every dimension holds, no unaccepted regression?"}
+    K -->|yes| KEEP["Keep, the new report is the baseline"]
+    K -->|no| REV["Revert"]
+    KEEP --> C
+    REV --> C
+```
+
 ### A run, a gate and a comparison
 
 The example below does the five steps on six sentiment cases. It uses two scripted "versions" of a prompt, which are lookup tables standing in for the application, so the program is exact and needs no model. Code grading is by exact label (the example's grader trims and lower-cases only, a simpler rule than the practice's `exact` check, which also collapses runs of white space), the criteria are a pass rate of at least 0.8 overall and at least 0.75 among the cases tagged `edge`, and the comparison names regressions and fixes. The source of all four languages is shown, and under each is what it printed in the container.

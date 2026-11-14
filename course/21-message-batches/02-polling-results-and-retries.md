@@ -29,6 +29,15 @@ Cancellation has one more state. Right after a cancel call the status is `cancel
 with a status of ended and may contain partial results for requests that were processed before cancellation." Cancellation may not be
 instant, and the requests that had already run are still billed.
 
+```mermaid
+stateDiagram-v2
+    [*] --> in_progress
+    in_progress --> ended : all requests finished
+    in_progress --> canceling : cancel call
+    canceling --> ended : may hold partial results
+    ended --> [*]
+```
+
 ### The four result types
 
 When processing has ended, every request has exactly one result:

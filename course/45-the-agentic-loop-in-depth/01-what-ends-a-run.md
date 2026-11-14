@@ -63,6 +63,19 @@ The engineering article keeps the count in its proper place: "It's also common t
 
 When the status `max_turns` shows up often, the count is not the thing to change. A run that does not converge usually has a tool that keeps failing, a description the model cannot use or a task that is too big. The status is a signal to read the conversation, which the practice keeps whole for that reason.
 
+```mermaid
+flowchart TD
+    A{"Turn count reached?"} -->|yes| MT["max_turns"]
+    A -->|no| B["Call the model"]
+    B --> C{"stop_reason"}
+    C -->|tool_use| D["Run the calls, send the results"]
+    D --> A
+    C -->|"end_turn or stop_sequence"| E["done"]
+    C -->|max_tokens| F["truncated"]
+    C -->|refusal| G["refused"]
+    C -->|"any other value"| H["unexpected"]
+```
+
 ### The example
 
 The example runs three loops over the same scripted replies. In scenario A the first reply says "All done" in its text and also calls `save_file`. In scenario B a task needs four lookups before the model ends its turn. The stop-reason loop is run with two backstops: a generous one and one that is too small.

@@ -60,6 +60,18 @@ A spawn is a tool call, so it goes through the evaluation of module 35: hooks, d
 
 "A subagent runs in the parent session's permission mode unless you set `permissionMode` on its `AgentDefinition` and the parent session is in `default`, `dontAsk`, or `plan` mode. Even then, Claude Code never applies a `"bypassPermissions"` value. A subagent runs in `bypassPermissions` mode only when the parent session itself does. (The documentation says that this rule needs Claude Code v2.1.267 or later.)" Read it as two rules. A definition can tighten a subagent's mode only when the parent is in a mode that allows it, and a definition can never loosen it to bypass. And a parent in `bypassPermissions` gives every subagent full autonomy, which the page spells out: "Subagents may have different system prompts and less constrained behavior than your main agent, so inheriting `bypassPermissions` grants them full, autonomous system access." An architect who runs the coordinator in a bypass mode for CI has also decided that for every subagent. Module 35's warning applies to the whole tree: "allowed_tools does not constrain bypassPermissions", so a bypass parent approves every tool that reaches the mode step. The controls that still hold are the ones evaluated first, deny rules, ask rules and hooks, and the subagent's own tool list, because a tool that is not in its session cannot be called at all.
 
+```mermaid
+flowchart TD
+    A{"Parent in bypassPermissions?"} -->|yes| B["Subagent runs in bypassPermissions"]
+    A -->|no| C{"permissionMode set on its AgentDefinition?"}
+    C -->|no| D["Subagent runs in the parent's mode"]
+    C -->|yes| E{"Parent in default, dontAsk or plan?"}
+    E -->|no| D
+    E -->|yes| F{"Value is bypassPermissions?"}
+    F -->|yes| G["Never applied"]
+    F -->|no| H["Subagent runs in the definition's mode"]
+```
+
 Hooks fire inside subagents too. A hook input has an `agent_id` and an `agent_type` "when the hook fires inside a subagent", and the `SubagentStart` and `SubagentStop` events exist to "track parallel task spawning" and "aggregate results from parallel tasks" (module 49). One practical effect: each subagent may ask for permission on its own, so "subagent permission prompts multiplying" is a known problem, and the documented cure is a `PreToolUse` hook that auto-approves specific tools, or permission rules, which subagents "inherit from the parent conversation".
 
 ### What Java and Kotlin teams use

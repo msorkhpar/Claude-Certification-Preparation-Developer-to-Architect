@@ -38,6 +38,19 @@ partway, it cannot change that status; it sends an `error` event in the stream, 
 body. That is why an error can arrive after the 200 status line. The example of the previous page shows the SDK turning
 that event into an exception.
 
+```mermaid
+sequenceDiagram
+    participant App as your code
+    participant API as Messages API
+    App->>API: POST with stream set to true
+    API-->>App: 200 status line
+    API-->>App: message_start and content deltas
+    API-->>App: error event, service overloaded
+    Note over App: no message_stop, so a failure
+    App->>App: discard the partial output
+    App->>API: retry the whole request after back-off
+```
+
 Three consequences:
 
 - **A status check alone cannot tell you a stream succeeded.** Read until `message_stop`; an `error` event or an early end

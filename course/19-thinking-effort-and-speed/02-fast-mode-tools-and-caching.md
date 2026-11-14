@@ -56,6 +56,20 @@ If a request changes the thinking mode in mid-turn, the API does not error: it "
 The page's advice is "Toggle between turns, not within them." In practice, choose the thinking and effort setting when a user
 message arrives and keep it until the model's final answer.
 
+```mermaid
+sequenceDiagram
+    participant App as your code
+    participant API as Messages API
+    App->>API: user message, thinking and effort chosen
+    loop the tool-use loop, one assistant turn
+        API-->>App: thinking blocks and a tool call
+        App->>App: run the tool
+        App->>API: tool results plus thinking blocks unchanged
+    end
+    API-->>App: the model's final answer
+    Note over App,API: one thinking mode for the whole turn
+```
+
 Forced tool use interacts with thinking too. Manual extended thinking supports only `tool_choice` of `auto` or `none`. Adaptive
 thinking supports forced tool use, except on Claude Opus 5.5, Claude Sonnet 5.5, Claude Fable 5.1 and Claude Mythos 5.1 (the
 last shares the specifications of Fable 5.1 and is offered by invitation only). On those models, use `auto` and get a structured result another way.

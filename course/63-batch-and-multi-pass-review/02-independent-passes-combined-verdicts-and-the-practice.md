@@ -47,6 +47,15 @@ A verification pass can ask the model for a confidence number beside each findin
 
 The same rule answers a question about processing time: independent checks cost more calls, and so the cheap first passes are batches and only the unconfirmed findings pay for a second look.
 
+```mermaid
+flowchart TD
+    L["Local pass per file, first batch"] --> I["Integration pass over the set, second batch"]
+    I --> M["merge_passes, a finding counts once per pass"]
+    M --> Q{"Two independent passes agree, neither unsure?"}
+    Q -->|yes| A["Accepted"]
+    Q -->|no| V["verify, another instance tries to refute it"]
+```
+
 ### The practice: a review pipeline
 
 The practice is in [`exercises/63-batch-and-multi-pass-review`](../../exercises/63-batch-and-multi-pass-review/unit-01/practice-1/statement.md). You write the submission interval that keeps a promise, the choice of interface for a workload, the plan for resubmitting the entries that failed, the passes of a multi-file review and the combination of their findings. It is graded in Python, TypeScript, Java and Kotlin; the statement lists eight cases, each saying what you should see when it works.

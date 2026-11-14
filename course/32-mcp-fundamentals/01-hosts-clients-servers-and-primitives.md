@@ -23,6 +23,14 @@ MCP follows a client-server architecture. The documentation names three roles:
 
 The host does not talk to a server itself. "The MCP host accomplishes this by creating one MCP client for each MCP server." Each client "maintains a dedicated connection with its corresponding MCP server", so a host connected to a ticketing server and a file server holds two clients. The word "server" says nothing about where the program runs. A filesystem server that a desktop application launches on the same machine is a local server, and the documentation's example of a remote one is a vendor's server on that vendor's platform. Local servers that use the stdio transport typically serve a single client, and remote servers on Streamable HTTP will typically serve many.
 
+```mermaid
+flowchart TD
+    H["MCP host, such as Claude Code"] --> C1["MCP client"]
+    H --> C2["MCP client"]
+    C1 <-->|dedicated connection| S1["Ticketing server"]
+    C2 <-->|dedicated connection| S2["File server"]
+```
+
 One boundary matters for the exam. MCP "does not dictate how AI applications use LLMs or manage the provided context." The protocol moves context between a server and a client. What the model does with it, and what a person must approve, belongs to the host.
 
 ### Two layers

@@ -37,6 +37,23 @@ This routine is the course's own. It is short enough to run in your head, and th
 6. **Did a tool misbehave?** Compare the tool name the model called with the list you offered, and look for an exception in your own tool code.
 7. **Name the origin, pick the recovery, and note whether the application recovered.** A later good response means the failure was survived, which still matters for the capacity plan.
 
+```mermaid
+flowchart TD
+    F["Find the first failure"] --> S{"Is there a status?"}
+    S -->|"yes, an error event"| N["Name the origin, pick the recovery, note whether it recovered"]
+    S -->|"no, a dropped connection"| SV["Service side"]
+    SV --> N
+    S -->|"a 200"| SR{"stop_reason a failure?"}
+    SR -->|yes| N
+    SR -->|no| CT{"Is the content there?"}
+    CT -->|"no, an empty end_turn"| RQ["Look at the request before it"]
+    RQ --> N
+    CT -->|yes| PS{"Did your code read it?"}
+    PS -->|no| N
+    PS -->|yes| TL["Check the tools: name offered, exception in your code"]
+    TL --> N
+```
+
 ### Integration or model: the question that decides
 
 An integration fault and a model fault can look the same in the output, so each needs a question whose answer is in the trace.

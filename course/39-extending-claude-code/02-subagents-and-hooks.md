@@ -56,6 +56,23 @@ A command hook is a process. "When an event fires, Claude Code passes event-spec
 
 Exit 0 with a JSON object on standard output is the structured answer. For `PreToolUse`, put `hookSpecificOutput` with `hookEventName: "PreToolUse"`, `permissionDecision` as `allow`, `deny` or `ask`, and `permissionDecisionReason`. Both forms can block. The JSON form lets you say `ask` and carries a reason that is shown to the person.
 
+```mermaid
+sequenceDiagram
+    participant CC as Claude Code
+    participant H as Hook command
+    CC->>H: event data as JSON on stdin, PreToolUse
+    alt exit 2
+        H-->>CC: reason on stderr
+        Note over CC: Blocks the call, the reason goes to Claude
+    else exit 0 with JSON on stdout
+        H-->>CC: permissionDecision allow, deny or ask, with a reason
+    else exit 0 with no output
+        Note over CC: No objection
+    else any other exit code
+        Note over CC: Non-blocking error, the call proceeds
+    end
+```
+
 Several hooks can match one call, and they run in parallel. "For `PreToolUse` permission decisions, the most restrictive answer applies, in the order `deny`, `defer`, `ask`, `allow`." A logging hook that exits 0 does not weaken a guard hook that denies. `defer` is a decision for programs that run `claude -p` and read its JSON output: it pauses the run at a tool call so the caller can collect an answer and resume, and Claude Code honors it only in that non-interactive mode and only when the turn makes a single tool call.
 
 Two practical points. A hook that guards a rule must read the whole command and not a prefix. A deny rule `Bash(git push *)` misses `git -C . push`, a push behind an environment assignment, a push inside `sh -c`, and one after `&&`, and a hook can normalise those spellings. And keep the matcher narrow: the documentation warns that an empty or `.*` matcher on a permission hook "would auto-approve every tool permission prompt".

@@ -35,6 +35,25 @@ The practice's refusals are `identity_required`, `order_not_owned`, `order_not_c
 
 Two of the refusals close the desk for the model: a refund over the limit, and a lock after repeated failed identity checks. The practice keeps one tool outside the gate, `escalate`, which is always allowed. This is a design rule for any gated agent: **the path to a person must not depend on a prerequisite that may be the thing that failed**. An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit (module 45). The lock matters for a second reason: without it, a person who is guessing at an identity code, or a model that is being led to guess, gets unlimited tries. Three failures in a row lock the desk, and a successful check resets the count, so ordinary typing mistakes do not lock anyone out.
 
+```mermaid
+flowchart TD
+    A["process_refund"] --> L{"Desk locked?"}
+    L -->|yes| LK["locked"]
+    L -->|no| V{"Identity verified?"}
+    V -->|no| IR["identity_required"]
+    V -->|yes| O{"Order looked up?"}
+    O -->|no| OC["order_not_checked"]
+    O -->|yes| M{"Positive whole number?"}
+    M -->|no| BA["bad_amount"]
+    M -->|yes| X{"Within what is left on the order?"}
+    X -->|no| EO["exceeds_order"]
+    X -->|yes| H{"Below the limit?"}
+    H -->|no| NH["needs_human"]
+    H -->|yes| B["Backend refunds"]
+    LK --> ESC["escalate, always allowed"]
+    NH --> ESC
+```
+
 ### Several concerns in one message
 
 Customers rarely send one concern at a time: "I want a refund on order O9, my address changed, and why was I charged twice?" The exam's third skill for this task is to split such a message into distinct items, look into each of them in parallel with the shared context they need, and then write one answer. Three things make that work.

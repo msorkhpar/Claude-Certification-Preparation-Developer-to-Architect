@@ -31,6 +31,19 @@ The example's `audit` is the review as code. It compares what an agent holds wit
 
 The tool search tool lets Claude "work with hundreds or thousands of tools by discovering and loading them on demand". The mechanics are short. You include a search tool in the `tools` list, and you mark the tools that should not load up front with `defer_loading: true`. Claude's context holds the search tool and the non-deferred tools. When it needs another tool it searches, the API returns the matches as references, expands them into full definitions, and Claude calls the tool. Four facts matter for a design.
 
+```mermaid
+sequenceDiagram
+    participant App as Your code
+    participant API as API
+    participant C as Claude
+    App->>API: tools list with search tool, others defer_loading true
+    API->>C: Context holds search tool and non-deferred tools
+    C->>API: Search for a tool it needs
+    API->>API: Expand matches into full definitions
+    API-->>C: The matching definitions
+    C->>API: Call the tool
+```
+
 - **When to use it.** The documentation lists "10 or more tools", "tool definitions consume more than 10k tokens", falling selection accuracy and a growing library. Standard tool calling is "a better fit when you have fewer than 10 tools, every tool is used in every request, or your tool definitions are small".
 - **Keep the common path free of search.** "Keep your 3–5 most frequently used tools non-deferred so Claude can call them without searching first." The example loads the four most used tools and defers the other twenty.
 - **Everything is still sent.** "You still send every tool's full definition in the `tools` array on every request", including the deferred ones, because the API needs them to run the search. Deferring changes what enters the context window, and it does not shrink the request.
