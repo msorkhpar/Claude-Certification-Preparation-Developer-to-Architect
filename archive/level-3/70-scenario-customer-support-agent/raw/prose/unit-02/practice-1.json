@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: audit a support agent's sessions and name the first fix"
-    },
-    {
       "type": "para",
       "text": "A customer support resolution agent has been in production for a month. The team's target is that at least 80 percent of conversations are resolved at first contact, and the agent must escalate the ones a person has to decide. The rate is below target, and each team member blames something else: the prompt, the tools, the model. In this practice you write the audit that ends the argument: it reads the month's recorded sessions, counts what went wrong in each failure shape, and names the one fix to make first. The model is not called: the tests give you recorded sessions. The audit, its failure shapes and its order of fixes are this course's own design for the capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -188,7 +183,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 7,
     "code": 2,
     "tables": 1,
@@ -200,7 +195,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "af91b5cf7e0d99451df6173ab43fbae59923406c58e5e926534f137c04bef839",
+  "content_sha256": "56be060792bc2d77a61ee4e4c1670811c1a2d7ad21bcd34bf757b0dae15efaf8",
   "starting_code": "\"\"\"Audit a support agent's recorded sessions: the rates, the failure shapes and the first fix.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nPROTECTED = (\"lookup_order\", \"process_refund\")\nTARGET = 0.8\n\n\ndef skipped_prerequisite(steps):\n    \"\"\"TODO 1 of 5 (unlocks e2): did an order or refund call come before the first successful get_customer call?\n\n    Receives a session's steps (dicts with tool and ok). Returns True or False; a failed get_customer does not identify anyone.\n    Example: [lookup_order, get_customer] -> True, [get_customer, lookup_order] -> False\n    \"\"\"\n    return False\n\n\ndef has_wrong_tool(steps):\n    \"\"\"TODO 2 of 5 (unlocks e6): does a step have a known right tool that differs from the tool used?\n\n    Receives a session's steps (a step may lack `right_tool`). Returns True for at least one such step, False otherwise.\n    Example: [{\"tool\": \"get_customer\", \"ok\": True, \"right_tool\": \"lookup_order\"}] -> True; a step with no right_tool never counts.\n    \"\"\"\n    return False\n\n\ndef is_over_limit(session):\n    \"\"\"TODO 3 of 5 (unlocks e3): was a refund above the limit actually made?\n\n    Receives one session. Returns True only when its outcome is `resolved` and `refund_cents` is above `limit_cents`.\n    Example: resolved, refund 10001, limit 10000 -> True; escalated with the same refund -> False\n    \"\"\"\n    return False\n\n\ndef first_contact_rate(resolved, n):\n    \"\"\"TODO 4 of 5 (unlocks e1 and e5): the first contact rate.\n\n    Receives the resolved count and the session count. Returns resolved / n rounded to three decimals, 0.0 when n is 0.\n    Example: first_contact_rate(2, 3) -> 0.667\n    \"\"\"\n    return 0.0\n\n\ndef diagnose(skipped, over_limit, wrong, over, under):\n    \"\"\"TODO 5 of 5 (unlocks e4 and e1): the first fix, by the order in the statement.\n\n    Receives the counts of skipped prerequisites, over-limit refunds, wrong-tool sessions, over- and under-escalations.\n    Returns `enforce_in_code`, `rewrite_tool_descriptions`, `write_escalation_criteria` or `none`.\n    Example: diagnose(0, 0, 2, 1, 0) -> \"rewrite_tool_descriptions\"\n    \"\"\"\n    return \"\"\n\n\ndef audit(sessions):\n    log.debug(\"audit input: %r\", sessions)\n    n = len(sessions)\n    resolved = sum(1 for s in sessions if s[\"outcome\"] == \"resolved\")\n    over = sum(1 for s in sessions if s[\"outcome\"] == \"escalated\" and not s[\"needs_human\"])\n    under = sum(1 for s in sessions if s[\"outcome\"] == \"resolved\" and s[\"needs_human\"])\n    skipped = sum(1 for s in sessions if skipped_prerequisite(s[\"steps\"]))\n    wrong = sum(1 for s in sessions if has_wrong_tool(s[\"steps\"]))\n    over_limit = sum(1 for s in sessions if is_over_limit(s))\n    fcr = first_contact_rate(resolved, n)\n    return {\"sessions\": n, \"resolved\": resolved, \"fcr\": fcr, \"meets_target\": fcr >= TARGET, \"over_escalated\": over, \"under_escalated\": under,\n            \"skipped_prerequisite\": skipped, \"wrong_tool\": wrong, \"over_limit_refunds\": over_limit,\n            \"diagnosis\": diagnose(skipped, over_limit, wrong, over, under)}\n",
   "exercise": {
     "main_path": "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-1/audit.py",
@@ -264,7 +259,10 @@
     },
     "origin": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md",
     "concepts": [
-      "the practice of Audit the sessions, order the fixes and the practice is solved"
+      "First-contact resolution is resolved over sessions, rounded to three decimals, and meets the target at 0.8 or above.",
+      "A prerequisite is an order: an order or refund call before a successful identity check is a skip, and a failed check identifies nobody.",
+      "Only a refund actually made counts as over the limit, and over- and under-escalation are counted apart.",
+      "Moving money wrongly is fixed in code first, then wrong tool calls by tool descriptions, then escalation by explicit criteria."
     ],
     "files": [
       "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-1/try_it.py"

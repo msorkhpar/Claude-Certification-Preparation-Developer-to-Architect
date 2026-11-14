@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a raw Messages API client, graded on the HTTP contract"
-    },
-    {
       "type": "para",
       "text": "Write a small client that speaks the Messages API by hand: no SDK, one injected transport. The tests check the request that would go on the wire and the way a reply, good or bad, becomes a value or an error."
     },
@@ -229,7 +224,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 9,
     "code": 2,
     "tables": 2,
@@ -241,7 +236,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "90bd10919f0df3b902d9ea7c215b07bee7d90d8bfc9c0fa408ee3d4a7273d156",
+  "content_sha256": "57efc5f7d6d5f1b1b371d49b76f3f57e672e21b8494cf38da7570549da2c11de",
   "starting_code": "\"\"\"A raw Messages API client over an injected transport. See ../../statement.md for the contract.\"\"\"\nimport json\nimport logging\nfrom dataclasses import dataclass, field\n\nlog = logging.getLogger(__name__)\n\nURL = \"https://api.anthropic.com/v1/messages\"\n\n\n@dataclass\nclass Request:\n    method: str\n    url: str\n    headers: dict\n    body: str  # JSON text\n\n\n@dataclass\nclass Response:\n    status: int\n    headers: dict  # lower-case names\n    body: str\n\n\nclass ApiError(Exception):\n    \"\"\"A non-2xx reply: status, error type, message and the request id (None when there is none).\"\"\"\n\n    def __init__(self, status, error_type, message, request_id=None):\n        super().__init__(f\"{status} {error_type}: {message}\")\n        self.status, self.error_type, self.detail, self.request_id = status, error_type, message, request_id\n\n\ndef _present(value):\n    return isinstance(value, str) and value.strip() != \"\"\n\n\ndef _validate(api_key, messages, max_tokens):\n    \"\"\"TODO 1 of 8 (finish this to pass e2): refuse bad input before anything is sent.\n\n    Receives the key, the messages and max_tokens. Raises ValueError when the key is blank (use _present), the messages are empty or\n    max_tokens is not a whole number of at least 1; otherwise returns nothing.\n    Example: _validate(\"  \", [], 8) -> ValueError, _validate(\"sk-x\", [{\"role\": \"user\", \"content\": \"hi\"}], 8) -> None\n    \"\"\"\n\n\ndef _headers(api_key):\n    \"\"\"TODO 2 of 8 (finish this to pass m1): the three request headers.\n\n    Receives the API key. Returns a dict with exactly `x-api-key` (the key), `anthropic-version` (2023-06-01) and `content-type`\n    (application/json).\n    Example: _headers(\"k\")[\"anthropic-version\"] -> \"2023-06-01\"\n    \"\"\"\n    return {}\n\n\ndef _body(model, messages, max_tokens, system):\n    \"\"\"TODO 3 of 8 (finish this to pass m1 and e1): the request body as a dict.\n\n    Receives the model, the messages, max_tokens and the system text (may be None). Returns a dict with `model`, `max_tokens` and\n    `messages`, plus `system` only when it is present and not blank (use _present).\n    Example: _body(\"m\", [], 8, \"  \") -> {\"model\": \"m\", \"max_tokens\": 8, \"messages\": []}\n    \"\"\"\n    return {}\n\n\ndef build_request(api_key, model, messages, max_tokens, system=None):\n    log.debug(\"build_request input: %r %r %r %r\", model, messages, max_tokens, system)\n    _validate(api_key, messages, max_tokens)\n    return Request(\"POST\", URL, _headers(api_key), json.dumps(_body(model, messages, max_tokens, system)))\n\n\ndef _error_parts(parsed, text):\n    \"\"\"TODO 4 of 8 (finish this to pass e4 and e5): the error type and message of an error reply.\n\n    Receives the parsed JSON body (None when it is not JSON) and the raw body text. For a body shaped like\n    {\"error\": {\"type\": ..., \"message\": ...}} returns that type and message as text; for anything else returns \"unknown\" and the first\n    200 characters of the text, trimmed.\n    Example: _error_parts({\"error\": {\"type\": \"x\", \"message\": \"m\"}}, \"\") -> (\"x\", \"m\"), _error_parts(None, \" <html> \") -> (\"unknown\", \"<html>\")\n    \"\"\"\n    return \"\", \"\"\n\n\ndef _pick_request_id(header_id, body_id):\n    \"\"\"TODO 5 of 8 (finish this to pass e4): which request id the error carries.\n\n    Receives the id from the `request-id` header and the id from the body, either may be None. Returns the header's when there is one,\n    else the body's, else None.\n    Example: _pick_request_id(\"h\", \"b\") -> \"h\", _pick_request_id(None, \"b\") -> \"b\"\n    \"\"\"\n    return None\n\n\ndef _redact(message, api_key):\n    \"\"\"TODO 6 of 8 (finish this to pass e6): keep the key out of the error.\n\n    Receives the message and the API key. Returns the message with every occurrence of the key replaced by [redacted].\n    Example: _redact(\"bad key sk-1\", \"sk-1\") -> \"bad key [redacted]\"\n    \"\"\"\n    return message\n\n\ndef _error_from(response, api_key):\n    try:\n        parsed = json.loads(response.body)\n    except ValueError:\n        parsed = None\n    kind, message = _error_parts(parsed, response.body)\n    body_id = parsed.get(\"request_id\") if isinstance(parsed, dict) else None\n    request_id = _pick_request_id(response.headers.get(\"request-id\"), body_id)\n    return ApiError(response.status, kind, _redact(message, api_key), request_id)\n\n\ndef _parse_message(text):\n    \"\"\"TODO 7 of 8 (finish this to pass e3): the message of a good reply.\n\n    Receives the response body text. Returns the parsed JSON object.\n    Example: _parse_message('{\"stop_reason\": \"end_turn\"}') -> {\"stop_reason\": \"end_turn\"}\n    \"\"\"\n    return {}\n\n\ndef send_messages(transport, api_key, model, messages, max_tokens, system=None):\n    request = build_request(api_key, model, messages, max_tokens, system)\n    response = transport(request)\n    if 200 <= response.status < 300:\n        return _parse_message(response.body)\n    raise _error_from(response, api_key)\n\n\ndef text_of(message):\n    \"\"\"TODO 8 of 8 (finish this to pass e3): the text of a message.\n\n    Receives a message dict with a `content` list of blocks. Returns the `text` of the blocks whose `type` is \"text\", joined with\n    nothing between them; every other block type is ignored.\n    Example: text_of({\"content\": [{\"type\": \"text\", \"text\": \"a\"}, {\"type\": \"tool_use\"}, {\"type\": \"text\", \"text\": \"b\"}]}) -> \"ab\"\n    \"\"\"\n    return \"\"\n",
   "exercise": {
     "main_path": "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-1/raw_client.py",
@@ -305,7 +300,10 @@
     },
     "origin": "course/13-one-rest-api-under-every-sdk/02-what-the-sdk-does-for-you.md",
     "concepts": [
-      "the practice of What the SDK does for you, and a raw client is solved"
+      "A Messages call is a POST to /v1/messages with exactly x-api-key, anthropic-version 2023-06-01 and content-type application/json.",
+      "The system prompt goes in the body only when present and not blank, and bad input is refused before anything is sent.",
+      "A non-2xx reply becomes an error with its type, message and request id, the request-id header winning over the body.",
+      "A reply that is not JSON still gives an error of type unknown, and the API key never appears in an error."
     ],
     "files": [
       "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-1/try_it.py"

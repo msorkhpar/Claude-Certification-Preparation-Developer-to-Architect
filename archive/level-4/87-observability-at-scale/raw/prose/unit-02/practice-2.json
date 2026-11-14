@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: trace triage"
-    },
-    {
       "type": "para",
       "text": "A platform keeps a random one percent of its traces, so the failures it needs to explain are mostly gone; when an agent fails, its dashboard names the span that reported the error and not the one that failed; a stale index never shows up because nothing threw; its alert fires on a single bad minute and is ignored by the third night; and its log records carry whole prompts. In this practice you write the pieces that replace that: the reason a trace is kept, with its order of priority; the search for the deepest failing span; the drift check against a baseline; the alert over consecutive windows; the redaction of a log record; and the trail of one request across components. The model is not called: the tests give you spans, metrics, series and events. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -188,7 +183,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -200,7 +195,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "b697e0bc33176f0e63d611928a349809de0741b6c682231f88c4aa54ae091d7b",
+  "content_sha256": "2427760d374da6baf391136ef69a7dd88a796b5e1daf6fab7231ff5af7afa6b8",
   "starting_code": "/** Trace triage: which traces to keep, the layer that failed, drift, alerts, redaction and one request's trail. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"triage\");\n\nexport type Span = { id: string; parent: string; kind: string; name: string; status: string; ms: number; note: string };\nexport type Cause = { layer: string; name: string; why: string; path: string[] };\nexport type Event = { request: string; ts: number; component: string; message: string };\nexport const CONTENT = new Set([\"prompt\", \"response\", \"tool_input\", \"tool_output\"]);\n\nexport function bucket(traceId: string): number {\n  let h = 7;\n  for (const c of traceId) h = (h * 31 + c.charCodeAt(0)) % 1000003;\n  return h % 100;\n}\n\nexport function keepTrace(traceId: string, spans: Span[], rate: number, feedback = false, slowMs = 5000): string | null {\n  log.debug(\"keepTrace input\", spans);\n  // TODO 1 of 7 (unlocks m1 and e1): why a trace is kept.\n  // Receives the trace id, its spans (`status`, `ms`, `kind`, `name`; the first span is the root), the sampling rate (0 to 100) and the flags. Returns the first reason\n  // that applies, in this order: \"error\" when any span has the status \"error\"; \"slow\" when the root's `ms` is over `slowMs` (equal is not slow); \"retries\" when\n  // one tool (a span of kind \"tool\") was called three times or more by name; \"feedback\" when `feedback` is set; otherwise \"sampled\" when `bucket(traceId)` is\n  // below `rate` and \"dropped\" when it is not.\n  // Example: one tool span called \"fetch\" three times, nothing else wrong -> \"retries\"\n  return null;\n}\n\nfunction deepest(failed: Span[]): Span {\n  // TODO 2 of 7 (unlocks e2): the span that is the origin of a failure.\n  // Receives the spans that failed (each has `id` and `parent`). Returns the first one that is not the parent of another failed span, so the error that a\n  // parent merely reported is passed over for the span below it.\n  // Example: s1 (root) <- s2 <- s3, all failed -> s3; two failed children of one parent -> the first of them\n  return failed[0];\n}\n\nfunction blamedRetrieval(spans: Span[]): Span | undefined {\n  // TODO 3 of 7 (unlocks e3): the retrieval span to blame when nothing failed.\n  // Receives the spans. Returns the first span of kind \"retrieval\" whose `note` is \"stale\" or \"no-hits\", or undefined when there is none.\n  // Example: a retrieval span with the note \"stale\" -> that span\n  return undefined;\n}\n\nexport function rootCause(spans: Span[]): Cause {\n  const byId = new Map(spans.map((s) => [s.id, s]));\n  const failed = spans.filter((s) => s.status === \"error\");\n  if (failed.length > 0) {\n    const origin = deepest(failed);\n    const path: string[] = [];\n    let cursor: Span | undefined = origin;\n    while (cursor !== undefined) {\n      path.push(cursor.name);\n      cursor = byId.get(cursor.parent);\n    }\n    return { layer: origin.kind, name: origin.name, why: \"failed\", path: path.reverse() };\n  }\n  const s = blamedRetrieval(spans);\n  if (s !== undefined) return { layer: \"retrieval\", name: s.name, why: s.note, path: [spans[0].name, s.name] };\n  return { layer: \"none\", name: \"\", why: \"no span failed\", path: [] };\n}\n\nexport function drift(baseline: Record<string, number>, current: Record<string, number>, tolerance: number): string[] {\n  // TODO 4 of 7 (unlocks e4): the metrics that moved.\n  // Receives the baseline and the current values (metric name to a whole number) and a tolerance in percent. Goes through the baseline names in alphabetical order.\n  // The change is `Math.floor(Math.abs(now - base) * 100 / base)`; a baseline of 0 counts as 100 when the value is not 0 and 0 when it is. Returns one string\n  // \"<name> up <pct>%\" or \"<name> down <pct>%\" for each metric whose change is over the tolerance (equal is fine).\n  // Example: baseline 10, now 14, tolerance 30 -> [\"a up 40%\"]\n  return [];\n}\n\nexport function alertAt(series: number[], threshold: number, windows: number): number {\n  // TODO 5 of 7 (unlocks e5): when an alert fires.\n  // Receives the series of window values, the threshold and how many windows in a row must be over it (strictly over). Returns the index of the window at which the\n  // count of consecutive windows over the threshold first reaches `windows`, or -1 when it never does. A window at or under the threshold starts the count again.\n  // Example: [1, 2, 9, 2, 8, 9, 10, 3], threshold 5, windows 3 -> 6\n  return -1;\n}\n\nexport function redact(event: Record<string, string | number>, allowed: string[] = []): Record<string, string | number> {\n  // TODO 6 of 7 (unlocks e6): what a log record keeps.\n  // Receives a record (an object) and the names that may stay. Returns a new object without the fields in CONTENT (`prompt`, `response`, `tool_input`, `tool_output`) unless the\n  // field's name is in `allowed`; every other field stays.\n  // Example: { trace: \"t\", prompt: \"x\" } -> { trace: \"t\" }\n  return { ...event };\n}\n\nexport function requestTrail(events: Event[], request: string): string[] {\n  // TODO 7 of 7 (unlocks e7): one request's story.\n  // Receives the events of every component (`request`, `ts`, `component`, `message`) and a request id. Returns \"<component>: <message>\" for each event of that request, in\n  // order of `ts` (events with the same `ts` stay in the order they came); an unknown request gives an empty array.\n  // Example: events at ts 30 (tool), 10 (api), 20 (agent) -> [\"api: ...\", \"agent: ...\", \"tool: ...\"]\n  return [];\n}\n",
   "exercise": {
     "main_path": "practice/level-4/87-observability-at-scale/prose/unit-02/practice-2/triage.ts",
@@ -268,7 +263,10 @@
     },
     "origin": "course/87-observability-at-scale/02-drift-alerts-and-the-practice.md",
     "concepts": [
-      "the practice of Drift, alerts and the practice is solved"
+      "A trace is kept for an error, then a slow root, then repeated retries, then feedback, and otherwise by sampling.",
+      "The root cause is the deepest failing span, and a stale or empty retrieval is blamed only when no span failed.",
+      "Drift reports a move in either direction over the tolerance, and an alert needs consecutive windows over the threshold.",
+      "Logs drop prompt, response and tool content unless allowed by name, and a request's trail joins every component's events in time order."
     ],
     "files": [
       "practice/level-4/87-observability-at-scale/prose/unit-02/practice-2/try-it.ts"

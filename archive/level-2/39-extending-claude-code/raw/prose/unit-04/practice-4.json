@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: the marketplace of a platform team"
-    },
-    {
       "type": "para",
       "text": "A platform team ships one plugin from its own repository and lists two more that live elsewhere. Each of these goes wrong quietly: an entry named differently from its manifest cannot be installed by the manifest's name, a version set in two places is read from one without a warning, a hooks file without its wrapper fails to load, a dependency from another marketplace is refused unless the root marketplace allows it, and a plugin from an external source is not installed by the repository's settings alone. In this practice you write the files of the page \"Building a plugin and publishing it through your own marketplace\". Nothing is installed and Claude Code is not started: the tests read your files and check them against the documented rules. It is in Python, TypeScript, Java and Kotlin; The folder is the root of the marketplace repository."
     },
@@ -309,7 +304,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 9,
     "code": 6,
     "tables": 2,
@@ -321,7 +316,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "cb257d902b433d1366a758da910d02129bdc590349c83a9ba1e612c10ff17b2f",
+  "content_sha256": "d47f23619dae9ae2c5f32b4f37698bc1eb14eebe6a4e1afcc9dfc3ecc7191884",
   "starting_code": "{\n  \"name\": \"example-org-tools\",\n  \"description\": \"Plugins for the platform team\",\n  \"owner\": { \"name\": \"Example Org Platform Team\", \"email\": \"contact@example.com\" },\n  \"plugins\": [\n    {\n      \"name\": \"standards-kit\",\n      \"source\": \"./plugins/standards-kit\",\n      \"description\": \"Changelog skill, edit guard and ticket server for the platform team\"\n    },\n    {\n      \"name\": \"\",\n      \"source\": {},\n      \"description\": \"Runs the team's linters\"\n    },\n    {\n      \"name\": \"db-tools\",\n      \"source\": {\n        \"source\": \"git-subdir\",\n        \"url\": \"example-org/monorepo\",\n        \"path\": \"tools/db-tools\",\n        \"ref\": \"v2.0.0\",\n        \"sha\": \"0f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c\"\n      },\n      \"description\": \"Database helpers\"\n    }\n  ]\n}\n",
   "exercise": {
     "main_path": "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/.claude-plugin/marketplace.json",
@@ -400,7 +395,10 @@
     },
     "origin": "course/39-extending-claude-code/04-building-a-plugin-and-publishing-it-through-your-own-marketplace.md",
     "concepts": [
-      "the practice of Building a plugin and publishing it through your own marketplace is solved"
+      "An entry's source is a relative path inside the marketplace, a github repo or a git-subdir, external ones pinned to a tag and full commit.",
+      "A plugin's version lives in its manifest alone, and only plugin.json goes inside .claude-plugin.",
+      "hooks.json wraps its events in a top-level hooks key, and a dependency from another marketplace must be allowed by name.",
+      "Team settings register the marketplace under its own name, and renames lead every former name to a current plugin or null."
     ],
     "files": [
       "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/.claude/settings.json",

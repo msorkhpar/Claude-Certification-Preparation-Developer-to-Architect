@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: bounded concurrency with backpressure"
-    },
-    {
       "type": "para",
       "text": "Write the worker pool that every batch job needs: run work over many items, never more than `limit` at a time, without reading the whole input first."
     },
@@ -193,7 +188,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 6,
     "code": 2,
     "tables": 2,
@@ -205,7 +200,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "29f7039fc988150bc05cf2b8caf77d33ea977b17c81a12f883d3692ea176758d",
+  "content_sha256": "aa5d3acc4ea7f8b333e8798cf2f7a4d4a5cf928c0881a4ed18ac5c6ca575e8cf",
   "starting_code": "\"\"\"Run async work over an iterable with a bound on how much runs at once. See ../../statement.md.\"\"\"\nimport asyncio\nimport logging\nfrom dataclasses import dataclass\nfrom typing import Any\n\nlog = logging.getLogger(__name__)\n\n\n@dataclass\nclass Outcome:\n    ok: bool\n    value: Any = None\n    error: Any = None\n\n\ndef _check_limit(limit):\n    \"\"\"TODO 1 of 6 (finish this to pass e4): refuse a limit that is not a whole number of at least 1.\n\n    Receives the limit. Raises ValueError(\"limit must be at least 1\") for 0, a negative number or a value that is not an int; returns nothing otherwise.\n    Example: _check_limit(0) raises ValueError, _check_limit(3) returns None\n    \"\"\"\n\n\ndef _next_slot(source, results):\n    \"\"\"TODO 2 of 6 (finish this to pass e5 and m1): take the next item and reserve its slot.\n\n    Receives the iterator `source` and the list `results`. Takes ONE item from the iterator, appends None to `results` as the slot of that item and\n    returns (index of the slot, item); returns None when the iterator is exhausted. Items are taken only here, one at a time.\n    Example: with results == [None] and source yielding \"b\": returns (1, \"b\") and results becomes [None, None]\n    \"\"\"\n    return None\n\n\ndef _succeeded(value):\n    \"\"\"TODO 3 of 6 (finish this to pass m1, e1 and e3): the Outcome of an item whose work returned `value`.\n\n    Example: _succeeded(4) -> Outcome(True, 4)\n    \"\"\"\n    return Outcome(False)\n\n\ndef _failed(error):\n    \"\"\"TODO 4 of 6 (finish this to pass e2): the Outcome of an item whose work raised `error`.\n\n    Example: _failed(RuntimeError(\"boom\")) -> Outcome(False, error=RuntimeError(\"boom\"))\n    \"\"\"\n    return Outcome(True)\n\n\ndef _place(results, index, outcome):\n    \"\"\"TODO 5 of 6 (finish this to pass e1): store `outcome` in slot `index` of `results`, so the list stays in input order.\n\n    Example: results == [None, None], _place(results, 1, o) makes results [None, o]\n    \"\"\"\n\n\ndef _pool(limit, worker):\n    \"\"\"TODO 6 of 6 (finish this to pass m1 and e5): the `limit` worker coroutines that run side by side.\n\n    Receives the limit and the worker coroutine function. Returns a list of `limit` fresh worker() coroutines.\n    Example: _pool(3, worker) -> [worker(), worker(), worker()]\n    \"\"\"\n    return []\n\n\nasync def map_bounded(items, work, limit):\n    log.debug(\"map_bounded input: items=%r limit=%r\", items, limit)\n    _check_limit(limit)\n    source = iter(items)\n    results = []  # one slot per item, in input order, filled as items finish\n\n    async def worker():\n        while True:\n            # The next item is taken only when this worker is free: a slow consumer holds the producer back.\n            slot = _next_slot(source, results)\n            if slot is None:\n                return\n            index, item = slot\n            try:\n                outcome = _succeeded(await work(item))\n            except Exception as err:  # noqa: BLE001 - one failure must not stop the others\n                outcome = _failed(err)\n            _place(results, index, outcome)\n\n    await asyncio.gather(*_pool(limit, worker))\n    return results\n",
   "exercise": {
     "main_path": "practice/level-2/16-async-concurrency-and-backpressure/prose/unit-02/practice-1/bounded.py",
@@ -264,7 +259,10 @@
     },
     "origin": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md",
     "concepts": [
-      "the practice of Rate limits as a client concern, backpressure, and a worker pool is solved"
+      "No more than the limit of calls run at once, and the limit is reached whenever there are enough items.",
+      "Results come back in input order, and a failing item is reported in its own outcome while the others finish.",
+      "Items are pulled one at a time only when a worker is free, so a slow consumer holds the producer back.",
+      "A limit below one is refused, and an empty input gives an empty result."
     ],
     "files": [
       "practice/level-2/16-async-concurrency-and-backpressure/prose/unit-02/practice-1/try_it.py"

@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a coordinator that delegates to isolated subagents"
-    },
-    {
       "type": "para",
       "text": "A research system has one coordinator and several subagents. The coordinator splits the question, hands each subagent a brief, reads what comes back, asks for more where there are gaps, and writes one answer. A subagent knows only its brief: it does not see the conversation, the plan or the other subagents' findings. Most of the failures of such a system are in the coordinator's code, not in the model: duplicated work, a vague brief, one failure that stops the team, a review that sends everyone out again, and a team built for a question that one agent could answer. Write the coordinator. Nothing here touches the network: the four model roles are functions that the tests script."
     },
@@ -217,7 +212,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 9,
+    "headings": 8,
     "paras": 5,
     "code": 2,
     "tables": 2,
@@ -229,7 +224,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "c9256a0942dba19999b74f72d63374ffe8baa86b14748080807c400e90672bb2",
+  "content_sha256": "9ddb3137dcdcd04f561d14ea1f00e60f345b3c6fa13f329552134a35ebffc003",
   "starting_code": "\"\"\"A coordinator that delegates to isolated subagents, reviews what comes back and synthesizes. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _drop_reason(brief, key, seen, kept_count, max_agents):\n    \"\"\"TODO 1 of 8 (unlocks e3): why a subtask is dropped, or None to keep it.\n\n    Receives the brief, the lower-cased scope key, the set of keys already kept, how many are kept and the limit. Returns\n    \"empty brief\" for a blank brief, else \"duplicate scope\" for a key already seen, else \"over limit\" when kept_count has reached\n    max_agents, else None. Example: _drop_reason(\"  \", \"a\", set(), 0, 3) -> \"empty brief\"\n    \"\"\"\n    return None\n\n\ndef _report_problem(report):\n    \"\"\"TODO 2 of 8 (unlocks e4): what is wrong with a subagent's report, or None.\n\n    Receives whatever the subagent returned. Returns \"empty report\" when it is not a string or only blank, else None.\n    Example: _report_problem(\"   \") -> \"empty report\"\n    \"\"\"\n    return None\n\n\ndef _follow_up(gap, question):\n    \"\"\"TODO 3 of 8 (unlocks e5): the brief for a follow-up on one gap.\n\n    Returns \"Follow up: <gap>\" then a newline then \"Question: <question>\". Example: _follow_up(\"2023\", \"q\") -> \"Follow up: 2023\\nQuestion: q\"\n    \"\"\"\n    return gap\n\n\ndef _may_refine(gaps, rounds, max_rounds):\n    \"\"\"TODO 4 of 8 (unlocks e5 and e6): is another refinement round allowed?\n\n    True while there are gaps and fewer than max_rounds rounds have run. Example: _may_refine([\"x\"], 2, 2) -> False\n    \"\"\"\n    return False\n\n\ndef _final_status(gaps, failed):\n    \"\"\"TODO 5 of 8 (unlocks m1 and e6): the status of a run that has an answer.\n\n    \"complete\" when no gaps remain and nothing failed, else \"partial\". Example: _final_status([\"x\"], []) -> \"partial\"\n    \"\"\"\n    return \"complete\"\n\n\ndef _wants_team(plan):\n    \"\"\"TODO 6 of 8 (unlocks e1): does the plan ask for subagents?\n\n    Receives the planner's dict. True when its \"delegate\" value is truthy, else False. Example: _wants_team({\"delegate\": False}) -> False\n    \"\"\"\n    return True\n\n\ndef _clean(subtasks, max_agents):\n    kept, dropped, seen = [], [], set()\n    for task in subtasks:\n        scope, brief = str(task.get(\"scope\", \"\")), str(task.get(\"brief\", \"\"))\n        key = scope.strip().lower()\n        reason = _drop_reason(brief, key, seen, len(kept), max_agents)\n        if reason:\n            dropped.append({\"scope\": scope, \"reason\": reason})\n        else:\n            seen.add(key)\n            kept.append({\"scope\": scope, \"brief\": brief})\n    return kept, dropped\n\n\ndef _clean_gaps(gaps, max_agents):\n    \"\"\"TODO 7 of 8 (unlocks e5 and e6): the reviewer's gaps, tidied.\n\n    Receives the reviewer's list (or None) and the limit. Returns the gaps stripped of blanks, without empty or repeated ones, in order, at most\n    max_agents of them. Example: _clean_gaps([\" a \", \"\", \"a\", \"b\"], 1) -> [\"a\"]\n    \"\"\"\n    return list(gaps or [])\n\n\ndef _brief_of(brief):\n    \"\"\"TODO 8 of 8 (unlocks m1 and e2): the text a subagent is handed.\n\n    Receives the subtask's brief. Returns exactly what the subagent is told: that brief and nothing else (no scope list, no earlier findings).\n    Example: _brief_of(\"cars: find 2024 car output news\") -> \"cars: find 2024 car output news\"\n    \"\"\"\n    return \"\"\n\n\ndef coordinate(planner, subagent, reviewer, synthesizer, question, max_agents=4, max_rounds=2):\n    log.debug(\"coordinate input: %r\", question)\n    plan = planner(question)\n    if not _wants_team(plan):  # a question the coordinator can answer itself is not worth a team\n        return {\"status\": \"direct\", \"answer\": plan.get(\"answer\"), \"findings\": [], \"failed\": [], \"dropped\": [], \"gaps\": [], \"rounds\": 0, \"subagent_calls\": 0}\n    tasks, dropped = _clean(plan.get(\"subtasks\") or [], max_agents)\n    findings, failed, calls = [], [], 0\n\n    def run(scope, brief):\n        nonlocal calls\n        calls += 1\n        try:\n            report = subagent(brief)  # the brief is everything the subagent knows\n        except Exception as error:  # one subagent failing must not stop the others\n            failed.append({\"scope\": scope, \"error\": str(error)})\n            return\n        problem = _report_problem(report)\n        if problem:\n            failed.append({\"scope\": scope, \"error\": problem})\n        else:\n            findings.append({\"scope\": scope, \"text\": report})\n\n    for task in tasks:\n        run(task[\"scope\"], _brief_of(task[\"brief\"]))\n    if not findings:\n        return {\"status\": \"failed\", \"answer\": None, \"findings\": [], \"failed\": failed, \"dropped\": dropped, \"gaps\": [], \"rounds\": 0, \"subagent_calls\": calls}\n    rounds = 0\n    gaps = _clean_gaps(reviewer(question, [dict(f) for f in findings]), max_agents)\n    while _may_refine(gaps, rounds, max_rounds):\n        rounds += 1\n        for gap in gaps:\n            run(gap, _follow_up(gap, question))\n        gaps = _clean_gaps(reviewer(question, [dict(f) for f in findings]), max_agents)\n    answer = synthesizer(question, [dict(f) for f in findings])\n    status = _final_status(gaps, failed)\n    return {\"status\": status, \"answer\": answer, \"findings\": findings, \"failed\": failed, \"dropped\": dropped, \"gaps\": gaps, \"rounds\": rounds, \"subagent_calls\": calls}\n",
   "exercise": {
     "main_path": "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-1/coordinator.py",
@@ -293,7 +288,10 @@
     },
     "origin": "course/46-coordinator-and-subagents/02-review-iteration-failures-and-the-practice.md",
     "concepts": [
-      "the practice of Review, iteration, failures and the practice is solved"
+      "A question the coordinator can answer itself starts no subagent, reviewer or synthesizer.",
+      "A subagent works in isolated context and receives exactly its own brief, with nothing from the plan or other subagents.",
+      "Empty briefs and duplicate scopes are dropped, the team is capped, and one failing subagent does not stop the others.",
+      "Review sends only the remaining gaps out again, for a capped number of rounds, and leftover gaps make the result partial."
     ],
     "files": [
       "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-1/try_it.py"

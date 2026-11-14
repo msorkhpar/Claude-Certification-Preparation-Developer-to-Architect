@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a conversation client, graded on the state it keeps"
-    },
-    {
       "type": "para",
       "text": "The Messages API is stateless: every request must carry the whole conversation. Write the client that keeps it."
     },
@@ -196,7 +191,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 4,
     "code": 2,
     "tables": 2,
@@ -208,7 +203,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "5f93ad3a898bd4e340609d2ba72254aba97742139dd1d8a15d5347a98863b80d",
+  "content_sha256": "c3ea989accb89cbb0039ce0c42292859fead9bb557dab5bb55881dac1cf17e5d",
   "starting_code": "\"\"\"A conversation client that keeps the state the API does not. See ../../statement.md for the contract.\"\"\"\nimport copy\nimport logging\nfrom dataclasses import dataclass\n\nlog = logging.getLogger(__name__)\n\n\n@dataclass\nclass Reply:\n    text: str\n    stop_reason: str\n    truncated: bool\n\n\nclass Conversation:\n    def __init__(self, send, model, max_tokens, system=None, stop_sequences=None):\n        self.send, self.model, self.max_tokens = send, model, max_tokens\n        self.system, self.stop_sequences = system, stop_sequences\n        self._history = []\n        self._totals = {\"input_tokens\": 0, \"output_tokens\": 0}\n\n    def _check_text(self, text):\n        \"\"\"TODO 1 of 8 (finish this to pass e6): refuse a blank turn before anything is sent.\n\n        Receives the text of the turn. Raises ValueError when it is not a string, empty or only whitespace; otherwise returns nothing.\n        Example: _check_text(\"   \") -> ValueError, _check_text(\"hi\") -> None\n        \"\"\"\n\n    def _request_body(self):\n        \"\"\"TODO 2 of 8 (finish this to pass m1 and e5): the request body, a snapshot.\n\n        Receives nothing (it reads self). Returns a dict with `model`, `max_tokens` and `messages`, where `messages` is a deep copy of\n        the whole history so far (the new user turn is already in it), so a later turn cannot change a request already sent.\n        Example: after say(\"a\"), the first body is {\"model\": ..., \"max_tokens\": ..., \"messages\": [{\"role\": \"user\", \"content\": \"a\"}]}\n        \"\"\"\n        return {\"model\": self.model, \"max_tokens\": self.max_tokens, \"messages\": []}\n\n    def _optional_fields(self, body):\n        \"\"\"TODO 3 of 8 (finish this to pass e4): the top-level fields that are only sometimes there.\n\n        Receives the body dict and adds to it: `system` (a top-level field, never a message) when self.system is not blank, and\n        `stop_sequences` (a copy of the list) when self.stop_sequences is given and not empty. Returns nothing.\n        Example: with system=\"Be brief.\" the body gains {\"system\": \"Be brief.\"}; with system=\"  \" it gains nothing\n        \"\"\"\n\n    def _send_or_roll_back(self, body):\n        \"\"\"TODO 4 of 8 (finish this to pass e2): send the body, and leave no dangling user turn when the call fails.\n\n        Receives the body. Returns self.send(body). When send raises, removes the user turn that say added to self._history and raises\n        the same exception again, so roles keep alternating on the next call.\n        Example: a send that raises RuntimeError leaves the history as it was before say\n        \"\"\"\n        return self.send(body)\n\n    def _assistant_turn(self, response):\n        \"\"\"TODO 5 of 8 (finish this to pass m1): the turn to store for the reply.\n\n        Receives the response dict. Returns {\"role\": \"assistant\", \"content\": <the response's content list, as received>}.\n        Example: a response with content [{\"type\": \"text\", \"text\": \"Paris.\"}] -> {\"role\": \"assistant\", \"content\": [that same list]}\n        \"\"\"\n        return {\"role\": \"assistant\", \"content\": []}\n\n    def _add_usage(self, usage):\n        \"\"\"TODO 6 of 8 (finish this to pass e1): keep the running totals.\n\n        Receives the response's usage dict (it may lack a key). Adds its `input_tokens` and `output_tokens` to self._totals. Returns nothing.\n        Example: totals {\"input_tokens\": 12, ...} plus usage {\"input_tokens\": 30, \"output_tokens\": 9} -> input_tokens 42\n        \"\"\"\n\n    def _reply(self, response):\n        \"\"\"TODO 7 of 8 (finish this to pass m1 and e3): what say returns.\n\n        Receives the response dict. Returns a Reply: the `text` of the content blocks whose `type` is \"text\" joined with nothing between\n        them, the response's `stop_reason`, and `truncated`, true only when the stop reason is \"max_tokens\".\n        Example: stop_reason \"max_tokens\" -> Reply(text, \"max_tokens\", True); \"end_turn\" -> truncated False\n        \"\"\"\n        return Reply(\"\", \"\", False)\n\n    def say(self, text):\n        log.debug(\"say input: %r\", text)\n        self._check_text(text)\n        self._history.append({\"role\": \"user\", \"content\": text})\n        body = self._request_body()\n        self._optional_fields(body)\n        response = self._send_or_roll_back(body)\n        self._history.append(self._assistant_turn(response))\n        self._add_usage(response.get(\"usage\", {}))\n        return self._reply(response)\n\n    def history(self):\n        \"\"\"TODO 8 of 8 (finish this to pass e5): the turns so far, as a copy.\n\n        Returns a deep copy of self._history, so changing what the caller gets changes nothing here.\n        Example: chat.history().append(x) leaves len(chat.history()) unchanged\n        \"\"\"\n        return []\n\n    def totals(self):\n        return dict(self._totals)\n\n    def reset(self):\n        self._history = []\n        self._totals = {\"input_tokens\": 0, \"output_tokens\": 0}\n",
   "exercise": {
     "main_path": "practice/level-2/14-the-messages-api/prose/unit-03/practice-1/conversation.py",
@@ -272,7 +267,10 @@
     },
     "origin": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md",
     "concepts": [
-      "the practice of The conversation state the client keeps, and a conversation client is solved"
+      "The Messages API is stateless, so every request carries the whole history, with the assistant content stored as received.",
+      "The system prompt is a top-level field, never a message, and stop sequences are passed on when given.",
+      "A failed call leaves no dangling user turn, so roles keep alternating, and a blank turn is refused before sending.",
+      "Usage adds up over the turns, and a stop reason of max_tokens marks the reply truncated."
     ],
     "files": [
       "practice/level-2/14-the-messages-api/prose/unit-03/practice-1/try_it.py"

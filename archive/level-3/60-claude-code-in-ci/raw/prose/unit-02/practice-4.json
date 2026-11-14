@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a review job that runs Claude Code in CI and gates on its JSON"
-    },
-    {
       "type": "para",
       "text": "A team wants every pull request reviewed by Claude Code in CI. The first workflow is a single line that runs `claude` with a free-text prompt and prints prose into a file: nobody can tell from the job's status whether the review ran, the key is typed into the file, the tool list lets the run edit the checkout, and the review criteria are the sentence \"be conservative\". In this practice you write the job so that it is safe and its result can be trusted: the workflow, the schema of the answer, the criteria file, the prompt, and the function that turns what Claude printed into a job status and a list of comments. All four editions test the same behaviour. The logic is plain data work on text and JSON, and the course checks it with a model of the documented command-line behaviour (`examples/60-ci-gate`, in your language): nothing here starts Claude Code, needs a key or touches the network. The configuration files are the same in every language; the decision function is the code part, `review_gate.py`, `reviewGate.ts`, `ReviewGate.java` (the class `ReviewGate`) or `ReviewGate.kt` (the object `ReviewGate`), with `reviewPrompt` and `gate` as methods in Java and Kotlin and a provided `SchemaCheck` that you do not edit. The Java and Kotlin tests read the JSON with Jackson and the workflow with its YAML module."
     },
@@ -247,7 +242,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 6,
     "code": 4,
     "tables": 1,
@@ -259,7 +254,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "2fb8165acd40d65981893bbb145f29a98c62b24a65b8d37cc094f0a94e53faec",
+  "content_sha256": "a75c88dd5eab13b9e04c5cdb5a5d3ecc46d65f4e62a30f4311f38aaa5dab68dc",
   "starting_code": "import com.fasterxml.jackson.databind.JsonNode\nimport com.fasterxml.jackson.databind.ObjectMapper\n\nprivate val log = System.getLogger(\"review_gate\")\n\n/** The decision of a review job and the prompt of a review run. See ../../statement.md. */\nobject ReviewGate {\n    val SEVERITIES = listOf(\"low\", \"medium\", \"high\")\n    private val json = ObjectMapper()\n\n    /** The prompt of one review run. prior: maps with file, line, category and issue; existingTests: test names. */\n    fun reviewPrompt(diff: String, prior: List<Map<String, Any?>> = emptyList(), existingTests: List<String> = emptyList()): String {\n        // TODO 1 of 9 (finish this to pass e4): the first instructions of the prompt. Add the sentence \"Report only\n        //   findings that are new or still unaddressed.\" as the third line of the instructions, after the line that points\n        //   to the project criteria. Example: the prompt starts with <instructions>, the review line, then this sentence.\n        val lines = mutableListOf(\"<instructions>\", \"Review the change in <diff> against the criteria in the project instructions.\")\n        if (prior.isNotEmpty()) lines += \"Do not repeat a finding listed in <already_reported>.\"\n        if (existingTests.isNotEmpty()) lines += \"Do not suggest a test for a behaviour that an existing test in <existing_tests> already covers.\"\n        lines += \"</instructions>\"\n        if (prior.isNotEmpty()) lines += listOf(\"<already_reported>\") + prior.map { \"- ${it[\"file\"]}:${it[\"line\"]} [${it[\"category\"]}] ${it[\"issue\"]}\" } + \"</already_reported>\"\n        if (existingTests.isNotEmpty()) lines += listOf(\"<existing_tests>\") + existingTests.map { \"- $it\" } + \"</existing_tests>\"\n        lines += listOf(\"<diff>\", diff, \"</diff>\")\n        return lines.joinToString(\"\\n\")\n    }\n\n    private fun decision(exit: Int, comments: List<Map<String, Any?>>, problems: List<String>): Map<String, Any?> = linkedMapOf(\"exit\" to exit, \"comments\" to comments, \"problems\" to problems)\n\n    /** policy: min_severity, disabled_categories and fail_on. Returns exit, comments and problems. */\n    fun gate(stdout: String, exitCode: Int, schema: JsonNode, policy: Map<String, Any?>): Map<String, Any?> {\n        log.log(System.Logger.Level.DEBUG, \"gate input: {0}\", stdout)\n        val problems = mutableListOf<String>()\n        // TODO 2 of 9 (finish this to pass e1): the exit status. When claude exited with a status other than 0, add the\n        //   problem \"claude exited with status N\" (the job fails whatever the output looks like). Example: exit 2 and a\n        //   perfect answer -> exit 1 and that problem.\n        val envelope = try { json.readTree(stdout) } catch (e: Exception) { null }\n        if (envelope == null || !envelope.isObject) return decision(1, emptyList(), problems + \"the output is not a JSON object\")\n        val subtype = envelope.get(\"subtype\")\n        if (envelope.path(\"is_error\").asBoolean(false) || subtype == null || !subtype.isTextual || subtype.asText() != \"success\") {\n            problems += \"the run ended with ${if (subtype == null || subtype.isNull) \"None\" else subtype.asText()}\"\n        }\n        val output = envelope.get(\"structured_output\")\n        // TODO 3 of 9 (finish this to pass e2): the schema check. Check the structured output against the schema with\n        //   the provided helper and add one problem per error, as \"schema \" followed by the error (which names the path).\n        //   Example: severity \"critical\" -> \"schema $.findings[0].severity: ...\".\n        if (output == null || output.isNull) problems += \"the result has no structured_output\"\n        if (problems.isNotEmpty()) return decision(1, emptyList(), problems)\n        val floor = SEVERITIES.indexOf(policy[\"min_severity\"])\n        val disabled = policy[\"disabled_categories\"] as List<*>\n        val failOn = policy[\"fail_on\"] as List<*>\n        // TODO 4 of 9 (finish this to pass m1): the comments of a valid answer. Keep each finding whose severity is at\n        //   or above policy min_severity (the order is low, medium, high) and whose category is not in\n        //   disabled_categories. Return one comment {file, line, severity, body} per kept finding, in order, with the body\n        //   \"ISSUE Suggested fix: FIX\". Example: a medium bug at api.py:12 with floor medium -> one comment.\n        val comments = emptyList<Map<String, Any?>>()\n        // TODO 5 of 9 (finish this to pass e3): the decision. The job fails (exit 1) when at least one posted comment\n        //   has a severity listed in policy fail_on; otherwise it only comments (exit 0). Example: fail_on [high], one\n        //   posted medium comment -> exit 0.\n        return decision(0, comments, emptyList())\n    }\n}\n",
   "exercise": {
     "main_path": "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-4/project/ReviewGate.kt",
@@ -336,7 +331,10 @@
     },
     "origin": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md",
     "concepts": [
-      "the practice of What the run knows: context, independence and the practice is solved"
+      "A CI review runs claude headless with -p, JSON output, a JSON schema, a turn limit, read-only tools, a timeout and a secret key.",
+      "A non-zero exit or an answer that breaks the schema fails the job and names the cause or the path of the problem.",
+      "Findings below the severity floor or in a disabled category are not posted, and only a severity in fail_on blocks the merge.",
+      "The prompt asks only for new or unaddressed findings, and the criteria give a concrete severity example at every level instead of \"be conservative\"."
     ],
     "files": [
       "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-4/project/.github/workflows/claude-review.yml",

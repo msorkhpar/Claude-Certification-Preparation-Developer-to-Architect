@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a context that keeps the facts, trims the noise, never mixes customers and never splits a tool call"
-    },
-    {
       "type": "para",
       "text": "A support agent works with a customer over many turns. Its summaries turn \"$129.50 by 30 September\" into \"a refund soon\", every order lookup drops forty internal fields into the conversation, a late message with an old address overwrites the new one, a facts block loaded for one customer shows up in another customer's session, and the window that trims old messages sometimes keeps a tool result without the call that produced it. In this practice you write the context's building blocks: the trimming of a tool record, the update of case facts, the assembly of the context, the check of a summary against the facts, and the sliding window. The model is not called. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -184,7 +179,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -196,7 +191,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "8b5022e922257dba0f83c593b7cb1a6dabf2b5d87aa358231528efb49d773f04",
+  "content_sha256": "0cccb18cc2bc847e95d229eaf93b4faded90fa45888cbfb34f3196991d0405f9",
   "starting_code": "/** What a long conversation keeps: trimmed tool output, case facts that newer information replaces, a context that never mixes customers, and a window that keeps tool calls whole. See ../../statement.md. */\n\nprivate val log = System.getLogger(\"context_builder\")\n\ndata class Fact(val value: String, val asOf: String, val superseded: List<String>)\n\ndata class FactEntry(val customer: String, val name: String, val value: String, val asOf: String)\n\ndata class Message(val role: String, val kind: String, val id: String, val text: String)\n\nfun estimateTokens(text: String): Int = (text.length + 3) / 4\n\nfun trimRecord(record: Map<String, String>, keep: List<String>): Map<String, String> {\n    // TODO 1 of 6 (finish this to pass m1, e1): the trim. Receives a tool's record and the list of fields to keep.\n    //   Return a new record with only those fields, in the order of the list, with their exact values, skipping a field\n    //   that the record does not have. Example: record {id, status, notes}, keep [status, id] -> {status, id}.\n    return LinkedHashMap(record)\n}\n\nfun updateFacts(facts: Map<String, Fact>, name: String, value: String, asOf: String): Map<String, Fact> {\n    val next = LinkedHashMap(facts)\n    val current = next[name]\n    if (current == null) {\n        next[name] = Fact(value, asOf, emptyList())\n    } else {\n        // TODO 2 of 6 (finish this to pass e2, e3): the update of a known fact. When the new date is the same as or later\n        //   than the stored one, replace the value and the date and append \"oldvalue@olddate\" to the history; when it is\n        //   earlier, keep the current value and append \"newvalue@newdate\" to the history. Example: stored 5@2026-01-02, new\n        //   7@2026-01-05 -> value 7, history [5@2026-01-02].\n        next[name] = Fact(value, asOf, current.superseded)\n    }\n    return next\n}\n\nfun buildContext(customer: String, facts: List<FactEntry>, summary: String, recent: List<Message>): String {\n    log.log(System.Logger.Level.DEBUG, \"buildContext input: {0}\", customer)\n    val parts = mutableListOf<String>()\n    // TODO 3 of 6 (finish this to pass e4): the facts of one customer. Receives the customer and all the fact entries.\n    //   Keep only the entries whose customer is that customer. Example: facts of C1 and C2, customer C1 -> the C1 entries\n    //   only.\n    val mine = facts\n    // TODO 4 of 6 (finish this to pass e5): the case facts section. When there are facts for the customer, add first a\n    //   section titled \"## Case facts\" with one line per fact, \"name: value (as of date)\". Example: one fact -> \"## Case\n    //   facts\\norder: A-7 (as of 2026-01-02)\", before the summary.\n    parts += \"## Summary so far\\n$summary\"\n    parts += \"## Recent messages\\n\" + recent.joinToString(\"\\n\") { \"${it.role}: ${it.text}\" }\n    return parts.joinToString(\"\\n\\n\")\n}\n\n// TODO 5 of 6 (finish this to pass e6): the check of a summary. Receives the summary and the fact entries. Return the\n//   names of the facts whose exact value does not appear in the summary text. Example: fact order = A-7, summary \"customer\n//   wants a refund\" -> [order].\nfun missingFromSummary(summary: String, facts: List<FactEntry>): List<String> = emptyList()\n\nfun window(messages: List<Message>, budget: Int): List<Message> {\n    val units = mutableListOf<List<Message>>()\n    var i = 0\n    while (i < messages.size) {\n        val m = messages[i]\n        // TODO 6 of 6 (finish this to pass e7): the units of the window. Walk the messages in order: a tool_use message\n        //   followed by the tool_result with the same id forms one unit of two, which is never split; any other message is\n        //   a unit of one. Example: [user, tool_use t1, tool_result t1] -> two units.\n        units += listOf(m)\n        i += 1\n    }\n    val kept = ArrayDeque<List<Message>>()\n    var used = 0\n    for (unit in units.asReversed()) {\n        val cost = unit.sumOf { estimateTokens(it.text) }\n        if (used + cost > budget) break\n        kept.addFirst(unit)\n        used += cost\n    }\n    return kept.flatten()\n}\n",
   "exercise": {
     "main_path": "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-4/src/main/kotlin/ContextBuilder.kt",
@@ -268,7 +263,10 @@
     },
     "origin": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md",
     "concepts": [
-      "the practice of Long sessions: windows, stale facts, late updates, isolation and the practice is solved"
+      "A trimmed tool result keeps only the named fields, with their exact values, in the named order.",
+      "A newer case fact replaces the old one and keeps it as history, while a late older fact never replaces the current value.",
+      "The context puts case facts first, then the summary, then recent messages, and never includes another customer's facts.",
+      "A summary that loses an exact value is reported, and the window keeps or drops a tool call together with its result."
     ],
     "files": [
       "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"

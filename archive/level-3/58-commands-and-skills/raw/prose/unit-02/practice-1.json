@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: write a forked review skill, a manual release skill and a command, and place the rest of the guidance"
-    },
-    {
       "type": "para",
       "text": "A team wants three reusable procedures for Claude Code and keeps getting them wrong. A pull request review should run in isolation and report findings. A release tag should only ever be started by a person and may run only two kinds of shell command without asking. A standup summary is an old command file that takes an argument. A developer also wants a personal variant of the review that must not hide the team's version. In this practice you write those files and say where five other pieces of guidance belong. The tests are the same in all four languages and read only the files: they are configuration and notes, not code in a language, and the Java and Kotlin tests read the YAML front matter with Jackson's YAML module. The checks run on the course's own model of the documented rules (`examples/58-skill-model`, in your language). Nothing here starts Claude Code or touches the network."
     },
@@ -263,7 +258,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 7,
     "code": 5,
     "tables": 1,
@@ -275,7 +270,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "5875879bf4686035a54dd74c51c0086437d6666063d691e53be4eb16f0cf97fc",
+  "content_sha256": "e2e4833f50d09094b2c6bdde4904fd2aaf3f1db6f4feab7f60013af5c1a1df55",
   "starting_code": "---\nname: review-pr\ndescription: A skill that reviews pull requests.\nallowed-tools: Read Bash\n---\nGuidelines for reviewing pull requests:\n\n- Be thorough and polite.\n- Look at the diff and the description.\n- Report anything suspicious.\n",
   "exercise": {
     "main_path": "practice/level-3/58-commands-and-skills/prose/unit-02/practice-1/project/.claude/skills/review-pr/SKILL.md",
@@ -349,7 +344,10 @@
     },
     "origin": "course/58-commands-and-skills/02-tools-arguments-forked-skills-and-the-practice.md",
     "concepts": [
-      "the practice of Tools, arguments, forked skills and the practice is solved"
+      "A forked review skill sets context: fork with a general-purpose agent and gives numbered task steps using $0, not a list of guidelines.",
+      "allowed-tools only pre-approves patterns, so taking Edit and Write away needs disallowed-tools.",
+      "disable-model-invocation: true makes a skill start only by a person, and declared arguments fill $version while a command receives $ARGUMENTS.",
+      "Every skill description says when to use it within the 1,536-character listing, and a personal variant takes a new name so it replaces nothing."
     ],
     "files": [
       "practice/level-3/58-commands-and-skills/prose/unit-02/practice-1/project/.claude/commands/standup.md",

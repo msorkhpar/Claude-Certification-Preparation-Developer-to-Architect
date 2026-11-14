@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: one shared setup for exploring a legacy system and generating boilerplate"
-    },
-    {
       "type": "para",
       "text": "A team uses Claude Code on a legacy system. They want an explorer that only reads, a scaffolder that writes boilerplate in one folder, a documentation server and a ticket server that agents may read but never change, and a note that tells the next person which environment variables to set and which kind of session to start. The files of the setup already exist as a draft, and the draft is wrong in several places: a token is typed into a file, a subagent inherits every tool, a permission rule approves a whole tool, a subagent names a server that is not configured. In this practice you correct the files. There is no program to write and no model is called: the tests read your files. The names, paths and rules the tests check are the documented ones of Claude Code (checked 2026-10-04) plus this course's own conventions for the note. It is in Python, TypeScript, Java and Kotlin; pick your language folder, open `starter/` and edit the files there; each language folder holds its own copy of the files."
     },
@@ -252,7 +247,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 9,
     "code": 5,
     "tables": 1,
@@ -264,7 +259,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "8a709a585c6bd13334fc7e6defa34c22e5aabe745799a04926d26437bbc2582b",
+  "content_sha256": "d30cb04e587204ba9a6697393fe15230e800c61f1e8418fa665cbff44c249bfe",
   "starting_code": "{\n  \"mcpServers\": {\n    \"docs\": {\n      \"type\": \"stdio\",\n      \"command\": \"python3\",\n      \"args\": [\"tools/docs_server.py\"]\n    },\n    \"tickets\": {\n      \"type\": \"http\",\n      \"url\": \"https://tickets.example.com/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <token>\"\n      }\n    }\n  }\n}\n",
   "exercise": {
     "main_path": "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-1/project/.mcp.json",
@@ -338,7 +333,10 @@
     },
     "origin": "course/73-scenario-developer-productivity/02-sessions-variables-and-the-practice.md",
     "concepts": [
-      "the practice of Sessions, environment variables and the practice is solved"
+      "Every MCP tool reference in subagents and permission rules names a server that the project configures.",
+      "The token is a ${VAR} reference with no default, while the server address may have one.",
+      "A read-only explorer lists its tools and says when to use it, and the scaffolder has no Bash and edits only the generated folder.",
+      "Ticket create and delete tools are denied, and a resumed session suits unchanged files, a fork compares designs and a fresh start follows rewritten code."
     ],
     "files": [
       "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-1/project/.claude/agents/explorer.md",

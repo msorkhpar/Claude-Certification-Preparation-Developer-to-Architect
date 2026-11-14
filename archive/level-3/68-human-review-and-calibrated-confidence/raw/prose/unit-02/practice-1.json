@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: human review that does not fool itself"
-    },
-    {
       "type": "para",
       "text": "A team extracts fields from documents and reports \"98% accurate\" to justify removing the human reviewers. The figure is an average over thousands of easy invoices; handwritten documents are wrong four times in ten. In this practice you write the pieces that make a review process honest: accuracy broken down by segment, the decision whether a segment may be automated, a confidence threshold calibrated against labelled examples, a stratified sample for ongoing checks, routing of uncertain extractions to a limited number of reviewers, and a checkpoint for actions that cannot be undone. The model is not called. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -190,7 +185,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -202,7 +197,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "71690940229fbdc80cb650f74d21a6a98707a952f91e4852a086bf72d4582e55",
+  "content_sha256": "4e189d0e86445cac3e2bdd6b59e5b4c5e87c00fcd31f897877f245a158f85399",
   "starting_code": "\"\"\"Human review without fooling yourself: accuracy by segment, the decision to automate, a calibrated confidence threshold, a stratified sample, review routing within capacity, and checkpoints for irreversible actions. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\nIRREVERSIBLE = (\"delete_records\", \"send_payment\", \"close_account\")\n\n\ndef _percent(correct, total):\n    return (200 * correct + total) // (2 * total)\n\n\ndef accuracy_by(records):\n    log.debug(\"accuracy_by input: %r\", records)\n    groups = {}\n    for r in records:\n        c, t = groups.get(f\"{r['doc_type']}/{r['field']}\", (0, 0))\n        groups[f\"{r['doc_type']}/{r['field']}\"] = (c + (1 if r[\"correct\"] else 0), t + 1)\n    correct = sum(c for c, _ in groups.values())\n    total = sum(t for _, t in groups.values())\n    out = [{\"segment\": \"overall\", \"correct\": correct, \"total\": total, \"percent\": _percent(correct, total) if total else 0}]\n    # TODO 1 of 7 (finish this to pass m1, e1): the segment rows. After the overall row, add one row for each segment\n    #   (\"doc_type/field\"), sorted by name, with its correct count, its total and the rounded percent. Example:\n    #   invoice/total 8 of 10 -> {segment: invoice/total, correct 8, total 10, percent 80}.\n    for name in sorted(groups):\n        c, t = groups[name]\n        out.append({\"segment\": name, \"correct\": c, \"total\": t, \"percent\": out[0][\"percent\"]})\n    return out\n\n\ndef can_automate(records, threshold, min_n):\n    failing, undersampled = [], []\n    segments = accuracy_by(records)[1:]\n    for s in segments:\n        # TODO 2 of 7 (finish this to pass e2): the sort of the segments. For each segment (not the overall row): when\n        #   its total is below min_n it is undersampled; otherwise when its percent is below the threshold it is failing.\n        #   Example: min_n 5, segment with 4 records -> undersampled; 5 records at 70 percent, threshold 90 -> failing.\n        pass\n    return {\"automate\": bool(segments) and not failing and not undersampled, \"failing\": failing, \"undersampled\": undersampled}\n\n\ndef calibrate_threshold(labeled, target):\n    # TODO 3 of 7 (finish this to pass e3, e4): the threshold. Receives the labelled items (confidence, correct) and the\n    #   target precision in percent. Try each distinct confidence from the lowest; return the first for which the items at\n    #   or above it are right at least target percent of the time; return none when no level does. Example: target 90 and\n    #   no level reaches it -> none.\n    return 0\n\n\ndef stratified_sample(items, per_stratum):\n    strata = []\n    for item in items:\n        if item[\"stratum\"] not in strata:\n            strata.append(item[\"stratum\"])\n    chosen = []\n    for stratum in strata:\n        members = sorted((i for i in items if i[\"stratum\"] == stratum), key=lambda i: (i[\"rank\"], i[\"id\"]))\n        # TODO 4 of 7 (finish this to pass e5): the sample of one stratum. `members` are the stratum's items sorted by\n        #   rank then id. Take only the first per_stratum of them and add their ids. Example: 5 items, per_stratum 2 ->\n        #   the 2 best ranked.\n        chosen += [i[\"id\"] for i in members]\n    return chosen\n\n\ndef route(extractions, threshold, capacity):\n    # TODO 5 of 7 (finish this to pass e6): the review queue. Keep the extractions that have a conflict or a confidence\n    #   below the threshold, ordered with conflicts first, then by confidence (lowest first), then by id. Example:\n    #   threshold 80, a conflict, a 60 and a 90 -> the conflict, then the 60.\n    candidates = list(extractions)\n    queue = [e[\"id\"] for e in candidates]\n    flagged = set(queue)\n    # TODO 6 of 7 (finish this to pass e7): the capacity cut. Split the queue: the first `capacity` ids go to review,\n    #   the others to the backlog, both in order. Example: queue [a, b, c], capacity 2 -> review [a, b], backlog [c].\n    return {\"review\": queue, \"backlog\": [], \"auto\": [e[\"id\"] for e in extractions if e[\"id\"] not in flagged]}\n\n\ndef checkpoint(action, amount, limit=1000):\n    # TODO 7 of 7 (finish this to pass e8): the checkpoint. Receives the action, the amount and the limit. Return human\n    #   when the action is in IRREVERSIBLE or the amount is above the limit, otherwise auto. Example: close_account for 10\n    #   -> human.\n    return \"auto\"\n",
   "exercise": {
     "main_path": "practice/level-3/68-human-review-and-calibrated-confidence/prose/unit-02/practice-1/review_routing.py",
@@ -276,7 +271,10 @@
     },
     "origin": "course/68-human-review-and-calibrated-confidence/02-routing-review-checkpoints-and-the-practice.md",
     "concepts": [
-      "the practice of Routing review, checkpoints for irreversible actions, and the practice is solved"
+      "Accuracy is broken down by document type and field, because a high overall figure can hide a weak segment.",
+      "Automation needs every segment to pass with enough samples, and the threshold is the lowest confidence whose accepted items meet the target precision.",
+      "Conflicts and low-confidence extractions go to review weakest first, up to capacity, with the rest kept in a backlog.",
+      "An irreversible action, or an amount above the limit, needs a person whatever the confidence."
     ],
     "files": [
       "practice/level-3/68-human-review-and-calibrated-confidence/prose/unit-02/practice-1/try_it.py"

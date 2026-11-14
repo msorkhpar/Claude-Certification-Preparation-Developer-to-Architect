@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: set up a repository for Claude Code"
-    },
-    {
       "type": "para",
       "text": "A repository is ready for Claude Code when the right instructions load every session, the permission rules say what runs freely, what asks and what never runs, the personal settings stay on one machine, and the unattended runs are bounded. All of that is plain files. In this practice you write them for a small service, the invoice API, and tests read the project the way Claude Code would. The tests are the same in all four languages and read only the project: the files are not code, and the checks run on the course's own models of the documented rules (`examples/38-settings-layers` and `examples/39-hook-gate`, in your language). The Java and Kotlin tests read JSON with Jackson and YAML front matter with its YAML module. Nothing here starts Claude Code or touches the network."
     },
@@ -252,7 +247,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 8,
     "code": 6,
     "tables": 1,
@@ -264,7 +259,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "4ab926899643678221e8e59a1ccc0ec8c762df566efe3f5af824dd072e8f163d",
+  "content_sha256": "a1ab40240cb7702b2de030905d0507c4cdf3bc3d85140bbfa12b487d231812c1",
   "starting_code": "# Invoice API\n\nA small service that stores invoices and exports them as CSV.\n\n## Commands\n\n<!-- TODO 1 of 8 (unlocks m1): one bullet each for the test and the lint command, each command in backticks.\n     Example: - Run the tests: `make test` -->\n- TODO\n\n## Conventions\n\n- Python 3.12, type hints on public functions.\n- Handlers live in `src/api/handlers/`, one module per resource.\n- Branch names are `feature/<ticket>`; commit messages start with the ticket id.\n\n## Architecture\n\n<!-- TODO 2 of 8 (unlocks m1): import the architecture notes with an @ line instead of naming them.\n     Example: See @docs/other.md for the details. -->\nSee the architecture notes for the module layout.\n\n## Gotchas\n\n- Tests need `INVOICE_DB_URL` to point at the local SQLite file; `make test` sets it.\n- IMPORTANT: never edit files under `migrations/` by hand; add a new migration instead.\n",
   "exercise": {
     "main_path": "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-1/project/CLAUDE.md",
@@ -334,7 +329,10 @@
     },
     "origin": "course/38-claude-code-for-developers/03-commands-headless-runs-and-the-practice.md",
     "concepts": [
-      "the practice of Commands, headless runs, auto mode and the practice is solved"
+      "CLAUDE.md stays under 200 lines, names the build commands and imports the architecture notes with an @ line.",
+      "Shared settings allow read-only commands, ask before git commit and deny .env, secrets, git push and curl, using only rules Claude Code consults.",
+      "settings.local.json overrides the model for one developer and is ignored by git.",
+      "A headless claude -p review is capped in turns and dollars, never skips permissions, and takes its key from the environment."
     ],
     "files": [
       "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-1/project/.claude/settings.json",

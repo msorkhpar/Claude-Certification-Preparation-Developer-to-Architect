@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a review job that runs Claude Code in CI and gates on its JSON"
-    },
-    {
       "type": "para",
       "text": "A team wants every pull request reviewed by Claude Code in CI. The first workflow is a single line that runs `claude` with a free-text prompt and prints prose into a file: nobody can tell from the job's status whether the review ran, the key is typed into the file, the tool list lets the run edit the checkout, and the review criteria are the sentence \"be conservative\". In this practice you write the job so that it is safe and its result can be trusted: the workflow, the schema of the answer, the criteria file, the prompt, and the function that turns what Claude printed into a job status and a list of comments. All four editions test the same behaviour. The logic is plain data work on text and JSON, and the course checks it with a model of the documented command-line behaviour (`examples/60-ci-gate`, in your language): nothing here starts Claude Code, needs a key or touches the network. The configuration files are the same in every language; the decision function is the code part, `review_gate.py`, `reviewGate.ts`, `ReviewGate.java` (the class `ReviewGate`) or `ReviewGate.kt` (the object `ReviewGate`), with `reviewPrompt` and `gate` as methods in Java and Kotlin and a provided `SchemaCheck` that you do not edit. The Java and Kotlin tests read the JSON with Jackson and the workflow with its YAML module."
     },
@@ -247,7 +242,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 6,
     "code": 4,
     "tables": 1,
@@ -259,7 +254,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "36208879900bb57e56fc58d9ec1616148aca03b639099ee83085434723f46932",
+  "content_sha256": "c2bcf5b73cd24608d2ad3341cd1cdbb8dc6a3163b787ba6b91524b98da39f6b4",
   "starting_code": "\"\"\"The decision of a review job and the prompt of a review run. See ../../statement.md.\"\"\"\nimport json\n\nfrom schema_check import schema_check\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSEVERITIES = [\"low\", \"medium\", \"high\"]\n\n\ndef review_prompt(diff, prior=(), existing_tests=()):\n    # TODO 1 of 9 (finish this to pass e4): the first instructions of the prompt. Add the sentence \"Report only findings\n    #   that are new or still unaddressed.\" as the third line of the instructions, after the line that points to the\n    #   project criteria. Example: the prompt starts with <instructions>, the review line, then this sentence.\n    lines = [\"<instructions>\", \"Review the change in <diff> against the criteria in the project instructions.\"]\n    if prior:\n        lines.append(\"Do not repeat a finding listed in <already_reported>.\")\n    if existing_tests:\n        lines.append(\"Do not suggest a test for a behaviour that an existing test in <existing_tests> already covers.\")\n    lines.append(\"</instructions>\")\n    if prior:\n        lines += [\"<already_reported>\"] + [f\"- {p['file']}:{p['line']} [{p['category']}] {p['issue']}\" for p in prior] + [\"</already_reported>\"]\n    if existing_tests:\n        lines += [\"<existing_tests>\"] + [f\"- {t}\" for t in existing_tests] + [\"</existing_tests>\"]\n    lines += [\"<diff>\", diff, \"</diff>\"]\n    return \"\\n\".join(lines)\n\n\ndef gate(stdout, exit_code, schema, policy):\n    log.debug(\"gate input: %r\", stdout)\n    problems = []\n    # TODO 2 of 9 (finish this to pass e1): the exit status. When claude exited with a status other than 0, add the\n    #   problem \"claude exited with status N\" (the job fails whatever the output looks like). Example: exit 2 and a\n    #   perfect answer -> exit 1 and that problem.\n    try:\n        envelope = json.loads(stdout)\n    except ValueError:\n        envelope = None\n    if not isinstance(envelope, dict):\n        return {\"exit\": 1, \"comments\": [], \"problems\": problems + [\"the output is not a JSON object\"]}\n    if envelope.get(\"is_error\") or envelope.get(\"subtype\") != \"success\":\n        problems.append(f\"the run ended with {envelope.get('subtype')}\")\n    output = envelope.get(\"structured_output\")\n    if output is None:\n        problems.append(\"the result has no structured_output\")\n    else:\n        # TODO 3 of 9 (finish this to pass e2): the schema check. Check the structured output against the schema with\n        #   the provided helper and add one problem per error, as \"schema \" followed by the error (which names the path).\n        #   Example: severity \"critical\" -> \"schema $.findings[0].severity: ...\".\n        pass\n    if problems:\n        return {\"exit\": 1, \"comments\": [], \"problems\": problems}\n    # TODO 4 of 9 (finish this to pass m1): the comments of a valid answer. Keep each finding whose severity is at or\n    #   above policy min_severity (the order is low, medium, high) and whose category is not in disabled_categories.\n    #   Return one comment {file, line, severity, body} per kept finding, in order, with the body \"ISSUE Suggested fix:\n    #   FIX\". Example: a medium bug at api.py:12 with floor medium -> one comment.\n    comments = []\n    # TODO 5 of 9 (finish this to pass e3): the decision. The job fails (exit 1) when at least one posted comment has a\n    #   severity listed in policy fail_on; otherwise it only comments (exit 0). Example: fail_on [high], one posted medium\n    #   comment -> exit 0.\n    blocked = False\n    return {\"exit\": 1 if blocked else 0, \"comments\": comments, \"problems\": []}\n",
   "exercise": {
     "main_path": "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-1/project/review_gate.py",
@@ -337,7 +332,10 @@
     },
     "origin": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md",
     "concepts": [
-      "the practice of What the run knows: context, independence and the practice is solved"
+      "A CI review runs claude headless with -p, JSON output, a JSON schema, a turn limit, read-only tools, a timeout and a secret key.",
+      "A non-zero exit or an answer that breaks the schema fails the job and names the cause or the path of the problem.",
+      "Findings below the severity floor or in a disabled category are not posted, and only a severity in fail_on blocks the merge.",
+      "The prompt asks only for new or unaddressed findings, and the criteria give a concrete severity example at every level instead of \"be conservative\"."
     ],
     "files": [
       "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-1/project/.github/workflows/claude-review.yml",

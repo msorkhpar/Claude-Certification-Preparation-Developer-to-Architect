@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: the design of a pull request pipeline that uses Claude"
-    },
-    {
       "type": "para",
       "text": "A team wants Claude in its pipeline for three jobs: a review that blocks the merge of a pull request, an overnight report on technical debt, and the generation of tests for changed files. The first draft has the usual mistakes. The review is a batch that a developer waits for, one pass reads fourteen files at once, the run is not headless, the review is allowed to run commands, the criteria say \"be conservative\", and the test prompt does not mention the tests that exist. In this practice you correct the files. There is no program to write and no model is called: the tests read your files. The pipeline's shape (job, audience, api, passes, session, context, tools, command) is this course's own description of a pipeline, not a product file; the flags, the schema and the batch behaviour are the documented ones (checked 2026-10-04). It is in Python, TypeScript, Java and Kotlin; pick your language folder, open `starter/` and edit the files there; each language folder holds its own copy of the files."
     },
@@ -236,7 +231,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 8,
     "code": 4,
     "tables": 1,
@@ -248,7 +243,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "a97bb9f51ac246115b79d34532684cf20a5f30c1c5432f7faf03e888e21fd975",
+  "content_sha256": "e051f78590f73a322072b86c9e2386c52ef0c511a5e8face7e9fccd8ccb68cb9",
   "starting_code": "{\n  \"jobs\": [\n    {\n      \"name\": \"pre-merge-review\", \"kind\": \"review\", \"audience\": \"waiting\", \"api\": \"batch\",\n      \"passes\": [\"all-files\"], \"session\": \"shared\", \"context\": [],\n      \"tools\": [\"Read\", \"Grep\", \"Bash\"],\n      \"command\": \"python ci/submit_batch.py pr-review\"\n    },\n    {\n      \"name\": \"debt-report\", \"kind\": \"report\", \"audience\": \"scheduled\", \"api\": \"realtime\",\n      \"passes\": [], \"session\": \"fresh\", \"context\": [],\n      \"tools\": [\"Read\", \"Grep\", \"Glob\"],\n      \"command\": \"claude \\\"List the technical debt in src\\\"\"\n    },\n    {\n      \"name\": \"test-generation\", \"kind\": \"testgen\", \"audience\": \"waiting\", \"api\": \"realtime\",\n      \"passes\": [], \"session\": \"fresh\", \"context\": [],\n      \"tools\": [\"Read\", \"Glob\", \"Edit\"],\n      \"command\": \"claude \\\"Write tests for the changed files\\\"\"\n    }\n  ]\n}\n",
   "exercise": {
     "main_path": "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-1/project/ci/pipeline.json",
@@ -321,7 +316,10 @@
     },
     "origin": "course/74-scenario-claude-code-in-ci/02-review-passes-criteria-test-generation-and-the-practice.md",
     "concepts": [
-      "the practice of Review passes, criteria, test generation and the practice is solved"
+      "A job a person waits for runs in real time, and a job nobody waits for runs as a batch.",
+      "The review runs a per-file pass then an integration pass, in a fresh session given the earlier findings, with read tools only.",
+      "Every claude command is headless with -p, JSON output and a turn limit, and the review schema has a closed severity list and required fields.",
+      "The criteria list what to report and skip with an example per severity and no vague phrase, and the test prompt receives the existing tests."
     ],
     "files": [
       "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-1/project/ci/review-criteria.md",

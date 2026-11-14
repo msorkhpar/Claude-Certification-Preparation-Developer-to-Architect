@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a data policy for a Claude deployment"
-    },
-    {
       "type": "para",
       "text": "A regulated customer asks where its data goes. The answer is a configuration: the platform that serves the model, the region, whether zero data retention is in place, how identifiers are handled, how tenants are separated and what the audit log keeps. In this practice you write the three checks around that configuration: the check that compares it with the customer's requirements, the rule that decides which audit entries to purge, and the routing rule that keeps each user's data in their region. The model is not called: the tests give you configurations as maps. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -212,7 +207,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 9,
+    "headings": 8,
     "paras": 9,
     "code": 2,
     "tables": 1,
@@ -224,7 +219,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "fcf87be3176d38c1eea54087e9ee8c36ff239fc1001356a46a4e1c5c4f6a0cd7",
+  "content_sha256": "ae6126b41558c1428efefab87d58f1213ded82dc37c9f08128411e1f6e6e0f74",
   "starting_code": "/** A data policy for a Claude deployment: the findings of a configuration check, what a retention rule purges, and the deployment that may serve a user. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"data_policy\");\n\nconst SAFE_INPUT = [\"tokenise\", \"redact\"]; // pii_handling values that keep identifiers out of the prompt\nconst WANT: Record<string, string> = { us: \"us\", eu: \"eu\", other: \"global\" }; // the residency of the deployment that may serve a user region\n\nconst byText = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);\nconst given = (value: any) => value !== undefined && value !== null;\n\nfunction report(findings: Set<string>): string[] | null {\n  // TODO 1 of 6 (unlocks m1): the answer of checkDeployment.\n  // Receives the set of finding ids. Returns them as an array sorted by text, or null when there is nothing to report yet.\n  // Example: report(new Set([\"zdr-missing\", \"phi-no-baa\"])) -> [\"phi-no-baa\", \"zdr-missing\"]\n  return null;\n}\n\nfunction residencyFindings(req: any, config: any): Set<string> {\n  const platform = config.platform;\n  const region: string = config.region ?? \"\";\n  if (req.residency === \"us\") {\n    if (platform === \"api\" || platform === \"aws-platform\") {\n      if (config.inference_geo !== \"us\") return new Set([\"residency-not-pinned\"]);\n    } else if (!region.startsWith(\"us-\")) {\n      return new Set([\"residency-region\"]);\n    }\n  } else if (req.residency === \"eu\") {\n    if (platform === \"api\" || platform === \"aws-platform\") {\n      return new Set([\"residency-unavailable\"]);\n    } else if (!(region.startsWith(\"eu-\") || region.startsWith(\"europe-\") || region === \"eu\")) {\n      return new Set([\"residency-region\"]);\n    }\n  }\n  return new Set();\n}\n\nfunction zdrFindings(req: any, config: any): Set<string> {\n  // TODO 2 of 6 (unlocks e2): the findings about zero data retention.\n  // Receives the requirements and the configuration. Returns a set of finding ids. When `zdr_required` is set: `zdr-not-anthropics` on the\n  // platforms `bedrock` and `vertex` (and nothing else); on the others `zdr-missing` when `zdr` is not set, and `model-needs-retention` when the\n  // model name starts with `claude-fable`. Nothing is required, nothing is found.\n  // Example: platform \"api\", zdr false, zdr_required true -> Set { \"zdr-missing\" }\n  return new Set();\n}\n\nfunction phiFindings(req: any, config: any): Set<string> {\n  // TODO 3 of 6 (unlocks e3): the findings about protected health information.\n  // Receives the requirements and the configuration. Returns a set of finding ids. When `phi` is set: `phi-no-baa` on the platform `api` without\n  // `hipaa_baa`; `phi-platform-unsupported` on `aws-platform`; `phi-not-deidentified` when `pii_handling` is not in SAFE_INPUT.\n  // Example: platform \"api\", hipaa_baa false, pii_handling \"tokenise\", phi true -> Set { \"phi-no-baa\" }\n  return new Set();\n}\n\nfunction tenantFindings(req: any, config: any): Set<string> {\n  return req.multi_tenant && config.tenancy !== \"workspace-per-tenant\" ? new Set([\"tenant-isolation\"]) : new Set();\n}\n\nfunction retentionFindings(req: any, config: any): Set<string> {\n  const findings = new Set<string>();\n  const days = (config.audit ?? {}).retain_days;\n  if (given(days)) {\n    if (given(req.audit_max_days) && days > req.audit_max_days) findings.add(\"retention-too-long\");\n    if (given(req.audit_min_days) && days < req.audit_min_days) findings.add(\"retention-too-short\");\n  }\n  return findings;\n}\n\nfunction auditFindings(req: any, config: any): Set<string> {\n  // TODO 4 of 6 (unlocks e5): the finding about stored prompts.\n  // Receives the requirements and the configuration; the audit settings are `config.audit` (it may be missing). Returns\n  // Set { \"audit-stores-sensitive\" } when `store_prompts` is set and either `phi` is required or `pii_handling` is not in SAFE_INPUT; an empty set otherwise.\n  // Example: store_prompts true, pii_handling \"none\" -> Set { \"audit-stores-sensitive\" }\n  return new Set();\n}\n\nexport function checkDeployment(config: any, req: any): string[] | null {\n  log.debug(\"checkDeployment input\", config);\n  const findings = new Set<string>();\n  for (const check of [residencyFindings, zdrFindings, phiFindings, tenantFindings, auditFindings, retentionFindings]) {\n    for (const finding of check(req, config)) findings.add(finding);\n  }\n  return report(findings);\n}\n\nconst dayNumber = (iso: string): number => Math.floor(Date.parse(`${iso}T00:00:00Z`) / 86_400_000);\nconst ageDays = (day: string, today: string): number => dayNumber(today) - dayNumber(day);\n\nexport function retentionActions(entries: any[], maxDays: number, today: string): { purge: string[]; keep: string[] } | null {\n  // TODO 5 of 6 (unlocks e7): what a retention rule purges.\n  // Receives the entries (each has `id` and an ISO `date`, and may have `hold`), the limit in days and today's ISO date. Returns\n  // { purge: [ids], keep: [ids] }, both sorted by id. An entry is purged when it is older than the limit (strictly) and is not on hold.\n  // Example: an entry dated 365 days before today with maxDays 365 is kept; one dated 366 days before is purged.\n  return null;\n}\n\nexport function pickDeployment(userRegion: string, deployments: any[]): string | null {\n  // TODO 6 of 6 (unlocks e8): the deployment that may serve a user.\n  // Receives the user's region (\"us\", \"eu\" or \"other\") and the deployments (each has `name` and `residency`). Returns the first name, in\n  // alphabetical order, of the deployments whose residency is WANT[userRegion], or null when there is none (a global deployment does not serve \"us\" or \"eu\").\n  // Example: \"eu\" with eu-main and eu-backup -> \"eu-backup\"\n  return null;\n}\n",
   "exercise": {
     "main_path": "practice/level-4/83-deployment-architecture-and-data-handling/prose/unit-02/practice-2/dataPolicy.ts",
@@ -297,7 +292,10 @@
     },
     "origin": "course/83-deployment-architecture-and-data-handling/02-the-identifier-boundary-the-audit-log-and-the-practice.md",
     "concepts": [
-      "the practice of The identifier boundary, the audit log and the practice is solved"
+      "US residency is pinned by inference_geo on the API, or by the cloud region on Bedrock and Vertex.",
+      "Zero data retention is an arrangement of Anthropic's own platforms, not of Bedrock or Vertex, and not of every model.",
+      "Protected health information needs a covered platform, a signed agreement where required and de-identified input, and the audit log never stores sensitive prompts.",
+      "Multi-tenant services need a workspace per tenant, and only entries past the retention limit and not on legal hold are purged."
     ],
     "files": [
       "practice/level-4/83-deployment-architecture-and-data-handling/prose/unit-02/practice-2/try-it.ts"

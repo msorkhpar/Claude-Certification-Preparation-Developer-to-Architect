@@ -221,7 +221,10 @@
 <p class="eyebrow" data-practices-part="kind"><span>Coding practice</span></p>
 <h3><a href="#s-practice-prose" data-practices-part="open">Practice: bounded concurrency with backpressure<svg data-practices-part="chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M 9 6 l 6 6 l -6 6"></path></svg></a></h3>
 <ul data-practices-part="concepts" aria-label="What it practises">
-<li>the practice of Rate limits as a client concern, backpressure, and a worker pool is solved</li>
+<li>No more than the limit of calls run at once, and the limit is reached whenever there are enough items.</li>
+<li>Results come back in input order, and a failing item is reported in its own outcome while the others finish.</li>
+<li>Items are pulled one at a time only when a worker is free, so a slow consumer holds the producer back.</li>
+<li>A limit below one is refused, and an empty input gives an empty result.</li>
 </ul>
 <p data-practices-part="state" hidden><span data-practice-state="not-started">Not started</span><span data-practice-state="partial" hidden>Passed in <b data-edition-count>0</b> of 4 languages</span><span data-practice-state="passed" hidden>Passed in every language</span></p>
 <p data-practices-part="editions">Available in: <span data-edition="python" data-edition-section="s-practice-prose" data-edition-key="level-2/16-async-concurrency-and-backpressure/unit-02/practice-prose">Python<span data-edition-mark hidden> (passed)</span></span>, <span data-edition="typescript" data-edition-section="s-practice-prose-2" data-edition-key="level-2/16-async-concurrency-and-backpressure/unit-02/practice-prose-2">TypeScript<span data-edition-mark hidden> (passed)</span></span>, <span data-edition="java" data-edition-section="s-practice-prose-3" data-edition-key="level-2/16-async-concurrency-and-backpressure/unit-02/practice-prose-3">Java<span data-edition-mark hidden> (passed)</span></span>, <span data-edition="kotlin" data-edition-section="s-practice-prose-4" data-edition-key="level-2/16-async-concurrency-and-backpressure/unit-02/practice-prose-4">Kotlin<span data-edition-mark hidden> (passed)</span></span>.</p>
@@ -230,19 +233,18 @@
 </section>
 <section id="s-practice-prose" data-section="practice-prose" data-kind="practice" data-label="Practice: bounded concurrency with backpressure (Python)" data-edition="python">
 <h2 id="practice-prose-b0">Problem statement</h2>
-<h2 id="practice-prose-b1">Practice: bounded concurrency with backpressure</h2>
 <p>Write the worker pool that every batch job needs: run work over many items, never more than <code>limit</code> at a time, without reading the whole input first.</p>
-<h2 id="practice-prose-b3">The function</h2>
+<h2 id="practice-prose-b2">The function</h2>
 <p><strong><code>map_bounded(items, work, limit)</code></strong> (TypeScript <code>mapBounded</code>, Java <code>Bounded.mapBounded</code>, Kotlin <code>mapBounded</code>)</p>
 <div class="scroll"><table><thead><tr><th>Language</th><th>Shape</th></tr></thead><tbody><tr><td>Python</td><td><code>async def map_bounded(items, work, limit)</code>: <code>items</code> is any iterable, <code>work(item)</code> is a coroutine function</td></tr><tr><td>TypeScript</td><td><code>async function mapBounded(items, work, limit)</code>: <code>items</code> is an <code>Iterable</code>, <code>work(item)</code> returns a promise</td></tr><tr><td>Java</td><td><code>static List&lt;Outcome&lt;R&gt;&gt; mapBounded(Iterator&lt;T&gt; items, Function&lt;T, R&gt; work, int limit)</code>: blocking, one worker thread per slot</td></tr><tr><td>Kotlin</td><td><code>fun mapBounded(items: Iterator&lt;T&gt;, work: (T) -&gt; R, limit: Int): List&lt;Outcome&lt;R&gt;&gt;</code>: blocking, one worker thread per slot</td></tr></tbody></table></div>
 <p>It returns one <strong><code>Outcome</code></strong> per item, <strong>in input order</strong>: <code>ok</code> with a <code>value</code>, or not <code>ok</code> with the <code>error</code> that <code>work</code> raised. <code>Outcome</code> is given in the starter.</p>
-<h2 id="practice-prose-b7">What is already written, and what you write</h2>
+<h2 id="practice-prose-b6">What is already written, and what you write</h2>
 <p>The starter is the working pool with six small gaps cut out of it: the worker loop, the <code>Outcome</code> type, the lazy source and the final join are written and correct. Each gap is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. To see what a gap receives, log its input with the <code>log</code> line at the top of the file (<code>log.debug(...)</code>); a run shows the lines under the failing case. The names below are Python's; TypeScript, Java and Kotlin use the camel-case forms (<code>checkLimit</code>, <code>nextSlot</code>, <code>succeeded</code>, <code>failed</code>, <code>place</code>, <code>pool</code>).</p>
 <ol class="items"><li><code>_check_limit</code> unlocks <code>e4</code>: refuse a limit below 1.</li><li><code>_next_slot</code> unlocks <code>e5</code> and <code>m1</code>: take one item and reserve its slot, or report that the input is exhausted.</li><li><code>_succeeded</code> unlocks <code>m1</code>, <code>e1</code> and <code>e3</code>: the outcome of an item whose work returned.</li><li><code>_failed</code> unlocks <code>e2</code>: the outcome of an item whose work raised.</li><li><code>_place</code> unlocks <code>e1</code>: store an outcome in the slot of its item, so the list keeps the input order.</li><li><code>_pool</code> unlocks <code>m1</code> and <code>e5</code>: the <code>limit</code> workers that run side by side.</li></ol>
 <p>About ten lines in all.</p>
-<h2 id="practice-prose-b11">Rules</h2>
+<h2 id="practice-prose-b10">Rules</h2>
 <ol class="items"><li><strong>Bounded.</strong> No more than <code>limit</code> calls of <code>work</code> are running at any moment, and when there are enough items, <code>limit</code> of them are.</li><li><strong>Ordered.</strong> The outcomes are in the order of the input, even when later items finish first.</li><li><strong>Isolated.</strong> A failing item is reported in its own outcome; the other items still run and finish.</li><li><strong>Edges.</strong> A limit larger than the number of items works; an empty input gives an empty list; a limit below 1 is refused (<code>ValueError</code>, TypeScript <code>Error</code>, Java and Kotlin <code>IllegalArgumentException</code>).</li><li><strong>Backpressure.</strong> Items are taken from the input <strong>one at a time, only when a worker is free</strong>. While every worker is busy, at most <code>limit</code> items have been taken: a slow consumer holds the producer back, so a million-line file never sits in memory.</li></ol>
-<h2 id="practice-prose-b13">The cases</h2>
+<h2 id="practice-prose-b12">The cases</h2>
 <div class="scroll"><table><thead><tr><th>Id</th><th>What it checks</th></tr></thead><tbody><tr><td><code>m1</code></td><td>Every item is processed, and never more than <code>limit</code> run at once</td></tr><tr><td><code>e1</code></td><td>Results keep the input order even when later items finish first</td></tr><tr><td><code>e2</code></td><td>A failing item is reported and the others still finish</td></tr><tr><td><code>e3</code></td><td>A limit above the item count and an empty input both work</td></tr><tr><td><code>e4</code></td><td>A limit below one is refused</td></tr><tr><td><code>e5</code></td><td>Items are pulled lazily: while all workers are blocked, only <code>limit</code> items have been taken</td></tr></tbody></table></div>
 <details class="disclosure"><summary>Show a worked solution</summary><figure class="code"><figcaption><span class="what">python</span></figcaption><pre><code class="language-python">&quot;&quot;&quot;Run async work over an iterable with a bound on how much runs at once. See ../../statement.md.&quot;&quot;&quot;
 import asyncio
@@ -351,7 +353,7 @@ print(&quot;values:&quot;, sorted(o.value for o in outcomes if o.ok))
 print(&quot;all ok:&quot;, all(o.ok for o in outcomes))
 print(&quot;peak in flight:&quot;, active[&quot;peak&quot;])
 </code></pre></figure></details>
-<h2 id="practice-prose-b17">Starting code</h2>
+<h2 id="practice-prose-b16">Starting code</h2>
 <figure class="code"><figcaption><span class="what">python</span></figcaption><pre><code class="language-python">&quot;&quot;&quot;Run async work over an iterable with a bound on how much runs at once. See ../../statement.md.&quot;&quot;&quot;
 import asyncio
 import logging
@@ -509,19 +511,18 @@ print(&quot;peak in flight:&quot;, active[&quot;peak&quot;])
 </section>
 <section id="s-practice-prose-2" data-section="practice-prose-2" data-kind="practice" data-label="Practice: bounded concurrency with backpressure (TypeScript)" data-edition="typescript">
 <h2 id="practice-prose-2-b0">Problem statement</h2>
-<h2 id="practice-prose-2-b1">Practice: bounded concurrency with backpressure</h2>
 <p>Write the worker pool that every batch job needs: run work over many items, never more than <code>limit</code> at a time, without reading the whole input first.</p>
-<h2 id="practice-prose-2-b3">The function</h2>
+<h2 id="practice-prose-2-b2">The function</h2>
 <p><strong><code>map_bounded(items, work, limit)</code></strong> (TypeScript <code>mapBounded</code>, Java <code>Bounded.mapBounded</code>, Kotlin <code>mapBounded</code>)</p>
 <div class="scroll"><table><thead><tr><th>Language</th><th>Shape</th></tr></thead><tbody><tr><td>Python</td><td><code>async def map_bounded(items, work, limit)</code>: <code>items</code> is any iterable, <code>work(item)</code> is a coroutine function</td></tr><tr><td>TypeScript</td><td><code>async function mapBounded(items, work, limit)</code>: <code>items</code> is an <code>Iterable</code>, <code>work(item)</code> returns a promise</td></tr><tr><td>Java</td><td><code>static List&lt;Outcome&lt;R&gt;&gt; mapBounded(Iterator&lt;T&gt; items, Function&lt;T, R&gt; work, int limit)</code>: blocking, one worker thread per slot</td></tr><tr><td>Kotlin</td><td><code>fun mapBounded(items: Iterator&lt;T&gt;, work: (T) -&gt; R, limit: Int): List&lt;Outcome&lt;R&gt;&gt;</code>: blocking, one worker thread per slot</td></tr></tbody></table></div>
 <p>It returns one <strong><code>Outcome</code></strong> per item, <strong>in input order</strong>: <code>ok</code> with a <code>value</code>, or not <code>ok</code> with the <code>error</code> that <code>work</code> raised. <code>Outcome</code> is given in the starter.</p>
-<h2 id="practice-prose-2-b7">What is already written, and what you write</h2>
+<h2 id="practice-prose-2-b6">What is already written, and what you write</h2>
 <p>The starter is the working pool with six small gaps cut out of it: the worker loop, the <code>Outcome</code> type, the lazy source and the final join are written and correct. Each gap is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. To see what a gap receives, log its input with the <code>log</code> line at the top of the file (<code>log.debug(...)</code>); a run shows the lines under the failing case. The names below are Python's; TypeScript, Java and Kotlin use the camel-case forms (<code>checkLimit</code>, <code>nextSlot</code>, <code>succeeded</code>, <code>failed</code>, <code>place</code>, <code>pool</code>).</p>
 <ol class="items"><li><code>_check_limit</code> unlocks <code>e4</code>: refuse a limit below 1.</li><li><code>_next_slot</code> unlocks <code>e5</code> and <code>m1</code>: take one item and reserve its slot, or report that the input is exhausted.</li><li><code>_succeeded</code> unlocks <code>m1</code>, <code>e1</code> and <code>e3</code>: the outcome of an item whose work returned.</li><li><code>_failed</code> unlocks <code>e2</code>: the outcome of an item whose work raised.</li><li><code>_place</code> unlocks <code>e1</code>: store an outcome in the slot of its item, so the list keeps the input order.</li><li><code>_pool</code> unlocks <code>m1</code> and <code>e5</code>: the <code>limit</code> workers that run side by side.</li></ol>
 <p>About ten lines in all.</p>
-<h2 id="practice-prose-2-b11">Rules</h2>
+<h2 id="practice-prose-2-b10">Rules</h2>
 <ol class="items"><li><strong>Bounded.</strong> No more than <code>limit</code> calls of <code>work</code> are running at any moment, and when there are enough items, <code>limit</code> of them are.</li><li><strong>Ordered.</strong> The outcomes are in the order of the input, even when later items finish first.</li><li><strong>Isolated.</strong> A failing item is reported in its own outcome; the other items still run and finish.</li><li><strong>Edges.</strong> A limit larger than the number of items works; an empty input gives an empty list; a limit below 1 is refused (<code>ValueError</code>, TypeScript <code>Error</code>, Java and Kotlin <code>IllegalArgumentException</code>).</li><li><strong>Backpressure.</strong> Items are taken from the input <strong>one at a time, only when a worker is free</strong>. While every worker is busy, at most <code>limit</code> items have been taken: a slow consumer holds the producer back, so a million-line file never sits in memory.</li></ol>
-<h2 id="practice-prose-2-b13">The cases</h2>
+<h2 id="practice-prose-2-b12">The cases</h2>
 <div class="scroll"><table><thead><tr><th>Id</th><th>What it checks</th></tr></thead><tbody><tr><td><code>m1</code></td><td>Every item is processed, and never more than <code>limit</code> run at once</td></tr><tr><td><code>e1</code></td><td>Results keep the input order even when later items finish first</td></tr><tr><td><code>e2</code></td><td>A failing item is reported and the others still finish</td></tr><tr><td><code>e3</code></td><td>A limit above the item count and an empty input both work</td></tr><tr><td><code>e4</code></td><td>A limit below one is refused</td></tr><tr><td><code>e5</code></td><td>Items are pulled lazily: while all workers are blocked, only <code>limit</code> items have been taken</td></tr></tbody></table></div>
 <details class="disclosure"><summary>Show a worked solution</summary><figure class="code"><figcaption><span class="what">typescript</span></figcaption><pre><code class="language-typescript">// Run async work over an iterable with a bound on how much runs at once. See ../../statement.md.
 import { logger } from &quot;./logger.ts&quot;;
@@ -617,7 +618,7 @@ console.log(&quot;values:&quot;, outcomes.flatMap((o) =&gt; (o.ok ? [o.value] : 
 console.log(&quot;all ok:&quot;, outcomes.every((o) =&gt; o.ok));
 console.log(&quot;peak in flight:&quot;, active.peak);
 </code></pre></figure></details>
-<h2 id="practice-prose-2-b17">Starting code</h2>
+<h2 id="practice-prose-2-b16">Starting code</h2>
 <figure class="code"><figcaption><span class="what">typescript</span></figcaption><pre><code class="language-typescript">// Run async work over an iterable with a bound on how much runs at once. See ../../statement.md.
 import { logger } from &quot;./logger.ts&quot;;
 const log = logger(&quot;bounded&quot;);
@@ -753,19 +754,18 @@ console.log(&quot;peak in flight:&quot;, active.peak);
 </section>
 <section id="s-practice-prose-3" data-section="practice-prose-3" data-kind="practice" data-label="Practice: bounded concurrency with backpressure (Java)" data-edition="java">
 <h2 id="practice-prose-3-b0">Problem statement</h2>
-<h2 id="practice-prose-3-b1">Practice: bounded concurrency with backpressure</h2>
 <p>Write the worker pool that every batch job needs: run work over many items, never more than <code>limit</code> at a time, without reading the whole input first.</p>
-<h2 id="practice-prose-3-b3">The function</h2>
+<h2 id="practice-prose-3-b2">The function</h2>
 <p><strong><code>map_bounded(items, work, limit)</code></strong> (TypeScript <code>mapBounded</code>, Java <code>Bounded.mapBounded</code>, Kotlin <code>mapBounded</code>)</p>
 <div class="scroll"><table><thead><tr><th>Language</th><th>Shape</th></tr></thead><tbody><tr><td>Python</td><td><code>async def map_bounded(items, work, limit)</code>: <code>items</code> is any iterable, <code>work(item)</code> is a coroutine function</td></tr><tr><td>TypeScript</td><td><code>async function mapBounded(items, work, limit)</code>: <code>items</code> is an <code>Iterable</code>, <code>work(item)</code> returns a promise</td></tr><tr><td>Java</td><td><code>static List&lt;Outcome&lt;R&gt;&gt; mapBounded(Iterator&lt;T&gt; items, Function&lt;T, R&gt; work, int limit)</code>: blocking, one worker thread per slot</td></tr><tr><td>Kotlin</td><td><code>fun mapBounded(items: Iterator&lt;T&gt;, work: (T) -&gt; R, limit: Int): List&lt;Outcome&lt;R&gt;&gt;</code>: blocking, one worker thread per slot</td></tr></tbody></table></div>
 <p>It returns one <strong><code>Outcome</code></strong> per item, <strong>in input order</strong>: <code>ok</code> with a <code>value</code>, or not <code>ok</code> with the <code>error</code> that <code>work</code> raised. <code>Outcome</code> is given in the starter.</p>
-<h2 id="practice-prose-3-b7">What is already written, and what you write</h2>
+<h2 id="practice-prose-3-b6">What is already written, and what you write</h2>
 <p>The starter is the working pool with six small gaps cut out of it: the worker loop, the <code>Outcome</code> type, the lazy source and the final join are written and correct. Each gap is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. To see what a gap receives, log its input with the <code>log</code> line at the top of the file (<code>log.debug(...)</code>); a run shows the lines under the failing case. The names below are Python's; TypeScript, Java and Kotlin use the camel-case forms (<code>checkLimit</code>, <code>nextSlot</code>, <code>succeeded</code>, <code>failed</code>, <code>place</code>, <code>pool</code>).</p>
 <ol class="items"><li><code>_check_limit</code> unlocks <code>e4</code>: refuse a limit below 1.</li><li><code>_next_slot</code> unlocks <code>e5</code> and <code>m1</code>: take one item and reserve its slot, or report that the input is exhausted.</li><li><code>_succeeded</code> unlocks <code>m1</code>, <code>e1</code> and <code>e3</code>: the outcome of an item whose work returned.</li><li><code>_failed</code> unlocks <code>e2</code>: the outcome of an item whose work raised.</li><li><code>_place</code> unlocks <code>e1</code>: store an outcome in the slot of its item, so the list keeps the input order.</li><li><code>_pool</code> unlocks <code>m1</code> and <code>e5</code>: the <code>limit</code> workers that run side by side.</li></ol>
 <p>About ten lines in all.</p>
-<h2 id="practice-prose-3-b11">Rules</h2>
+<h2 id="practice-prose-3-b10">Rules</h2>
 <ol class="items"><li><strong>Bounded.</strong> No more than <code>limit</code> calls of <code>work</code> are running at any moment, and when there are enough items, <code>limit</code> of them are.</li><li><strong>Ordered.</strong> The outcomes are in the order of the input, even when later items finish first.</li><li><strong>Isolated.</strong> A failing item is reported in its own outcome; the other items still run and finish.</li><li><strong>Edges.</strong> A limit larger than the number of items works; an empty input gives an empty list; a limit below 1 is refused (<code>ValueError</code>, TypeScript <code>Error</code>, Java and Kotlin <code>IllegalArgumentException</code>).</li><li><strong>Backpressure.</strong> Items are taken from the input <strong>one at a time, only when a worker is free</strong>. While every worker is busy, at most <code>limit</code> items have been taken: a slow consumer holds the producer back, so a million-line file never sits in memory.</li></ol>
-<h2 id="practice-prose-3-b13">The cases</h2>
+<h2 id="practice-prose-3-b12">The cases</h2>
 <div class="scroll"><table><thead><tr><th>Id</th><th>What it checks</th></tr></thead><tbody><tr><td><code>m1</code></td><td>Every item is processed, and never more than <code>limit</code> run at once</td></tr><tr><td><code>e1</code></td><td>Results keep the input order even when later items finish first</td></tr><tr><td><code>e2</code></td><td>A failing item is reported and the others still finish</td></tr><tr><td><code>e3</code></td><td>A limit above the item count and an empty input both work</td></tr><tr><td><code>e4</code></td><td>A limit below one is refused</td></tr><tr><td><code>e5</code></td><td>Items are pulled lazily: while all workers are blocked, only <code>limit</code> items have been taken</td></tr></tbody></table></div>
 <details class="disclosure"><summary>Show a worked solution</summary><figure class="code"><figcaption><span class="what">java</span></figcaption><pre><code class="language-java">import java.util.ArrayList;
 import java.util.Iterator;
@@ -897,7 +897,7 @@ public class TryIt {
     }
 }
 </code></pre></figure></details>
-<h2 id="practice-prose-3-b17">Starting code</h2>
+<h2 id="practice-prose-3-b16">Starting code</h2>
 <figure class="code"><figcaption><span class="what">java</span></figcaption><pre><code class="language-java">import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -1063,19 +1063,18 @@ public class TryIt {
 </section>
 <section id="s-practice-prose-4" data-section="practice-prose-4" data-kind="practice" data-label="Practice: bounded concurrency with backpressure (Kotlin)" data-edition="kotlin">
 <h2 id="practice-prose-4-b0">Problem statement</h2>
-<h2 id="practice-prose-4-b1">Practice: bounded concurrency with backpressure</h2>
 <p>Write the worker pool that every batch job needs: run work over many items, never more than <code>limit</code> at a time, without reading the whole input first.</p>
-<h2 id="practice-prose-4-b3">The function</h2>
+<h2 id="practice-prose-4-b2">The function</h2>
 <p><strong><code>map_bounded(items, work, limit)</code></strong> (TypeScript <code>mapBounded</code>, Java <code>Bounded.mapBounded</code>, Kotlin <code>mapBounded</code>)</p>
 <div class="scroll"><table><thead><tr><th>Language</th><th>Shape</th></tr></thead><tbody><tr><td>Python</td><td><code>async def map_bounded(items, work, limit)</code>: <code>items</code> is any iterable, <code>work(item)</code> is a coroutine function</td></tr><tr><td>TypeScript</td><td><code>async function mapBounded(items, work, limit)</code>: <code>items</code> is an <code>Iterable</code>, <code>work(item)</code> returns a promise</td></tr><tr><td>Java</td><td><code>static List&lt;Outcome&lt;R&gt;&gt; mapBounded(Iterator&lt;T&gt; items, Function&lt;T, R&gt; work, int limit)</code>: blocking, one worker thread per slot</td></tr><tr><td>Kotlin</td><td><code>fun mapBounded(items: Iterator&lt;T&gt;, work: (T) -&gt; R, limit: Int): List&lt;Outcome&lt;R&gt;&gt;</code>: blocking, one worker thread per slot</td></tr></tbody></table></div>
 <p>It returns one <strong><code>Outcome</code></strong> per item, <strong>in input order</strong>: <code>ok</code> with a <code>value</code>, or not <code>ok</code> with the <code>error</code> that <code>work</code> raised. <code>Outcome</code> is given in the starter.</p>
-<h2 id="practice-prose-4-b7">What is already written, and what you write</h2>
+<h2 id="practice-prose-4-b6">What is already written, and what you write</h2>
 <p>The starter is the working pool with six small gaps cut out of it: the worker loop, the <code>Outcome</code> type, the lazy source and the final join are written and correct. Each gap is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. To see what a gap receives, log its input with the <code>log</code> line at the top of the file (<code>log.debug(...)</code>); a run shows the lines under the failing case. The names below are Python's; TypeScript, Java and Kotlin use the camel-case forms (<code>checkLimit</code>, <code>nextSlot</code>, <code>succeeded</code>, <code>failed</code>, <code>place</code>, <code>pool</code>).</p>
 <ol class="items"><li><code>_check_limit</code> unlocks <code>e4</code>: refuse a limit below 1.</li><li><code>_next_slot</code> unlocks <code>e5</code> and <code>m1</code>: take one item and reserve its slot, or report that the input is exhausted.</li><li><code>_succeeded</code> unlocks <code>m1</code>, <code>e1</code> and <code>e3</code>: the outcome of an item whose work returned.</li><li><code>_failed</code> unlocks <code>e2</code>: the outcome of an item whose work raised.</li><li><code>_place</code> unlocks <code>e1</code>: store an outcome in the slot of its item, so the list keeps the input order.</li><li><code>_pool</code> unlocks <code>m1</code> and <code>e5</code>: the <code>limit</code> workers that run side by side.</li></ol>
 <p>About ten lines in all.</p>
-<h2 id="practice-prose-4-b11">Rules</h2>
+<h2 id="practice-prose-4-b10">Rules</h2>
 <ol class="items"><li><strong>Bounded.</strong> No more than <code>limit</code> calls of <code>work</code> are running at any moment, and when there are enough items, <code>limit</code> of them are.</li><li><strong>Ordered.</strong> The outcomes are in the order of the input, even when later items finish first.</li><li><strong>Isolated.</strong> A failing item is reported in its own outcome; the other items still run and finish.</li><li><strong>Edges.</strong> A limit larger than the number of items works; an empty input gives an empty list; a limit below 1 is refused (<code>ValueError</code>, TypeScript <code>Error</code>, Java and Kotlin <code>IllegalArgumentException</code>).</li><li><strong>Backpressure.</strong> Items are taken from the input <strong>one at a time, only when a worker is free</strong>. While every worker is busy, at most <code>limit</code> items have been taken: a slow consumer holds the producer back, so a million-line file never sits in memory.</li></ol>
-<h2 id="practice-prose-4-b13">The cases</h2>
+<h2 id="practice-prose-4-b12">The cases</h2>
 <div class="scroll"><table><thead><tr><th>Id</th><th>What it checks</th></tr></thead><tbody><tr><td><code>m1</code></td><td>Every item is processed, and never more than <code>limit</code> run at once</td></tr><tr><td><code>e1</code></td><td>Results keep the input order even when later items finish first</td></tr><tr><td><code>e2</code></td><td>A failing item is reported and the others still finish</td></tr><tr><td><code>e3</code></td><td>A limit above the item count and an empty input both work</td></tr><tr><td><code>e4</code></td><td>A limit below one is refused</td></tr><tr><td><code>e5</code></td><td>Items are pulled lazily: while all workers are blocked, only <code>limit</code> items have been taken</td></tr></tbody></table></div>
 <details class="disclosure"><summary>Show a worked solution</summary><figure class="code"><figcaption><span class="what">kotlin</span></figcaption><pre><code class="language-kotlin">private val log = System.getLogger(&quot;bounded&quot;)
 
@@ -1161,7 +1160,7 @@ fun main() {
     println(&quot;peak in flight: ${peak.get()}&quot;)
 }
 </code></pre></figure></details>
-<h2 id="practice-prose-4-b17">Starting code</h2>
+<h2 id="practice-prose-4-b16">Starting code</h2>
 <figure class="code"><figcaption><span class="what">kotlin</span></figcaption><pre><code class="language-kotlin">private val log = System.getLogger(&quot;bounded&quot;)
 
 private fun checkLimit(limit: Int) {

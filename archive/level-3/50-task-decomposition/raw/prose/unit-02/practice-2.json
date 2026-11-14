@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: decompose a task in code"
-    },
-    {
       "type": "para",
       "text": "A big review does not have to be one request, and an open-ended investigation cannot be planned in advance. This practice has you write the control flow for both: a review that looks at each file alone and then looks across files, an investigation loop in which a planner chooses each step from the result of the last, and the rule that picks between the two. The model is a function you are given (the tests script it), so the practice grades the part that is yours: what each call is given, what is kept, what stops the work and what is reported when something goes wrong. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -224,7 +219,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 10,
+    "headings": 9,
     "paras": 11,
     "code": 2,
     "tables": 1,
@@ -236,7 +231,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "1149f6758de791d633cc017e5252f1bfad1c9bd6a6b9cfd03dce648513b429d9",
+  "content_sha256": "90b5a1cf18dac2a4eb420c61e6ef74dca6352a08b7def570304c7d5c37e53b1c",
   "starting_code": "// Task decomposition: a per-item pass and a cross-item pass, an adaptive loop, and the choice between them. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"decompose\");\ntype FilePass = (path: string, text: string, part: number, parts: number) => { findings: string[]; summary: string };\n\n// Review each file alone (long files in parts), then let one pass read only the summaries of the files that were reviewed.\nexport function reviewChanges(files: Array<{ path: string; text: string }>, filePass: FilePass, crossPass: (summaries: Array<{ path: string; summary: string }>) => string[], maxLines = 40): any {\n  log.debug(\"reviewChanges input\", files);\n  const reviewed: Record<string, { findings: string[]; summary: string; parts: number }> = {};\n  const failed: Record<string, string> = {};\n  const skipped: string[] = [];\n  for (const { path, text } of files) {\n    // TODO 2 of 9 (finish this to pass e2): the blank file rule. When the file's text is blank, add its path to\n    //   `skipped` and go on to the next file. Example: \"\\n  \\n\" -> skipped.\n    const lines = text.split(/\\r?\\n/);\n    if (lines[lines.length - 1] === \"\") lines.pop();\n    // TODO 3 of 9 (finish this to pass e2): the number of parts. Receives the lines of the file and max_lines. Return\n    //   how many parts of at most max_lines lines the file needs, rounding up. Example: 41 lines, max_lines 40 -> 2.\n    const parts = 1;\n    const findings: string[] = [];\n    const summaries: string[] = [];\n    try {\n      for (let part = 0; part < parts; part++) {\n        // TODO 1 of 9 (finish this to pass m1, e1): the review of one part of a file. Slice the part's lines (part\n        //   number 1..parts, max_lines per part), call the file pass with (path, text of the part, part number from 1,\n        //   parts), add its findings to `findings` and its summary to `summaries`. Example: a 5 line file, max_lines 3 ->\n        //   two calls, parts 1 and 2 of 2.\n      }\n    } catch (error) {\n      // TODO 4 of 9 (finish this to pass e3): the failing file. When the file pass throws, record the path with the\n      //   error's message in `failed` and go on to the next file. Example: the pass raises \"boom\" for a.py -> failed {a.py:\n      //   \"boom\"}, and b.py is still reviewed.\n      continue;\n    }\n    reviewed[path] = { findings, summary: summaries.join(\" \"), parts };\n  }\n  let cross: string[] = [];\n  let crossError: string | null = null;\n  // TODO 5 of 9 (finish this to pass e3): the guard of the cross pass. Run it only when at least two files were reviewed\n  //   (a relation between files needs two). Example: one reviewed file and one failed -> no cross pass.\n  if (Object.keys(reviewed).length >= 0) {\n    try {\n      // TODO 6 of 9 (finish this to pass m1, e1): the cross pass call. Call the cross pass with one {path, summary}\n      //   entry per reviewed file (the joined summary, never the text) and keep what it returns in `cross`. Example: two\n      //   files -> one call with two entries.\n      cross = [];\n    } catch (error) {\n      crossError = error instanceof Error ? error.message : String(error);\n    }\n  }\n  return { files: reviewed, cross, failed, skipped, cross_error: crossError };\n}\n\n// Ask the planner what to do next after every step, and stop when it is done, stuck or out of steps.\nexport function runAdaptive(planner: (goal: string, steps: any[]) => any, worker: (subtask: string) => string, goal: string, maxSteps = 6): any {\n  const steps: Array<{ subtask: string; result: string }> = [];\n  const finish = (status: string, summary = \"\", reason = \"\") => ({ status, summary, steps, reason });\n  while (true) {\n    // TODO 7 of 9 (finish this to pass e4): the question to the planner. Call the planner with the goal and a copy of\n    //   the steps done so far (each {subtask, result}). Example: after two steps the planner receives a list of two.\n    const plan = planner(goal, []);\n    if (plan === null || typeof plan !== \"object\" || Array.isArray(plan) || typeof plan.done !== \"boolean\") return finish(\"bad_plan\", \"\", \"the planner reply could not be read\");\n    if (plan.done) return finish(\"done\", String(plan.summary || \"\"));\n    const subtask = String(plan.next || \"\").trim();\n    // TODO 8 of 9 (finish this to pass e5): the stuck rules. When the planner gives no next step, finish with status\n    //   stuck and the reason \"no next step\"; when the next step was already done (compare ignoring case), finish with\n    //   status stuck and the reason \"repeated subtask: NAME\". Example: next \"Fix A\" after \"fix a\" -> stuck.\n    if (steps.length >= maxSteps) return finish(\"step_limit\", \"\", \"step limit reached\");\n    let result: string;\n    try {\n      result = worker(subtask);\n    } catch (error) { // the planner decides what a failed step means\n      result = `ERROR: ${error instanceof Error ? error.message : String(error)}`;\n    }\n    steps.push({ subtask, result });\n  }\n}\n\n// fixed_chain, per_item_then_cross or adaptive, from what is known about the steps and whether the items affect each other.\nexport function chooseStrategy(task: Record<string, unknown>): string {\n  const { steps_known: stepsKnown, items } = task;\n  if (typeof stepsKnown !== \"boolean\" || typeof items !== \"number\" || !Number.isInteger(items) || items < 0) {\n    throw new Error(\"steps_known must be true or false and items a whole number of at least 0\");\n  }\n  // TODO 9 of 9 (finish this to pass e6): the choice. Receives the validated fields. Return adaptive when the steps are\n  //   not known; otherwise per_item_then_cross when there are at least 2 items and items_interact is true; otherwise\n  //   fixed_chain. Example: steps known, 3 items that interact -> per_item_then_cross.\n  return \"fixed_chain\";\n}\n",
   "exercise": {
     "main_path": "practice/level-3/50-task-decomposition/prose/unit-02/practice-2/decompose.ts",
@@ -299,7 +294,10 @@
     },
     "origin": "course/50-task-decomposition/02-per-item-passes-adaptive-guards-and-the-practice.md",
     "concepts": [
-      "the practice of Per-item passes, adaptive guards and the practice is solved"
+      "A per-file pass sees only its own file, and a separate cross-file pass sees only the summaries, never the text.",
+      "A long file is reviewed in labelled parts, and a failing file is reported without stopping the others.",
+      "In dynamic decomposition the planner picks each step from earlier results, and the loop stops on a repeat, a blank step or the step limit.",
+      "Unknown steps call for an adaptive plan; known steps over several interacting items call for per-item passes then a cross pass."
     ],
     "files": [
       "practice/level-3/50-task-decomposition/prose/unit-02/practice-2/try-it.ts"

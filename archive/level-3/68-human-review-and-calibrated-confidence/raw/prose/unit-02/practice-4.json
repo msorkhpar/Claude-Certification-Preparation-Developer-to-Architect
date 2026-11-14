@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: human review that does not fool itself"
-    },
-    {
       "type": "para",
       "text": "A team extracts fields from documents and reports \"98% accurate\" to justify removing the human reviewers. The figure is an average over thousands of easy invoices; handwritten documents are wrong four times in ten. In this practice you write the pieces that make a review process honest: accuracy broken down by segment, the decision whether a segment may be automated, a confidence threshold calibrated against labelled examples, a stratified sample for ongoing checks, routing of uncertain extractions to a limited number of reviewers, and a checkpoint for actions that cannot be undone. The model is not called. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -190,7 +185,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -202,7 +197,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "3ba6451839f5d5b3f46ba8c6c8a727441d30e11daf7845a50789ca6316aefbce",
+  "content_sha256": "08e89823be1afc851aa427facd8e88527b279f6f079a63b0752317d6f6048b0c",
   "starting_code": "/** Human review without fooling yourself: accuracy by segment, the decision to automate, a calibrated confidence threshold, a stratified sample, review routing within capacity, and checkpoints for irreversible actions. See ../../statement.md. */\n\nprivate val log = System.getLogger(\"review_routing\")\n\nval IRREVERSIBLE = listOf(\"delete_records\", \"send_payment\", \"close_account\")\n\ndata class Rec(val docType: String, val field: String, val correct: Boolean)\n\ndata class Seg(val segment: String, val correct: Int, val total: Int, val percent: Int)\n\ndata class Automation(val automate: Boolean, val failing: List<String>, val undersampled: List<String>)\n\ndata class Labeled(val confidence: Int, val correct: Boolean)\n\ndata class Item(val id: String, val stratum: String, val rank: Int)\n\ndata class Extraction(val id: String, val confidence: Int, val conflict: Boolean)\n\ndata class Routing(val review: List<String>, val backlog: List<String>, val auto: List<String>)\n\nprivate fun percent(correct: Int, total: Int): Int = (200 * correct + total) / (2 * total)\n\nfun accuracyBy(records: List<Rec>): List<Seg> {\n    log.log(System.Logger.Level.DEBUG, \"accuracyBy input: {0}\", records)\n    val groups = records.groupBy { \"${it.docType}/${it.field}\" }.toSortedMap()\n    val correct = records.count { it.correct }\n    val total = records.size\n    // TODO 1 of 7 (finish this to pass m1, e1): the segment rows. After the overall row, add one row for each segment\n    //   (\"doc_type/field\"), sorted by name, with its correct count, its total and the rounded percent. Example:\n    //   invoice/total 8 of 10 -> {segment: invoice/total, correct 8, total 10, percent 80}.\n    return listOf(Seg(\"overall\", correct, total, if (total > 0) percent(correct, total) else 0)) +\n        groups.map { (name, rs) -> Seg(name, rs.count { it.correct }, rs.size, if (total > 0) percent(correct, total) else 0) }\n}\n\nfun canAutomate(records: List<Rec>, threshold: Int, minN: Int): Automation {\n    val segments = accuracyBy(records).drop(1)\n    // TODO 2 of 7 (finish this to pass e2): the sort of the segments. For each segment (not the overall row): when its\n    //   total is below min_n it is undersampled; otherwise when its percent is below the threshold it is failing. Example:\n    //   min_n 5, segment with 4 records -> undersampled; 5 records at 70 percent, threshold 90 -> failing.\n    val undersampled = emptyList<String>()\n    val failing = emptyList<String>()\n    return Automation(segments.isNotEmpty() && failing.isEmpty() && undersampled.isEmpty(), failing, undersampled)\n}\n\nfun calibrateThreshold(labeled: List<Labeled>, target: Int): Int? {\n    // TODO 3 of 7 (finish this to pass e3, e4): the threshold. Receives the labelled items (confidence, correct) and the\n    //   target precision in percent. Try each distinct confidence from the lowest; return the first for which the items at\n    //   or above it are right at least target percent of the time; return none when no level does. Example: target 90 and\n    //   no level reaches it -> none.\n    return 0\n}\n\n// TODO 4 of 7 (finish this to pass e5): the sample of one stratum. `members` are the stratum's items sorted by rank then\n//   id. Take only the first per_stratum of them and add their ids. Example: 5 items, per_stratum 2 -> the 2 best ranked.\nfun stratifiedSample(items: List<Item>, perStratum: Int): List<String> =\n    items.map { it.stratum }.distinct().flatMap { stratum -> items.filter { it.stratum == stratum }.sortedWith(compareBy({ it.rank }, { it.id })).map { it.id } }\n\nfun route(extractions: List<Extraction>, threshold: Int, capacity: Int): Routing {\n    // TODO 5 of 7 (finish this to pass e6): the review queue. Keep the extractions that have a conflict or a confidence\n    //   below the threshold, ordered with conflicts first, then by confidence (lowest first), then by id. Example:\n    //   threshold 80, a conflict, a 60 and a 90 -> the conflict, then the 60.\n    val queue = extractions.map { it.id }\n    val flagged = queue.toSet()\n    // TODO 6 of 7 (finish this to pass e7): the capacity cut. Split the queue: the first `capacity` ids go to review,\n    //   the others to the backlog, both in order. Example: queue [a, b, c], capacity 2 -> review [a, b], backlog [c].\n    return Routing(queue, emptyList(), extractions.filter { it.id !in flagged }.map { it.id })\n}\n\n// TODO 7 of 7 (finish this to pass e8): the checkpoint. Receives the action, the amount and the limit. Return human when\n//   the action is in IRREVERSIBLE or the amount is above the limit, otherwise auto. Example: close_account for 10 ->\n//   human.\nfun checkpoint(action: String, amount: Int, limit: Int = 1000): String = \"auto\"\n",
   "exercise": {
     "main_path": "practice/level-3/68-human-review-and-calibrated-confidence/prose/unit-02/practice-4/src/main/kotlin/ReviewRouting.kt",
@@ -279,7 +274,10 @@
     },
     "origin": "course/68-human-review-and-calibrated-confidence/02-routing-review-checkpoints-and-the-practice.md",
     "concepts": [
-      "the practice of Routing review, checkpoints for irreversible actions, and the practice is solved"
+      "Accuracy is broken down by document type and field, because a high overall figure can hide a weak segment.",
+      "Automation needs every segment to pass with enough samples, and the threshold is the lowest confidence whose accepted items meet the target precision.",
+      "Conflicts and low-confidence extractions go to review weakest first, up to capacity, with the rest kept in a backlog.",
+      "An irreversible action, or an amount above the limit, needs a person whatever the confidence."
     ],
     "files": [
       "practice/level-3/68-human-review-and-calibrated-confidence/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"

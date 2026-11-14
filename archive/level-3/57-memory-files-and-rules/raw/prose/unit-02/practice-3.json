@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: split one oversized memory file into a root file, scoped rules and personal files"
-    },
-    {
       "type": "para",
       "text": "A team keeps all of its instructions for Claude Code in one long `CLAUDE.md`: universal rules, testing, API and Terraform conventions, a rule that must never be broken, and some lines that are only one engineer's preferences. Claude reads that file in every session, so the conventions for Terraform sit in the context while someone fixes a button, and the rule that matters most is one line among sixty. In this practice you split it. The tests are the same in all four languages and read only the files: they are configuration and notes, not code in a language, and the Java and Kotlin tests read the JSON with Jackson and the rules' YAML front matter with its YAML module. The checks run on the course's own model of the documented loading rules (`examples/57-memory-loading`, with `examples/38-settings-layers` for permission rules, in your language). Nothing here starts Claude Code or touches the network."
     },
@@ -314,7 +309,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 10,
     "code": 8,
     "tables": 1,
@@ -326,7 +321,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "5bc78d75baee204b3fb9eb1d8ceaa45911902e0fa05a2ce75a927d450f5d0649",
+  "content_sha256": "b8b77986eeb431d5b1892ed7558517486de67c912f06900d32fc346a315b454b",
   "starting_code": "# Inventory platform\n\nShared instructions for everyone who works on this repository. Area conventions live in `.claude/rules/` and load when matching\nfiles are touched. The architecture notes are imported below.\n\n@docs/standards/architechture.md\n\n## Always\n- Commit messages use the imperative mood and stay under 72 characters in the first line.\n- Run `npm test` before saying a task is done.\n- Do not add dependencies without asking.\n\n## API handlers\n- Every handler under `src/api/` validates its input with the shared `parse()` helper before it uses it.\n- Return errors as `{ code, message }` with the HTTP status from `src/api/status.ts`.\n- Handlers are `async` and never swallow a rejected promise.\n- Document each endpoint with an OpenAPI comment above its handler.\n\n## Where things are\n- Area conventions: `.claude/rules/` (testing, API handlers, Terraform).\n- Files in `db/migrations/` are protected by the permission rules, not by this file.\n- Name test files `<module>.test.ts` or `<Component>.test.tsx`, next to the file they test.\n\n## About me\n- I prefer short answers with no preamble.\n- My sandbox API is at http://localhost:4010 with the dev token from my shell profile.\n- My notes are in /home/dev/notes.\n",
   "exercise": {
     "main_path": "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-3/project/CLAUDE.md",
@@ -402,7 +397,10 @@
     },
     "origin": "course/57-memory-files-and-rules/02-path-scoped-rules-size-and-the-practice.md",
     "concepts": [
-      "the practice of Path-scoped rules, file size and the practice is solved"
+      "The root memory file stays short and holds only the rules every task needs, with no area convention, not even through an import.",
+      "An area's conventions move to a scoped rule whose paths list follows the file type, such as test files in any folder.",
+      "A rule that must always hold, such as no edits to migrations, is a deny permission rather than a sentence.",
+      "Personal preferences go in user memory or a git-ignored local memory file, and an @import names a file that exists."
     ],
     "files": [
       "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-3/project/.claude/rules/api.md",

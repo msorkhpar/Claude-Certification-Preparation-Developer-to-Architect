@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a prompt plan under a token budget"
-    },
-    {
       "type": "para",
       "text": "A support assistant sends the same role text and policy on every request, a customer record, a conversation history and a question. The architect has three decisions to make in code: how to assemble the request so that the part that never changes can be cached and the budget is respected, which model to use for a workload, and whether two requests can share a cached prefix. The model is not called: the tests give you modules, workloads and prompts. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -197,7 +192,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -209,7 +204,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "da97f34dca38b68cb09bee693cce4736a2951a2d7672b9c0438597b0c5e1031d",
+  "content_sha256": "f22527063a39f2dff3e65b9d8da50c932f034f978f3dad26cf12589621cc988f",
   "starting_code": "/** A prompt plan: modules in cache-friendly order under a token budget, a model for the workload, and what a cache can reuse. See ../../statement.md. Modules, prompts and models are JSON-like maps. */\nprivate val log = System.getLogger(\"prompt_plan\")\n\nconst val MIN_CACHEABLE = 512 // tokens: a shorter prefix cannot be cached\n\nprivate val VARIABLE = Regex(\"\\\\{(\\\\w+)\\\\}\")\n\n/** One token per four characters, rounded up. */\nfun tokens(text: String): Int = (text.length + 3) / 4\n\n/** A dynamic module that is still in the prompt. */\ndata class Kept(val name: String, val text: String, val priority: Int)\n\nprivate fun block(name: Any?, text: String): Map<String, Any?> = linkedMapOf(\"name\" to name, \"text\" to text)\n\n/**\n * TODO 1 of 7 (unlocks e2): fill the variables of a dynamic module's text.\n * Receives the text and a map of variables. Returns the text with every `{name}` replaced by that variable's value (extra variables are ignored).\n * Throws `IllegalArgumentException(\"missing variable: <name>\")` when a variable has no value (`VARIABLE` matches a variable).\n * Example: fill(\"Q: {q}\", mapOf(\"q\" to \"hello\")) -> \"Q: hello\"\n */\nfun fill(text: String, variables: Map<String, String>): String = text\n\n/**\n * TODO 2 of 7 (unlocks e1): refuse a variable in a static module.\n * Receives the list of static modules. Throws `IllegalArgumentException` with a message that says `static` (for example `static module <name> holds a variable, which\n * would break the cache`) when any module's text holds a variable; otherwise returns nothing.\n * Example: a static module with the text \"policy for {customer}\" -> IllegalArgumentException\n */\nfun checkStatic(stat: List<Map<String, Any?>>) {}\n\n/**\n * TODO 3 of 7 (unlocks e3): which dynamic module is dropped first?\n * Receives the list of kept dynamic modules (`Kept(name, text, priority)`). Returns the index of the one with the lowest priority; of two with the same\n * priority, the later one (the higher index).\n * Example: priorities [1, 9, 1] -> 2\n */\nfun pickVictim(kept: List<Kept>): Int = 0\n\n/**\n * TODO 4 of 7 (unlocks e3 and e4): drop dynamic modules until the prompt fits the budget.\n * Receives the tokens of the static prefix, the list `kept` of dynamic modules (change it in place) and the budget. While `prefix` plus the tokens of the\n * kept modules exceeds the budget, remove the module `pickVictim` chooses and note its name. Returns the dropped names in the order they were dropped.\n * When nothing is left to drop and the budget is still exceeded, throws `IllegalArgumentException(\"over budget: ...\")`: static modules are never dropped.\n * Example: kept priorities [1, 1] and a budget that fits one of them -> the later name is dropped\n */\nfun fitBudget(prefix: Int, kept: MutableList<Kept>, budget: Int): List<String> = emptyList()\n\n/**\n * TODO 5 of 7 (unlocks m1 and e5): where the cache breakpoint goes.\n * Receives the number of static blocks and the tokens of the static prefix. Returns the index of the last static block when there is at least one static\n * block and the prefix has at least `MIN_CACHEABLE` tokens; otherwise `null`.\n * Example: breakpointOf(2, 512) -> 1, breakpointOf(2, 511) -> null, breakpointOf(0, 900) -> null\n */\nfun breakpointOf(staticCount: Int, prefix: Int): Int? = null\n\nfun assemble(modules: List<Map<String, Any?>>, variables: Map<String, String>, budget: Int): Map<String, Any?>? {\n    log.log(System.Logger.Level.DEBUG, \"assemble input: {0}\", modules)\n    val stat = modules.filter { it[\"static\"] == true }\n    val dynamic = modules.filter { it[\"static\"] != true }\n    checkStatic(stat)\n    val kept = dynamic.map { Kept(it[\"name\"] as String, fill(it[\"text\"] as String, variables), (it[\"priority\"] as Int?) ?: 0) }.toMutableList()\n    val blocks = stat.map { block(it[\"name\"], it[\"text\"] as String) }.toMutableList()\n    val prefix = stat.sumOf { tokens(it[\"text\"] as String) }\n    val dropped = fitBudget(prefix, kept, budget)\n    val used = prefix + kept.sumOf { tokens(it.text) }\n    blocks += kept.map { block(it.name, it.text) }\n    return linkedMapOf(\"blocks\" to blocks, \"tokens\" to used, \"dropped\" to dropped, \"breakpoint\" to breakpointOf(stat.size, prefix))\n}\n\n/**\n * TODO 6 of 7 (unlocks e6): choose the model for a workload.\n * Receives the workload (`tier`, `max_latency_ms`) and a list of models (`name`, `tier`, `latency_ms`, `price_out`). Returns the name of the model with the lowest\n * `price_out` among those whose `tier` is at least the workload's and whose `latency_ms` is within the limit; equal prices go to the lower name; `null` when no\n * model fits. Example: two models at the same price named \"mid\" and \"mid2\", both fitting -> \"mid\"\n */\nfun chooseModel(workload: Map<String, Any?>, models: List<Map<String, Any?>>): String? = null\n\n/**\n * TODO 7 of 7 (unlocks e7): how many tokens of cached prefix can be reused?\n * Receives two assembled prompts (each a map with `blocks` and `breakpoint`). When both have a breakpoint, the breakpoints are equal and every block up to and\n * including it is identical (name and text) in both, returns the tokens of those blocks; otherwise returns 0.\n * Example: two prompts that differ only in their dynamic blocks -> the tokens of the static prefix; one edited static block -> 0\n */\nfun reusablePrefix(a: Map<String, Any?>, b: Map<String, Any?>): Int? = 0\n",
   "exercise": {
     "main_path": "practice/level-4/82-models-prompts-and-context-as-design-choices/prose/unit-02/practice-4/src/main/kotlin/PromptPlan.kt",
@@ -281,7 +276,10 @@
     },
     "origin": "course/82-models-prompts-and-context-as-design-choices/02-choosing-a-model-and-shaping-the-context.md",
     "concepts": [
-      "the practice of Choosing a model and shaping the context is solved"
+      "Static modules come first and may hold no variable, because a value that changes in the prefix breaks the cache.",
+      "Over budget, the lowest-priority dynamic module is dropped first, a tie drops the later one, and static modules are never dropped.",
+      "The cache breakpoint follows the last static block only when the prefix reaches the minimum cacheable size of 512 tokens.",
+      "The cheapest model that meets the tier and the latency wins, and only an identical static prefix can be reused."
     ],
     "files": [
       "practice/level-4/82-models-prompts-and-context-as-design-choices/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"

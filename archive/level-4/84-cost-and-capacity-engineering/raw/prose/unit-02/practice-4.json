@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: the decisions of an internal gateway"
-    },
-    {
       "type": "para",
       "text": "Four product teams call Claude through one internal gateway that holds the credentials, so that the platform team can route requests, enforce budgets, show each team what it spent and protect callers that cannot wait. In this practice you write the four decisions that gateway makes: the model a request is sent to, whether a request is admitted against the team's budget, the cost table that each team sees, and whether a caller gets its answer on the same connection or through accept-and-poll. The model is not called: the tests give you requests, policies and usage rows. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -191,7 +186,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -203,7 +198,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "0ce4a9775a1a7a86ba063b74f1f34cbc18b40064be7e5a7c1131ece0b4f31416",
+  "content_sha256": "41c6f6c7a5755132b80a02d75ad78c7d9d701b3d1f3ca8c014d9e9ffdd76cb1c",
   "starting_code": "private val log = System.getLogger(\"gateway_budget\")\n\n/** The decisions of an internal gateway: route a request, admit it against a budget, show back what each team spent and choose sync or accept-and-poll. See ../../statement.md. Requests, policies and rows are JSON-like maps. */\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun asMap(value: Any?): Map<String, Any?> = value as Map<String, Any?>\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun asList(value: Any?): List<String> = value as List<String>\n\nprivate fun n(map: Map<String, Any?>, key: String) = (map[key] as Number).toLong()\n\nprivate fun chosenModel(request: Map<String, Any?>, policy: Map<String, Any?>): String? {\n    // TODO 1 of 6 (unlocks m1 and e6): the model the policy picks for a request.\n    // Receives the request (`task`, and perhaps `model`, a pin) and the policy (`allowed`, `routes`, `default`; use `asList` and `asMap`). Returns the pinned model\n    // when it is in the `allowed` list; otherwise the model `routes` names for the task, or `default` for a task that is not listed.\n    // Example: task \"review\" with no pin -> \"opus\"; task \"classify\" pinned to \"opus\" (not allowed) -> \"haiku\"\n    return null\n}\n\nfun route(request: Map<String, Any?>, policy: Map<String, Any?>, status: String): String? {\n    log.log(System.Logger.Level.DEBUG, \"route input: {0}\", request)\n    // TODO 2 of 6 (unlocks e1): the model for the request once the budget status is known.\n    // Receives the request, the policy and the budget status (\"allow\", \"warn\" or \"block\"). Returns null when the status is \"block\"; the model from\n    // `chosenModel` when it is \"allow\"; for \"warn\" the cheaper model that the policy's `cheaper` map names for it (the model itself when none is named).\n    // Example: status \"warn\", chosen model \"opus\", cheaper {opus: sonnet} -> \"sonnet\"\n    return null\n}\n\nfun admit(spend: Long, budget: Long, estimate: Long): String? {\n    // TODO 3 of 6 (unlocks e2): admit one more request against the budget.\n    // Receives what the team has spent, its budget and the estimated cost of the request, all in cents. Returns \"block\" when the budget is not positive or\n    // `spend + estimate` is more than the budget; \"warn\" when it reaches 80 percent of the budget (80 percent itself warns) and is not over; else \"allow\".\n    // Example: admit(700, 1000, 100) -> \"warn\", admit(900, 1000, 101) -> \"block\"\n    return null\n}\n\nprivate fun cost(row: Map<String, Any?>, prices: Map<String, Any?>): Long {\n    // TODO 4 of 6 (unlocks e3): what one row of tokens costs.\n    // Receives a row (`model`, `input`, `cache_read`, `output`: token counts) and `prices`, which maps a model to cents per million tokens for the same three\n    // kinds (`n(map, key)` reads a number). Returns tokens times price, summed over the three kinds (not yet divided by a million). Fails with\n    // `require(...) { \"unknown model: $name\" }` for a model without a price.\n    // Example: input 1_000_000 at price 200 and nothing else -> 200_000_000\n    return 0L\n}\n\nprivate fun toCents(value: Long): Long {\n    // TODO 5 of 6 (unlocks e4): a team's total in whole cents.\n    // Receives a total in cents times a million. Returns it divided by one million and rounded to the nearest cent, halves up, with integer arithmetic.\n    // Example: toCents(500_000) -> 1, toCents(499_999) -> 0\n    return 0L\n}\n\nfun showback(rows: List<Map<String, Any?>>, prices: Map<String, Any?>): List<Map<String, Any?>>? {\n    val totals = linkedMapOf<String, Long>()\n    for (r in rows) totals[r[\"team\"] as String] = (totals[r[\"team\"] as String] ?: 0L) + cost(r, prices)\n    val result = totals.map { (team, value) -> linkedMapOf<String, Any?>(\"team\" to team, \"cents\" to toCents(value)) }\n    return result.sortedWith(compareBy({ -(it[\"cents\"] as Long) }, { it[\"team\"] as String }))\n}\n\nfun delivery(p95Seconds: Long, timeoutSeconds: Long, marginPercent: Long): String? {\n    // TODO 6 of 6 (unlocks e5): sync or accept-and-poll.\n    // Receives the p95 latency and the caller's timeout in seconds and a safety margin in percent. Returns \"sync\" when the p95 plus the margin fits within the\n    // timeout (an exact fit counts), otherwise \"accept-and-poll\". Compare p95 * (100 + margin) with timeout * 100.\n    // Example: delivery(8, 10, 25) -> \"sync\", delivery(8, 10, 26) -> \"accept-and-poll\"\n    return null\n}\n",
   "exercise": {
     "main_path": "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-4/src/main/kotlin/GatewayBudget.kt",
@@ -270,7 +265,10 @@
     },
     "origin": "course/84-cost-and-capacity-engineering/02-the-gateway-budgets-and-callers-that-cannot-wait.md",
     "concepts": [
-      "the practice of The gateway, budgets and callers that cannot wait is solved"
+      "A request is blocked when it would exceed the budget, warned at 80 percent, and a warned team is moved to a cheaper model.",
+      "A team's pinned model is honoured only when the policy allows it; otherwise the route table picks the model.",
+      "Showback prices each team's tokens by model, rounds the total to a cent once, and refuses a model with no price.",
+      "A caller with a hard timeout gets accept-and-poll when the p95 plus its margin does not fit."
     ],
     "files": [
       "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"

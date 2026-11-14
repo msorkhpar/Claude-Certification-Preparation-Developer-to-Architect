@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: connect a team's MCP servers to Claude Code"
-    },
-    {
       "type": "para",
       "text": "The orders platform team wants four MCP servers in Claude Code: a GitHub server, a documentation search server, a small server that holds the tools used on every turn, and a server that serves the database schemas. Each developer has their own tokens and a few experiments of their own. In this practice you write the files that make that work for everyone without a secret in the repository, and the tests read the project the way Claude Code does. The tests are the same in all four languages and read only the files: they are configuration, not code in a language, and the Java and Kotlin tests read the JSON with Jackson. The checks run on the course's own model of the documented rules (`examples/55-mcp-config`, in your language). Nothing here starts Claude Code, starts a server or touches the network."
     },
@@ -257,7 +252,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 7,
     "code": 5,
     "tables": 1,
@@ -269,7 +264,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "c92a0501a3603799343e34524cc58736718fe671f959d860034e46795fae70dd",
+  "content_sha256": "838b4eb27fcc6efbdcf4d6fb8e4b14da83531069814738df9db2c41ed5f601dc",
   "starting_code": "{\n  \"mcpServers\": {\n    \"github\": {\n      \"type\": \"http\",\n      \"url\": \"https://github-mcp.example.com/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Bearer lit-tok\"\n      }\n    },\n    \"docs\": {\n      \"type\": \"stdio\",\n      \"command\": \"\",\n      \"args\": [],\n      \"env\": {}\n    },\n    \"core\": {\n      \"type\": \"http\",\n      \"url\": \"https://core-mcp.example.com/mcp\"\n    },\n    \"schema\": {\n      \"type\": \"stdio\",\n      \"command\": \"\",\n      \"args\": []\n    }\n  }\n}\n",
   "exercise": {
     "main_path": "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-3/project/.mcp.json",
@@ -347,7 +342,10 @@
     },
     "origin": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md",
     "concepts": [
-      "the practice of Tools together, descriptions that steer, resources and the practice is solved"
+      "Team MCP servers live in the shared project file, and a personal server belongs only in the user scope.",
+      "Credentials come from the environment as ${VAR} references with no default, while non-secret URLs and paths get a ${VAR:-default}.",
+      "Only the small core server sets alwaysLoad, and permissions allow read-only servers as mcp__server__* while denying the destructive tool.",
+      "A tool description fits 2,048 characters and says within its first 300 when to use it instead of Grep."
     ],
     "files": [
       "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-3/project/.claude/settings.json",

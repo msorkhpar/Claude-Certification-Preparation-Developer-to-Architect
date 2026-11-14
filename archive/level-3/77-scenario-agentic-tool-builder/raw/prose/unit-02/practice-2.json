@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: review a tool that an agent proposes"
-    },
-    {
       "type": "para",
       "text": "A team lets its agent write its own tools: the agent proposes a name, a description, the permissions it needs, the limits it wants and the code. Before any proposed tool runs, a gate reads the proposal and decides: approve it, approve it behind a person's sign-off, send it back for a fix, or refuse it. In this practice you write that gate. The model is not called and no proposed code is ever executed: the gate reads the text of the proposal. The shapes of the proposal, of the policy and of the report, and the crude scan of the code, are this course's own design for the capstone, not an Anthropic interface, and a text scan is not a sandbox: it is the cheap first check in front of one. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -194,7 +189,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 7,
     "code": 2,
     "tables": 1,
@@ -206,7 +201,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "ba17adf0f2fb1f92e706f3a44655d133a9650f070d797b4f65b1d95126cb6734",
+  "content_sha256": "46837231b73c22f3b7b6497b17a76a9ecd3b8b5e09cb03274dd4ad6d2a6231a0",
   "starting_code": "// Review a tool that an agent proposes: its name and description, the limits it asks for, what its code does and which permissions it declares, and the decision.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"tool_review\");\n\nexport type Proposal = { name: string; description: string; permissions: string[]; timeout_s: number; memory_mb: number; code: string };\nexport type Policy = { min_words: number; max_timeout: number; max_memory: number; denied: string[]; approval: string[] };\nexport type Report = { name: string; decision: string; refusals: string[]; findings: string[]; used: string[]; audit: string };\n\nconst FORBIDDEN = [\"os.system\", \"subprocess\", \"eval(\", \"exec(\", \"__import__\"];\n// a deliberately crude scan of the code text: which permission each marker shows (the order of this table is not the order of the report)\nconst MARKERS: Record<string, string[]> = {\n  network: [\"requests.\", \"urllib\"],\n  write_files: [\".write(\", \"shutil.\"],\n  read_files: [\"open(\", \".read(\"],\n  run_process: [\"subprocess\"],\n};\n\n/**\n * TODO 1 of 6 (unlocks e1, e2 and e3): the findings about the name, the description and the limits.\n * Receives the proposal and the policy. Returns a list, in this order, of `bad_name` (the name does not match `[a-z][a-z0-9_]{2,63}`),\n * `short_description` (fewer than `min_words` words), `timeout` (`timeout_s` above `max_timeout`) and `memory` (`memory_mb` above `max_memory`).\n * Example: a 3-word description with a policy minimum of 12 -> [\"short_description\"]\n */\nexport function findingsOf(proposal: Proposal, policy: Policy): string[] {\n  return [];\n}\n\n/**\n * TODO 2 of 6 (unlocks e4): the forbidden tokens in the code.\n * Receives the code text. Returns the tokens of `FORBIDDEN` that it contains, in alphabetical order.\n * Example: \"eval(text)\\nos.system('ls')\" -> [\"eval(\", \"os.system\"]\n */\nexport function forbiddenCalls(code: string): string[] {\n  return [];\n}\n\n/**\n * TODO 3 of 6 (unlocks e5, e6 and e8): the permissions the code shows.\n * Receives the code text. Returns the permissions of `MARKERS` that have a marker in the code, in alphabetical order (the table is not in that order).\n * Example: \"shutil.copy(a, b)\\nopen(a).read()\" -> [\"read_files\", \"write_files\"]\n */\nexport function permissionsUsed(code: string): string[] {\n  return [];\n}\n\n/**\n * TODO 4 of 6 (unlocks e4 and e5): the refusals, in order.\n * Receives the forbidden tokens, the permissions used, the permissions declared and the permissions the policy denies. Returns\n * `forbidden:<token>` for each forbidden token, then `undeclared:<permission>` for each used permission that was not declared, then\n * `denied:<permission>` for each declared permission that is denied (alphabetical within each group).\n * Example: refusalsOf([], [\"network\"], [\"read_files\"], [\"network\"]) -> [\"undeclared:network\"]\n */\nexport function refusalsOf(forbidden: string[], used: string[], declared: string[], denied: string[]): string[] {\n  return [];\n}\n\n/**\n * TODO 5 of 6 (unlocks e6): does a declared permission need approval?\n * Receives the declared permissions and the permissions that need approval. Returns true when any declared permission is among them.\n * Example: isGated([\"read_files\", \"write_files\"], [\"write_files\"]) -> true\n */\nexport function isGated(declared: string[], approval: string[]): boolean {\n  return false;\n}\n\n/**\n * TODO 6 of 6 (unlocks m1, e6 and e7): the decision.\n * Receives the refusals, the findings and `gated`. Returns `refuse` when there are refusals, otherwise `revise` when there are findings,\n * otherwise `approve_with_gate` when gated, otherwise `approve`.\n * Example: decide([], [\"timeout\"], true) -> \"revise\"\n */\nexport function decide(refusals: string[], findings: string[], gated: boolean): string {\n  return \"\";\n}\n\nexport function review(proposal: Proposal, policy: Policy): Report {\n  log.debug(\"review input\", proposal);\n  const { name, code, permissions: declared } = proposal;\n  const findings = findingsOf(proposal, policy);\n  const used = permissionsUsed(code);\n  const refusals = refusalsOf(forbiddenCalls(code), used, declared, policy.denied);\n  const decision = decide(refusals, findings, isGated(declared, policy.approval));\n  return { name, decision, refusals, findings, used, audit: `${name}: ${decision}` };\n}\n",
   "exercise": {
     "main_path": "practice/level-3/77-scenario-agentic-tool-builder/prose/unit-02/practice-2/toolReview.ts",
@@ -279,7 +274,10 @@
     },
     "origin": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md",
     "concepts": [
-      "the practice of Reviewing a proposal, and the practice is solved"
+      "A tool name is lower-case snake case of at most 64 characters, and timeout and memory may equal their limits but not exceed them.",
+      "Forbidden calls such as eval or subprocess in the code refuse the tool, listed alphabetically.",
+      "A permission the code uses without declaring it, or a denied one, refuses the tool.",
+      "A refusal beats a revision, a revision beats a gate, and a declared permission that needs approval is approved only behind a gate."
     ],
     "files": [
       "practice/level-3/77-scenario-agentic-tool-builder/prose/unit-02/practice-2/try-it.ts"

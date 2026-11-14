@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: thinking, effort and speed set correctly per model"
-    },
-    {
       "type": "para",
       "text": "Write the function that turns what an application wants (thinking mode, effort, fast mode, sampling) into request parameters for one model, and refuses the combinations the API would answer with a 400. The rules come from the documentation read on 2026-10-02 and are summarised in `docs/VERSIONS.md`; the lesson pages explain them."
     },
@@ -195,7 +190,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 6,
     "code": 2,
     "tables": 2,
@@ -207,7 +202,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "71ec2b572f9f08af09ee012d3ee78a56c90fe94fc48990410bf06873aff549a2",
+  "content_sha256": "0a1c5fb5ff9c671c6ffa93d5b8ebe7c926a530f086ddc212b3a3ed4842b30dac",
   "starting_code": "// Request parameters for thinking, effort and speed, checked per model. See ../../statement.md for the contract.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"params\");\n\nconst EFFORTS = [\"low\", \"medium\", \"high\", \"xhigh\", \"max\"];\nconst FAST_BETA = \"fast-mode-2026-02-01\";\nconst DEFAULT_EFFORT: Record<string, string> = { \"claude-fable-5-1\": \"high\", \"claude-opus-5-5\": \"medium\", \"claude-sonnet-5-5\": \"high\" };\n\n/** The API would answer 400. `param` names the offending parameter. */\nexport class RejectedRequest extends Error {\n  param: string;\n  reason: string;\n  constructor(param: string, reason: string) {\n    super(`${param}: ${reason}`);\n    this.param = param;\n    this.reason = reason;\n  }\n}\n\nfunction family(model: string): string {\n  if (model.startsWith(\"claude-haiku-4-5\")) return \"claude-haiku-4-5\";\n  if (model in DEFAULT_EFFORT) return model;\n  throw new RejectedRequest(\"model\", `unknown model ${model}`);\n}\n\nfunction checkEffort(haiku: boolean, effort: string): void {\n  // TODO 1 of 7 (finish this to pass e3): refuse an effort level the model cannot take.\n  // Receives whether the model is Haiku and the effort given. Throws RejectedRequest(\"output_config.effort\", ...) for Haiku (it has no effort) and for a level that is not in EFFORTS.\n  // Example: checkEffort(true, \"low\") throws, checkEffort(false, \"adaptive\") throws, checkEffort(false, \"high\") returns\n}\n\nfunction checkMode(haiku: boolean, kind: string): void {\n  // TODO 2 of 7 (finish this to pass e1): refuse a thinking mode the model does not have.\n  // Receives whether the model is Haiku and the thinking type. Throws RejectedRequest(\"thinking\", ...) for \"adaptive\" on Haiku, and for \"enabled\" or \"disabled\" on any model that is not Haiku.\n  // Example: checkMode(false, \"disabled\") throws, checkMode(true, \"disabled\") returns\n}\n\nfunction checkBudget(budget: number | undefined | null, maxTokens: number): void {\n  // TODO 3 of 7 (finish this to pass e6): refuse a manual thinking budget that does not fit.\n  // Receives the budget (undefined or null when missing) and maxTokens. Throws RejectedRequest(\"thinking.budget_tokens\", ...) when the budget is missing, below 1024 or not below maxTokens.\n  // Example: checkBudget(1023, 4096) throws, checkBudget(2048, 2048) throws, checkBudget(1024, 2048) returns\n}\n\nfunction checkBetweenTools(fam: string, effort: string | undefined | null): void {\n  // TODO 4 of 7 (finish this to pass e2): refuse between_tools where it does not work.\n  // Receives the model family and the effort given (undefined or null when absent). Throws RejectedRequest(\"thinking\", ...) unless the family is \"claude-sonnet-5-5\", and when the\n  // effective effort (the one given, else DEFAULT_EFFORT[fam]) is \"xhigh\" or \"max\".\n  // Example: checkBetweenTools(\"claude-sonnet-5-5\", \"max\") throws, checkBetweenTools(\"claude-sonnet-5-5\", undefined) returns\n}\n\nfunction thinkingObject(kind: string, budget: number | undefined | null): Record<string, any> {\n  // TODO 5 of 7 (finish this to pass m1 and e7): the `thinking` value of the request.\n  // Receives the thinking type and the budget (undefined unless \"enabled\"). Returns { type: kind }, plus budget_tokens: budget for \"enabled\". Effort never goes in here.\n  // Example: thinkingObject(\"adaptive\", undefined) -> { type: \"adaptive\" }, thinkingObject(\"enabled\", 2048) -> { type: \"enabled\", budget_tokens: 2048 }\n  return {};\n}\n\nfunction samplingAllowed(haiku: boolean, name: string, value: number): boolean {\n  // TODO 6 of 7 (finish this to pass e4): whether the model accepts this sampling parameter.\n  // Receives whether the model is Haiku, the parameter name (temperature, top_p or top_k) and its value. Returns true for Haiku, and for the others only a temperature of exactly 1.0.\n  // Example: samplingAllowed(false, \"temperature\", 0.2) -> false, samplingAllowed(true, \"top_k\", 40) -> true\n  return true;\n}\n\nfunction fastParams(fam: string, batch: unknown): Record<string, any> {\n  // TODO 7 of 7 (finish this to pass e5): the parameters fast mode adds, or a refusal.\n  // Receives the model family and whether the request goes into a batch. Throws RejectedRequest(\"speed\", ...) unless the family is \"claude-opus-5-5\", and when `batch` is truthy.\n  // Otherwise returns { speed: \"fast\", betas: [FAST_BETA] }.\n  // Example: fastParams(\"claude-opus-5-5\", false) -> { speed: \"fast\", betas: [\"fast-mode-2026-02-01\"] }\n  return {};\n}\n\nexport function buildParams(model: string, maxTokens: number, options: Record<string, any> = {}): Record<string, any> {\n  log.debug(\"buildParams input\", model, maxTokens, options);\n  const fam = family(model);\n  const haiku = fam === \"claude-haiku-4-5\";\n  if (maxTokens < 1) throw new RejectedRequest(\"max_tokens\", \"must be at least 1\");\n  const params: Record<string, any> = { model, max_tokens: maxTokens };\n\n  const effort = options.effort;\n  if (effort !== undefined && effort !== null) {\n    checkEffort(haiku, effort);\n    params.output_config = { effort };\n  }\n\n  const thinking = options.thinking;\n  if (thinking !== undefined && thinking !== null) {\n    const kind = thinking.type;\n    if (![\"adaptive\", \"enabled\", \"disabled\", \"between_tools\"].includes(kind)) throw new RejectedRequest(\"thinking\", `unknown thinking type ${kind}`);\n    if (kind === \"between_tools\") checkBetweenTools(fam, effort);\n    else checkMode(haiku, kind);\n    if (kind === \"enabled\") checkBudget(thinking.budget_tokens, maxTokens);\n    params.thinking = thinkingObject(kind, thinking.budget_tokens);\n  }\n\n  for (const name of [\"temperature\", \"top_p\", \"top_k\"]) {\n    const value = options[name];\n    if (value === undefined || value === null) continue;\n    if (!samplingAllowed(haiku, name, value)) throw new RejectedRequest(name, \"this model rejects a non-default value\");\n    params[name] = value;\n  }\n\n  if (options.speed === \"fast\") Object.assign(params, fastParams(fam, options.batch));\n  return params;\n}\n",
   "exercise": {
     "main_path": "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-2/params.ts",
@@ -275,7 +270,10 @@
     },
     "origin": "course/19-thinking-effort-and-speed/02-fast-mode-tools-and-caching.md",
     "concepts": [
-      "the practice of Fast mode, thinking with tools, and thinking's effect on caching is solved"
+      "Effort goes in output_config, never inside thinking, and Haiku 4.5 takes no effort at all.",
+      "Fable 5.1 and Opus 5.5 take only adaptive thinking; Haiku 4.5 takes enabled with a budget of at least 1,024 below max_tokens.",
+      "Skipping thinking up front is Sonnet 5.5 only, at an effective effort of high or below.",
+      "Fast mode is Opus-only, needs its beta header, and is never sent in a batch; newer models reject top_p, top_k and non-default temperature."
     ],
     "files": [
       "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-2/try-it.ts"

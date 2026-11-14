@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: order a request for cache hits"
-    },
-    {
       "type": "para",
       "text": "A prompt cache stores a **prefix** of the request: the tools first, then the system prompt, then the messages, up to a breakpoint. Anything that changes inside the prefix, a timestamp for instance, starts the cache over. Write the function that puts a request's blocks in the order that keeps the prefix stable and places the breakpoints the cache needs. The rules come from the Claude documentation on prompt caching, read on 2026-10-02; the lesson pages explain them."
     },
@@ -168,7 +163,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -180,7 +175,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "6b007109a4cc2ddd8b289048b2620a1bc7361952c764c72af18113ede6bb1349",
+  "content_sha256": "edf304986a39c373fcc1974aaf734ac966e69fed1f7f383dbf1dc41d52dad942",
   "starting_code": "// Order a request for cache hits and place its breakpoints. See ../../statement.md for the contract.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"cacheplan\");\n\nexport type Block = { id: string; section: \"tools\" | \"system\" | \"messages\"; tokens: number; volatile?: boolean; breakpoint?: boolean; ttl?: \"5m\" | \"1h\" };\nexport type Planned = { id: string; cache: \"5m\" | \"1h\" | null };\n\nconst SECTIONS = { tools: 0, system: 1, messages: 2 };\nconst MAX_BREAKPOINTS = 4;\n\n/** The request cannot be cached as asked (the API would answer 400, or the plan can never hit). */\nexport class PlanError extends Error {}\n\nfunction checkTools(blocks: Block[]): void {\n  // TODO 1 of 6 (finish this to pass e5): refuse a volatile tool definition.\n  // Receives the blocks. Throws PlanError when a block in the \"tools\" section is volatile (tools come first, nothing volatile may sit\n  // in the prefix); returns nothing otherwise. Example: checkTools([{ id: \"t\", section: \"tools\", tokens: 9, volatile: true }]) throws\n}\n\nfunction ordered(blocks: Block[]): Block[] {\n  // TODO 2 of 6 (finish this to pass m1, e1 and e6): the blocks in cache-friendly order, as a new array.\n  // Receives the blocks. Returns a new array: sections in the order of SECTIONS (tools, system, messages), blocks of one section in the\n  // order given, then every volatile block moved to the very end in its given order. The input is left unchanged.\n  // Example: ids of [m (messages), s (system, volatile), t (tools)] come out as t, m, s\n  return [];\n}\n\nfunction wantsBreakpoint(block: Block, total: number, minTokens: number): boolean {\n  // TODO 3 of 6 (finish this to pass e2 and e5): does this block carry a breakpoint?\n  // Receives the block, total (the stable tokens from the start up to and including this block) and minTokens. Returns true when the\n  // block asks for a breakpoint, is not volatile and total is at least minTokens. Example: a breakpoint block at total 500, min 1024 -> false\n  return false;\n}\n\nfunction marker(block: Block): \"5m\" | \"1h\" {\n  // TODO 4 of 6 (finish this to pass m1): the cache lifetime a breakpoint carries.\n  // Receives the block. Returns its ttl (\"5m\" or \"1h\"), \"5m\" when it has none. Example: marker({ ttl: \"1h\" }) -> \"1h\"\n  return \"5m\";\n}\n\nfunction checkCount(marked: string[]): void {\n  // TODO 5 of 6 (finish this to pass e3): at most MAX_BREAKPOINTS breakpoints.\n  // Receives the lifetimes of the blocks that kept a breakpoint. Throws PlanError when there are more than MAX_BREAKPOINTS.\n  // Example: checkCount([\"5m\", \"5m\", \"5m\", \"5m\", \"5m\"]) throws\n}\n\nfunction checkLifetimes(marked: string[]): void {\n  // TODO 6 of 6 (finish this to pass e4): a 1h breakpoint must come before every 5m one.\n  // Receives the lifetimes of the kept breakpoints in request order. Throws PlanError when a \"1h\" follows a \"5m\".\n  // Example: checkLifetimes([\"5m\", \"1h\"]) throws, checkLifetimes([\"1h\", \"5m\"]) does not\n}\n\nexport function planRequest(blocks: Block[], minTokens = 1024): Planned[] {\n  log.debug(\"planRequest input\", blocks);\n  checkTools(blocks);\n  const plan: Planned[] = [];\n  let total = 0;\n  for (const b of ordered(blocks)) {\n    if (!b.volatile) total += b.tokens;\n    plan.push({ id: b.id, cache: wantsBreakpoint(b, total, minTokens) ? marker(b) : null });\n  }\n  const marked = plan.filter((p) => p.cache).map((p) => p.cache as string);\n  checkCount(marked);\n  checkLifetimes(marked);\n  return plan;\n}\n",
   "exercise": {
     "main_path": "practice/level-2/20-prompt-caching/prose/unit-02/practice-2/cacheplan.ts",
@@ -243,7 +238,10 @@
     },
     "origin": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
     "concepts": [
-      "the practice of Prices, lifetimes, the lookback and what breaks a cache is solved"
+      "The cache prefix runs tools, then system, then messages, so volatile content such as the current time goes at the very end.",
+      "A breakpoint only counts when the stable tokens up to it reach the minimum; below it the API ignores the marker silently.",
+      "A request may carry at most four breakpoints, and a one-hour breakpoint may not follow a five-minute one.",
+      "A volatile block never carries a breakpoint, and a volatile tool cannot be moved out of the prefix."
     ],
     "files": [
       "practice/level-2/20-prompt-caching/prose/unit-02/practice-2/try-it.ts"

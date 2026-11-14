@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: rolling Claude Code out to an organisation"
-    },
-    {
       "type": "para",
       "text": "A company is about to give three hundred developers Claude Code. The platform team has drafted the policy and the plan, and the draft is wrong in several places: the lock that makes managed permissions the only ones sits in a project file where it does nothing, plugins can come from anywhere, a managed default model is mistaken for a lock, the spend limits do not add up, and the adoption targets count lines and prompts. In this practice you correct the files. There is no program to write and no model is called: the tests read your files. The names of the settings are the documented ones of Claude Code (settings and managed-settings pages, read 2026-10-04); the numbers (an effort cap of at most `high`, a baseline of at least 4 weeks, group limits that add up to the organisation limit) are this course's design values. It is in Python, TypeScript, Java and Kotlin; pick your language folder, open `starter/` and edit the files there; each language folder holds its own copy of the files."
     },
@@ -223,7 +218,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 7,
     "code": 3,
     "tables": 1,
@@ -235,7 +230,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "d46b1e00d31dbdf632f83a7125dddb90d784d8d298b9146e054cb5398c781917",
+  "content_sha256": "5bb634092d0e4f06bec520c055980472cd1c5753561049569f05e763a0489bba",
   "starting_code": "{\n  \"permissions\": {\n    \"deny\": [\"Read(./.env)\"]\n  },\n  \"strictKnownMarketplaces\": [],\n  \"model\": \"opus\",\n  \"maxEffortLevel\": \"max\"\n}\n",
   "exercise": {
     "main_path": "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-3/project/managed/managed-settings.json",
@@ -306,7 +301,10 @@
     },
     "origin": "course/92-enabling-teams-and-operations/01-one-setting-in-five-places-precedence-locks-and-managed-only-keys.md",
     "concepts": [
-      "the practice of One setting in five places: precedence, locks and managed-only keys is solved"
+      "The managed settings file locks permission rules, turns off bypass mode and denies reading the environment file.",
+      "Managed-only keys such as allowManagedHooksOnly do nothing in the project file, and marketplaces are limited to sources the company owns.",
+      "The managed MCP allowlist is exclusive and disjoint from the denylist, and availableModels includes the default with effort capped at high.",
+      "Group spend limits add up to no more than the organisation's, and adoption targets are outcomes measured against a baseline of at least four weeks."
     ],
     "files": [
       "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-3/project/.claude/settings.json",

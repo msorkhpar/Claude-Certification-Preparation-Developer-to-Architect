@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: subagents that recover locally, fail with context and leave the coordinator able to decide"
-    },
-    {
       "type": "para",
       "text": "A research system sends one subagent to each source. When a source times out, the subagent returns \"search unavailable\" and the coordinator learns nothing; when a source has nothing to say, the subagent returns an error, so the coordinator retries a search that worked; when one source is closed to the system, the whole run stops; and the final report claims to cover every topic although two of them were never read. In this practice you write the three decisions that fix this: what a subagent does about a failure (retry what is transient, report the rest with its context), what the coordinator does with each result, and what the report says about coverage. The tool is not called: the tests give you scripted replies. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -192,7 +187,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 6,
     "code": 2,
     "tables": 1,
@@ -204,7 +199,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "7cca2279888c4c76b7314596a537c3fc982eaf6f829c00c91c3321ba80c1b524",
+  "content_sha256": "2e590107e12277775b949bece14ed753a7bed66f1bdf5cfe96a915228ab05086",
   "starting_code": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.function.BiFunction;\n\n/** How a subagent's failure reaches the coordinator and the report: local recovery, structured error context, valid empty results, and coverage notes. See ../../statement.md. */\nfinal class ErrorFlow {\n    private static final System.Logger LOG = System.getLogger(ErrorFlow.class.getName());\n    private ErrorFlow() {}\n\n    static final Map<String, List<String>> ALTERNATIVES = Map.of(\n        \"timeout\", List.of(\"retry later\", \"try a narrower query\"),\n        \"unavailable\", List.of(\"use a cached source\", \"try another provider\"),\n        \"permission\", List.of(\"request access\", \"use a public source\"),\n        \"invalid_query\", List.of(\"rewrite the query\"));\n    static final List<String> TRANSIENT = List.of(\"timeout\", \"unavailable\");\n\n    /** What a search tool returns: status ok with items, or status error with a type and the partial items found before it failed. */\n    record Reply(String status, String type, List<String> items, List<String> partial) {}\n\n    record Outcome(String status, List<String> items, int attempts, String failureType, String attempted, List<String> partialResults, List<String> alternatives) {}\n\n    record Step(String topic, String action) {}\n\n    static Outcome searchWithRecovery(String query, BiFunction<String, Integer, Reply> call) {\n        return searchWithRecovery(query, call, 2);\n    }\n\n    static Outcome searchWithRecovery(String query, BiFunction<String, Integer, Reply> call, int maxAttempts) {\n        LOG.log(System.Logger.Level.DEBUG, \"searchWithRecovery input: {0}\", query);\n        int attempts = 0;\n        while (true) {\n            attempts += 1;\n            Reply reply = call.apply(query, attempts);\n            if (reply.status().equals(\"ok\")) {\n                // TODO 2 of 6 (finish this to pass e1): the status of an ok reply. Return success when the reply holds\n                //   items and empty when it holds none (a search that found nothing is a valid answer, not a failure).\n                //   Example: ok with [] -> empty.\n                return new Outcome(\"success\", reply.items(), attempts, null, null, List.of(), List.of());\n            }\n            String kind = reply.type();\n            // TODO 1 of 6 (finish this to pass m1): the local retry. When the failure type is one of TRANSIENT and the\n            //   attempts so far are below max_attempts, try again; otherwise give up. Example: timeout then ok, limit 2 ->\n            //   success with attempts 2.\n            // TODO 3 of 6 (finish this to pass e2, e3): the failed outcome. Return status failed with the failure type,\n            //   the query that was attempted, the attempts, the partial results the reply carried (none when absent) and\n            //   the alternatives listed for that failure type (none when unknown). Example: permission error ->\n            //   alternatives [request access, use a public source].\n            return new Outcome(\"failed\", List.of(), attempts, kind, query, List.of(), List.of());\n        }\n    }\n\n    static List<Step> coordinatorPlan(Map<String, Outcome> results) {\n        List<Step> plan = new ArrayList<>();\n        for (Map.Entry<String, Outcome> e : results.entrySet()) {\n            Outcome o = e.getValue();\n            String action;\n            if (o.status().equals(\"success\")) action = \"use\";\n            else if (o.status().equals(\"empty\")) action = \"no_findings\";\n            // TODO 4 of 6 (finish this to pass e4): the rows for a failed topic. When the outcome has partial results,\n            //   the action is use_partial; otherwise try_alternative when it has alternatives; otherwise flag_gap.\n            //   Example: failed, no partial, alternatives [rewrite the query] -> try_alternative.\n            else action = \"flag_gap\";\n            plan.add(new Step(e.getKey(), action));\n        }\n        return plan;\n    }\n\n    static String coverageNote(Map<String, Outcome> results, List<String> topics) {\n        Map<String, List<String>> groups = new LinkedHashMap<>();\n        for (String name : List.of(\"Well-supported\", \"Partial\", \"No findings\", \"Gaps\")) groups.put(name, new ArrayList<>());\n        for (String topic : topics) {\n            Outcome o = results.get(topic);\n            // TODO 6 of 6 (finish this to pass e6): the topic with no result. When a requested topic has no outcome at\n            //   all, list it under Gaps as \"topic (not searched)\". Example: topics [a, b], results only for a -> Gaps: b\n            //   (not searched).\n            if (o == null) continue;\n            else if (o.status().equals(\"success\")) groups.get(\"Well-supported\").add(topic);\n            else if (o.status().equals(\"empty\")) groups.get(\"No findings\").add(topic);\n            // TODO 5 of 6 (finish this to pass e5): the groups of a failed topic in the coverage note. With partial\n            //   results, list the topic under Partial as \"topic (failure type)\"; without, under Gaps as \"topic (failure\n            //   type: query attempted)\". Example: partial, timeout -> Partial: topic (timeout).\n            else groups.get(\"Gaps\").add(topic);\n        }\n        List<String> lines = new ArrayList<>();\n        for (Map.Entry<String, List<String>> g : groups.entrySet()) if (!g.getValue().isEmpty()) lines.add(g.getKey() + \": \" + String.join(\", \", g.getValue()));\n        return String.join(\"\\n\", lines);\n    }\n}\n",
   "exercise": {
     "main_path": "practice/level-3/66-errors-across-agents/prose/unit-02/practice-3/src/main/java/ErrorFlow.java",
@@ -271,7 +266,10 @@
     },
     "origin": "course/66-errors-across-agents/02-plans-partial-results-coverage-notes-and-the-practice.md",
     "concepts": [
-      "the practice of Plans, partial results, coverage notes and the practice is solved"
+      "A transient failure is retried locally, and the success is reported with its number of attempts.",
+      "A valid empty result is a success with no findings, never an error, and a permission or invalid query error is not retried.",
+      "A failure carries what was attempted, the attempts, partial results and alternatives, so the coordinator can act on it.",
+      "The coordinator uses partial results, tries an alternative or flags a gap without stopping the run, and the coverage note names each cause."
     ],
     "files": [
       "practice/level-3/66-errors-across-agents/prose/unit-02/practice-3/src/main/java/TryIt.java"

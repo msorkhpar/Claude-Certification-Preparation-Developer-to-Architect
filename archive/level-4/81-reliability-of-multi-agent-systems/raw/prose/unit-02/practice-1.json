@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a multi-agent run graded on injected failures"
-    },
-    {
       "type": "para",
       "text": "A research team of agents runs a plan of tasks, and in production some of them time out, some fail for good and some take the process down. In this practice you write the runner that decides what happens next: which task is retried and with which key, which tasks are skipped because something they need failed, when an agent is cut off, when a weaker agent takes over, and what a second run does with the work that was already done. The model is not called: the tests give you agents that fail on demand. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -205,7 +200,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 9,
+    "headings": 8,
     "paras": 6,
     "code": 2,
     "tables": 1,
@@ -217,7 +212,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "a7c36a48d847209e7197d34745c61c809de0250f915d2fc99b50ae92f192f471",
+  "content_sha256": "3320974b355c14258142739a27c6a1ae34bdbdf208064694dfcc5ff2aedd9686",
   "starting_code": "\"\"\"A multi-agent run that survives injected failures: retries with one key, isolation, a breaker, a fallback and a checkpoint. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\nclass Transient(Exception):\n    \"\"\"A failure worth retrying: a timeout, a rate limit, a lost response.\"\"\"\n\n\nclass Fatal(Exception):\n    \"\"\"A failure that retrying cannot fix.\"\"\"\n\n\ndef call_once(agents, name, key, inputs):\n    \"\"\"One call to an agent: (\"ok\", result), (\"transient\", None) or (\"fatal\", message). Any other exception is a crash and is not caught.\"\"\"\n    try:\n        return \"ok\", agents[name](key, inputs)\n    except Transient:\n        return \"transient\", None\n    except Fatal as error:\n        return \"fatal\", str(error)\n\n\ndef breaker_open(consecutive, name, threshold):\n    \"\"\"TODO 1 of 7 (unlocks e4): is the breaker of this agent open?\n\n    Receives the map of consecutive failures per agent, the agent name and the threshold. Returns True when the agent's count has reached the threshold\n    (a name that is not in the map has a count of 0). Example: breaker_open({\"w\": 3}, \"w\", 3) -> True, breaker_open({}, \"w\", 3) -> False\n    \"\"\"\n    return False\n\n\ndef record_outcome(consecutive, name, ok):\n    \"\"\"TODO 2 of 7 (unlocks e4): update the consecutive-failure count of an agent after a call.\n\n    Receives the map of consecutive failures, the agent name and whether the call succeeded. Sets the count to 0 on a success and adds one on a failure.\n    Example: after a failure then a success then a failure, the count is 1\n    \"\"\"\n    return None\n\n\ndef attempt(agents, name, key, inputs, calls, task_id, consecutive, attempts, threshold):\n    \"\"\"TODO 3 of 7 (unlocks m1, e1, e2 and e4): call an agent for a task, retrying a transient failure.\n\n    Receives the agents, the agent name, the task's key and inputs, the per-task call counts, the task id, the breaker counts, the attempt limit and the breaker\n    threshold. Up to `attempts` times: if the breaker is open return (None, \"circuit open\") without calling; otherwise add one to `calls[task_id]`, make the\n    call with `call_once` (always the same key), record the outcome and return (result, None) on \"ok\"; return (None, \"fatal: <message>\") on \"fatal\" without\n    retrying; retry on \"transient\". After the last attempt return (None, \"retries exhausted\").\n    Example: an agent that fails once with Transient and then answers \"ok\" -> (\"ok\", None) with two calls counted\n    \"\"\"\n    return None, \"retries exhausted\"\n\n\ndef missing_dependency(needs, done):\n    \"\"\"TODO 4 of 7 (unlocks e3): the first dependency that did not finish.\n\n    Receives the ids a task needs and the dict of finished results. Returns the first id in `needs` (in order) that is not in `done`, or None when all are.\n    Example: missing_dependency([\"a\", \"b\"], {\"a\": \"x\"}) -> \"b\"\n    \"\"\"\n    return None\n\n\ndef fallback_key(key):\n    \"\"\"TODO 5 of 7 (unlocks e5): the idempotency key for the fallback agent.\n\n    Receives the task's key. Returns it followed by `:fallback`, so that a repeat of the fallback is recognised without colliding with the primary.\n    Example: fallback_key(\"key-s\") -> \"key-s:fallback\"\n    \"\"\"\n    return key\n\n\ndef should_resume(tid, store):\n    \"\"\"TODO 6 of 7 (unlocks e6): is this task already checkpointed?\n\n    Receives a task id and the store of checkpointed results. Returns True when the store holds the task, so that no agent is called for it.\n    Example: should_resume(\"a\", {\"a\": \"ok\"}) -> True\n    \"\"\"\n    return False\n\n\ndef checkpoint(store, tid, result, degraded):\n    \"\"\"TODO 7 of 7 (unlocks m1, e5, e6 and e7): write a finished task's result to the store.\n\n    Receives the store, the task id, the result and whether the result is degraded (it came from the fallback). Writes the result to the store unless it is\n    degraded, so that a later run tries the primary again. It is called as soon as each task finishes, so a crash later in the run loses nothing finished.\n    Example: checkpoint(store, \"a\", \"ok\", False) -> store == {\"a\": \"ok\"}; with degraded True the store is unchanged\n    \"\"\"\n    return None\n\n\ndef run_plan(plan, agents, store, attempts=3, breaker_threshold=3):\n    log.debug(\"run_plan input: %r\", plan)\n    done, failed, skipped, degraded, resumed, calls = {}, {}, {}, [], [], {}\n    consecutive = {}\n    for task in plan:\n        tid = task[\"id\"]\n        calls[tid] = 0\n        if should_resume(tid, store):\n            done[tid] = store[tid]\n            resumed.append(tid)\n            continue\n        needs = task.get(\"needs\") or []\n        missing = missing_dependency(needs, done)\n        if missing is not None:\n            skipped[tid] = f\"dependency failed: {missing}\"\n            continue\n        inputs = {n: done.get(n, \"\") for n in needs}\n        result, reason = attempt(agents, task[\"agent\"], task[\"key\"], inputs, calls, tid, consecutive, attempts, breaker_threshold)\n        if result is None and task.get(\"fallback\"):\n            result, _ = attempt(agents, task[\"fallback\"], fallback_key(task[\"key\"]), inputs, calls, tid, consecutive, attempts, breaker_threshold)\n            if result is not None:\n                done[tid] = result\n                degraded.append(tid)\n                checkpoint(store, tid, result, True)\n                continue\n        if result is None:\n            failed[tid] = reason\n            continue\n        done[tid] = result\n        checkpoint(store, tid, result, False)\n    return {\"done\": done, \"failed\": failed, \"skipped\": skipped, \"degraded\": degraded, \"attempts\": calls, \"resumed\": resumed}\n",
   "exercise": {
     "main_path": "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-1/reliable_agents.py",
@@ -286,7 +281,10 @@
     },
     "origin": "course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md",
     "concepts": [
-      "the practice of Isolation, fallbacks and resuming a run is solved"
+      "Every retry of a task carries the same idempotency key, retries stop at the limit, and a fatal failure is not retried.",
+      "A failure stays inside its branch, so tasks that depend on it are skipped while the rest run.",
+      "A circuit breaker stops calls to an agent after consecutive failures reach the threshold, and a success resets the count.",
+      "A fallback result uses its own key and is degraded, not checkpointed, so a rerun resumes from the checkpoint and retries only what failed."
     ],
     "files": [
       "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-1/try_it.py"

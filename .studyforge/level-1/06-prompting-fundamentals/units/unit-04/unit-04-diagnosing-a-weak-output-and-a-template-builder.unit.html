@@ -235,7 +235,10 @@ Three weak outputs and their diagnosis. The symptoms are hand-written for this p
 <p class="eyebrow" data-practices-part="kind"><span>Coding practice</span></p>
 <h3><a href="#s-practice-prose" data-practices-part="open">Practice: a prompt template builder, graded on structure<svg data-practices-part="chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M 9 6 l 6 6 l -6 6"></path></svg></a></h3>
 <ul data-practices-part="concepts" aria-label="What it practises">
-<li>the practice of Diagnosing a weak output, and a template builder is solved</li>
+<li>A prompt puts role, documents, context, examples, constraints, output format and task in a fixed order, and leaves out any empty section.</li>
+<li>Placeholders are filled in one pass, and a placeholder with no value is an error that names the variable.</li>
+<li>Documents are untrusted data: their ampersands and angle brackets are escaped, and placeholders inside them stay literal.</li>
+<li>A missing or blank task is refused, and documents and examples keep their given order and numbering.</li>
 </ul>
 <p data-practices-part="state" hidden><span data-practice-state="not-started">Not started</span><span data-practice-state="partial" hidden>Passed in <b data-edition-count>0</b> of 4 languages</span><span data-practice-state="passed" hidden>Passed in every language</span></p>
 <p data-practices-part="editions">Available in: <span data-edition="python" data-edition-section="s-practice-prose" data-edition-key="level-1/06-prompting-fundamentals/unit-04/practice-prose">Python<span data-edition-mark hidden> (passed)</span></span>, <span data-edition="typescript" data-edition-section="s-practice-prose-2" data-edition-key="level-1/06-prompting-fundamentals/unit-04/practice-prose-2">TypeScript<span data-edition-mark hidden> (passed)</span></span>, <span data-edition="java" data-edition-section="s-practice-prose-3" data-edition-key="level-1/06-prompting-fundamentals/unit-04/practice-prose-3">Java<span data-edition-mark hidden> (passed)</span></span>, <span data-edition="kotlin" data-edition-section="s-practice-prose-4" data-edition-key="level-1/06-prompting-fundamentals/unit-04/practice-prose-4">Kotlin<span data-edition-mark hidden> (passed)</span></span>.</p>
@@ -244,16 +247,15 @@ Three weak outputs and their diagnosis. The symptoms are hand-written for this p
 </section>
 <section id="s-practice-prose" data-section="practice-prose" data-kind="practice" data-label="Practice: a prompt template builder, graded on structure (Python)" data-edition="python">
 <h2 id="practice-prose-b0">Problem statement</h2>
-<h2 id="practice-prose-b1">Practice: a prompt template builder, graded on structure</h2>
 <p>Write <code>build_prompt</code> (Python), <code>buildPrompt</code> (TypeScript), <code>PromptBuilder.build</code> (Java) or <code>buildPrompt</code> (Kotlin): it turns a prompt <strong>spec</strong> into one prompt string. The tests check the structure of the string, exactly, so the format below is the contract.</p>
-<h2 id="practice-prose-b3">What is already written, and what you write</h2>
+<h2 id="practice-prose-b2">What is already written, and what you write</h2>
 <p>The starter is a working prompt builder with eight gaps cut out of it. The plumbing is written and correct: the spec handling, the order of the sections, the placeholder pass, the block helper and the numbering loops. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the <code>log</code> line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names, with a leading underscore; the TypeScript, Java and Kotlin names are the camel-case forms, <code>renderDocument</code> for <code>_render_document</code>, and so on):</p>
 <ol class="items"><li><code>_join</code> unlocks every case: the sections separated by one blank line.</li><li><code>_present</code> unlocks <code>e1</code>: an absent, empty or whitespace-only text is not there.</li><li><code>_lookup</code> unlocks <code>e2</code>: a placeholder's value, or an error that names the variable.</li><li><code>_escape</code> unlocks <code>e4</code>: <code>&amp;</code>, <code>&lt;</code> and <code>&gt;</code> made harmless.</li><li><code>_render_document</code> unlocks <code>e4</code>, <code>e5</code> and <code>e6</code>: one document, escaped and never filled.</li><li><code>_render_example</code> unlocks <code>m1</code> and <code>e6</code>: one example with its input and output blocks.</li><li><code>_constraint_lines</code> unlocks <code>m1</code>: one <code>- </code> line per constraint.</li><li><code>_check_task</code> unlocks <code>e3</code>: a blank task is refused.</li></ol>
 <p><code>m1</code> needs gaps 1, 2, 3, 5, 6 and 7. A few lines each, about ten in all.</p>
-<h2 id="practice-prose-b7">The spec</h2>
+<h2 id="practice-prose-b6">The spec</h2>
 <div class="scroll"><table><thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead><tbody><tr><td><code>task</code></td><td>text</td><td>The ask. <strong>Required.</strong></td></tr><tr><td><code>role</code></td><td>text, optional</td><td>Who Claude is for this task</td></tr><tr><td><code>context</code></td><td>text, optional</td><td>Why and for whom</td></tr><tr><td><code>documents</code></td><td>list of <code>name</code> and <code>text</code>, optional</td><td>Source material (untrusted data)</td></tr><tr><td><code>examples</code></td><td>list of <code>input</code> and <code>output</code>, optional</td><td>Worked examples</td></tr><tr><td><code>constraints</code></td><td>list of text, optional</td><td>Rules the answer must obey</td></tr><tr><td><code>output_format</code></td><td>text, optional</td><td>The shape of the answer</td></tr></tbody></table></div>
 <p>Plus a <code>variables</code> map from names to text. (TypeScript, Java and Kotlin name the field <code>outputFormat</code>.)</p>
-<h2 id="practice-prose-b10">The output</h2>
+<h2 id="practice-prose-b9">The output</h2>
 <p>Sections appear in this order, separated by one blank line, with no trailing newline. A section is <strong>omitted entirely</strong> when its field is absent, <code>null</code>, empty or only whitespace; <code>task</code> is never omitted.</p>
 <figure class="code" data-frame="terminal"><figcaption><span class="what">output</span></figcaption><pre><code class="language-text">&lt;role&gt;
 {role}
@@ -296,9 +298,9 @@ Three weak outputs and their diagnosis. The symptoms are hand-written for this p
 {task}
 &lt;/task&gt;</code></pre></figure>
 <p>Documents and examples keep the order they were given, numbered from 1.</p>
-<h2 id="practice-prose-b14">Rules</h2>
+<h2 id="practice-prose-b13">Rules</h2>
 <ol class="items"><li><strong>Variables.</strong> <code>{{name}}</code> in <code>role</code>, <code>context</code>, <code>constraints</code>, <code>output_format</code>, <code>task</code>, and the <code>input</code> and <code>output</code> of examples is replaced by the variable's value, in one pass: a value that itself contains <code>{{other}}</code> is inserted as it is. A placeholder with no value is an error that names the variable (Python <code>ValueError</code>, TypeScript <code>Error</code>, Java and Kotlin <code>IllegalArgumentException</code>; the message contains the variable's name).</li><li><strong>Documents are data.</strong> In a document's <code>text</code> and <code>name</code>, replace <code>&amp;</code> with <code>&amp;amp;</code>, <code>&lt;</code> with <code>&amp;lt;</code> and <code>&gt;</code> with <code>&amp;gt;</code>, and in the <code>name</code> also <code>&quot;</code> with <code>&amp;quot;</code>, so a document can never close its own tag. Placeholders inside documents are <strong>not</strong> replaced.</li><li><strong>A blank task is refused</strong> with the same error type: missing, empty or only whitespace.</li></ol>
-<h2 id="practice-prose-b16">The cases</h2>
+<h2 id="practice-prose-b15">The cases</h2>
 <div class="scroll"><table><thead><tr><th>Id</th><th>What it checks</th></tr></thead><tbody><tr><td><code>m1</code></td><td>A full spec renders every section in the order above</td></tr><tr><td><code>e1</code></td><td>Absent, empty and whitespace-only optional sections are omitted, not rendered empty</td></tr><tr><td><code>e2</code></td><td>Variables are filled in one pass; a missing variable is named in the error</td></tr><tr><td><code>e3</code></td><td>A missing, empty or whitespace-only task is refused</td></tr><tr><td><code>e4</code></td><td>Document text and names are escaped, so a document cannot close its own tag</td></tr><tr><td><code>e5</code></td><td>Placeholders inside document text stay literal</td></tr><tr><td><code>e6</code></td><td>Documents and examples keep their order and their numbering</td></tr></tbody></table></div>
 <details class="disclosure"><summary>Show a worked solution</summary><figure class="code"><figcaption><span class="what">python</span></figcaption><pre><code class="language-python">&quot;&quot;&quot;Build a structured prompt from a spec. See ../../statement.md for the exact format.&quot;&quot;&quot;
 import logging
@@ -408,7 +410,7 @@ print(&quot;starts with:&quot;, repr(prompt[:20]))
 print(&quot;has task block:&quot;, &quot;&lt;task&gt;\nClassify the message about delivery.\n&lt;/task&gt;&quot; in prompt)
 print(prompt)
 </code></pre></figure></details>
-<h2 id="practice-prose-b20">Starting code</h2>
+<h2 id="practice-prose-b19">Starting code</h2>
 <figure class="code"><figcaption><span class="what">python</span></figcaption><pre><code class="language-python">&quot;&quot;&quot;Build a structured prompt from a spec. See ../../statement.md for the exact format.&quot;&quot;&quot;
 import logging
 import re
@@ -590,16 +592,15 @@ print(prompt)
 </section>
 <section id="s-practice-prose-2" data-section="practice-prose-2" data-kind="practice" data-label="Practice: a prompt template builder, graded on structure (TypeScript)" data-edition="typescript">
 <h2 id="practice-prose-2-b0">Problem statement</h2>
-<h2 id="practice-prose-2-b1">Practice: a prompt template builder, graded on structure</h2>
 <p>Write <code>build_prompt</code> (Python), <code>buildPrompt</code> (TypeScript), <code>PromptBuilder.build</code> (Java) or <code>buildPrompt</code> (Kotlin): it turns a prompt <strong>spec</strong> into one prompt string. The tests check the structure of the string, exactly, so the format below is the contract.</p>
-<h2 id="practice-prose-2-b3">What is already written, and what you write</h2>
+<h2 id="practice-prose-2-b2">What is already written, and what you write</h2>
 <p>The starter is a working prompt builder with eight gaps cut out of it. The plumbing is written and correct: the spec handling, the order of the sections, the placeholder pass, the block helper and the numbering loops. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the <code>log</code> line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names, with a leading underscore; the TypeScript, Java and Kotlin names are the camel-case forms, <code>renderDocument</code> for <code>_render_document</code>, and so on):</p>
 <ol class="items"><li><code>_join</code> unlocks every case: the sections separated by one blank line.</li><li><code>_present</code> unlocks <code>e1</code>: an absent, empty or whitespace-only text is not there.</li><li><code>_lookup</code> unlocks <code>e2</code>: a placeholder's value, or an error that names the variable.</li><li><code>_escape</code> unlocks <code>e4</code>: <code>&amp;</code>, <code>&lt;</code> and <code>&gt;</code> made harmless.</li><li><code>_render_document</code> unlocks <code>e4</code>, <code>e5</code> and <code>e6</code>: one document, escaped and never filled.</li><li><code>_render_example</code> unlocks <code>m1</code> and <code>e6</code>: one example with its input and output blocks.</li><li><code>_constraint_lines</code> unlocks <code>m1</code>: one <code>- </code> line per constraint.</li><li><code>_check_task</code> unlocks <code>e3</code>: a blank task is refused.</li></ol>
 <p><code>m1</code> needs gaps 1, 2, 3, 5, 6 and 7. A few lines each, about ten in all.</p>
-<h2 id="practice-prose-2-b7">The spec</h2>
+<h2 id="practice-prose-2-b6">The spec</h2>
 <div class="scroll"><table><thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead><tbody><tr><td><code>task</code></td><td>text</td><td>The ask. <strong>Required.</strong></td></tr><tr><td><code>role</code></td><td>text, optional</td><td>Who Claude is for this task</td></tr><tr><td><code>context</code></td><td>text, optional</td><td>Why and for whom</td></tr><tr><td><code>documents</code></td><td>list of <code>name</code> and <code>text</code>, optional</td><td>Source material (untrusted data)</td></tr><tr><td><code>examples</code></td><td>list of <code>input</code> and <code>output</code>, optional</td><td>Worked examples</td></tr><tr><td><code>constraints</code></td><td>list of text, optional</td><td>Rules the answer must obey</td></tr><tr><td><code>output_format</code></td><td>text, optional</td><td>The shape of the answer</td></tr></tbody></table></div>
 <p>Plus a <code>variables</code> map from names to text. (TypeScript, Java and Kotlin name the field <code>outputFormat</code>.)</p>
-<h2 id="practice-prose-2-b10">The output</h2>
+<h2 id="practice-prose-2-b9">The output</h2>
 <p>Sections appear in this order, separated by one blank line, with no trailing newline. A section is <strong>omitted entirely</strong> when its field is absent, <code>null</code>, empty or only whitespace; <code>task</code> is never omitted.</p>
 <figure class="code" data-frame="terminal"><figcaption><span class="what">output</span></figcaption><pre><code class="language-text">&lt;role&gt;
 {role}
@@ -642,9 +643,9 @@ print(prompt)
 {task}
 &lt;/task&gt;</code></pre></figure>
 <p>Documents and examples keep the order they were given, numbered from 1.</p>
-<h2 id="practice-prose-2-b14">Rules</h2>
+<h2 id="practice-prose-2-b13">Rules</h2>
 <ol class="items"><li><strong>Variables.</strong> <code>{{name}}</code> in <code>role</code>, <code>context</code>, <code>constraints</code>, <code>output_format</code>, <code>task</code>, and the <code>input</code> and <code>output</code> of examples is replaced by the variable's value, in one pass: a value that itself contains <code>{{other}}</code> is inserted as it is. A placeholder with no value is an error that names the variable (Python <code>ValueError</code>, TypeScript <code>Error</code>, Java and Kotlin <code>IllegalArgumentException</code>; the message contains the variable's name).</li><li><strong>Documents are data.</strong> In a document's <code>text</code> and <code>name</code>, replace <code>&amp;</code> with <code>&amp;amp;</code>, <code>&lt;</code> with <code>&amp;lt;</code> and <code>&gt;</code> with <code>&amp;gt;</code>, and in the <code>name</code> also <code>&quot;</code> with <code>&amp;quot;</code>, so a document can never close its own tag. Placeholders inside documents are <strong>not</strong> replaced.</li><li><strong>A blank task is refused</strong> with the same error type: missing, empty or only whitespace.</li></ol>
-<h2 id="practice-prose-2-b16">The cases</h2>
+<h2 id="practice-prose-2-b15">The cases</h2>
 <div class="scroll"><table><thead><tr><th>Id</th><th>What it checks</th></tr></thead><tbody><tr><td><code>m1</code></td><td>A full spec renders every section in the order above</td></tr><tr><td><code>e1</code></td><td>Absent, empty and whitespace-only optional sections are omitted, not rendered empty</td></tr><tr><td><code>e2</code></td><td>Variables are filled in one pass; a missing variable is named in the error</td></tr><tr><td><code>e3</code></td><td>A missing, empty or whitespace-only task is refused</td></tr><tr><td><code>e4</code></td><td>Document text and names are escaped, so a document cannot close its own tag</td></tr><tr><td><code>e5</code></td><td>Placeholders inside document text stay literal</td></tr><tr><td><code>e6</code></td><td>Documents and examples keep their order and their numbering</td></tr></tbody></table></div>
 <details class="disclosure"><summary>Show a worked solution</summary><figure class="code"><figcaption><span class="what">typescript</span></figcaption><pre><code class="language-typescript">// Build a structured prompt from a spec. See ../../statement.md for the exact format.
 import { logger } from &quot;./logger.ts&quot;;
@@ -754,7 +755,7 @@ console.log(&quot;starts with:&quot;, JSON.stringify(prompt.slice(0, 20)));
 console.log(&quot;has task block:&quot;, prompt.includes(&quot;&lt;task&gt;\nClassify the message about delivery.\n&lt;/task&gt;&quot;));
 console.log(prompt);
 </code></pre></figure></details>
-<h2 id="practice-prose-2-b20">Starting code</h2>
+<h2 id="practice-prose-2-b19">Starting code</h2>
 <figure class="code"><figcaption><span class="what">typescript</span></figcaption><pre><code class="language-typescript">// Build a structured prompt from a spec. See ../../statement.md for the exact format.
 import { logger } from &quot;./logger.ts&quot;;
 const log = logger(&quot;promptBuilder&quot;);
@@ -918,16 +919,15 @@ console.log(prompt);
 </section>
 <section id="s-practice-prose-3" data-section="practice-prose-3" data-kind="practice" data-label="Practice: a prompt template builder, graded on structure (Java)" data-edition="java">
 <h2 id="practice-prose-3-b0">Problem statement</h2>
-<h2 id="practice-prose-3-b1">Practice: a prompt template builder, graded on structure</h2>
 <p>Write <code>build_prompt</code> (Python), <code>buildPrompt</code> (TypeScript), <code>PromptBuilder.build</code> (Java) or <code>buildPrompt</code> (Kotlin): it turns a prompt <strong>spec</strong> into one prompt string. The tests check the structure of the string, exactly, so the format below is the contract.</p>
-<h2 id="practice-prose-3-b3">What is already written, and what you write</h2>
+<h2 id="practice-prose-3-b2">What is already written, and what you write</h2>
 <p>The starter is a working prompt builder with eight gaps cut out of it. The plumbing is written and correct: the spec handling, the order of the sections, the placeholder pass, the block helper and the numbering loops. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the <code>log</code> line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names, with a leading underscore; the TypeScript, Java and Kotlin names are the camel-case forms, <code>renderDocument</code> for <code>_render_document</code>, and so on):</p>
 <ol class="items"><li><code>_join</code> unlocks every case: the sections separated by one blank line.</li><li><code>_present</code> unlocks <code>e1</code>: an absent, empty or whitespace-only text is not there.</li><li><code>_lookup</code> unlocks <code>e2</code>: a placeholder's value, or an error that names the variable.</li><li><code>_escape</code> unlocks <code>e4</code>: <code>&amp;</code>, <code>&lt;</code> and <code>&gt;</code> made harmless.</li><li><code>_render_document</code> unlocks <code>e4</code>, <code>e5</code> and <code>e6</code>: one document, escaped and never filled.</li><li><code>_render_example</code> unlocks <code>m1</code> and <code>e6</code>: one example with its input and output blocks.</li><li><code>_constraint_lines</code> unlocks <code>m1</code>: one <code>- </code> line per constraint.</li><li><code>_check_task</code> unlocks <code>e3</code>: a blank task is refused.</li></ol>
 <p><code>m1</code> needs gaps 1, 2, 3, 5, 6 and 7. A few lines each, about ten in all.</p>
-<h2 id="practice-prose-3-b7">The spec</h2>
+<h2 id="practice-prose-3-b6">The spec</h2>
 <div class="scroll"><table><thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead><tbody><tr><td><code>task</code></td><td>text</td><td>The ask. <strong>Required.</strong></td></tr><tr><td><code>role</code></td><td>text, optional</td><td>Who Claude is for this task</td></tr><tr><td><code>context</code></td><td>text, optional</td><td>Why and for whom</td></tr><tr><td><code>documents</code></td><td>list of <code>name</code> and <code>text</code>, optional</td><td>Source material (untrusted data)</td></tr><tr><td><code>examples</code></td><td>list of <code>input</code> and <code>output</code>, optional</td><td>Worked examples</td></tr><tr><td><code>constraints</code></td><td>list of text, optional</td><td>Rules the answer must obey</td></tr><tr><td><code>output_format</code></td><td>text, optional</td><td>The shape of the answer</td></tr></tbody></table></div>
 <p>Plus a <code>variables</code> map from names to text. (TypeScript, Java and Kotlin name the field <code>outputFormat</code>.)</p>
-<h2 id="practice-prose-3-b10">The output</h2>
+<h2 id="practice-prose-3-b9">The output</h2>
 <p>Sections appear in this order, separated by one blank line, with no trailing newline. A section is <strong>omitted entirely</strong> when its field is absent, <code>null</code>, empty or only whitespace; <code>task</code> is never omitted.</p>
 <figure class="code" data-frame="terminal"><figcaption><span class="what">output</span></figcaption><pre><code class="language-text">&lt;role&gt;
 {role}
@@ -970,9 +970,9 @@ console.log(prompt);
 {task}
 &lt;/task&gt;</code></pre></figure>
 <p>Documents and examples keep the order they were given, numbered from 1.</p>
-<h2 id="practice-prose-3-b14">Rules</h2>
+<h2 id="practice-prose-3-b13">Rules</h2>
 <ol class="items"><li><strong>Variables.</strong> <code>{{name}}</code> in <code>role</code>, <code>context</code>, <code>constraints</code>, <code>output_format</code>, <code>task</code>, and the <code>input</code> and <code>output</code> of examples is replaced by the variable's value, in one pass: a value that itself contains <code>{{other}}</code> is inserted as it is. A placeholder with no value is an error that names the variable (Python <code>ValueError</code>, TypeScript <code>Error</code>, Java and Kotlin <code>IllegalArgumentException</code>; the message contains the variable's name).</li><li><strong>Documents are data.</strong> In a document's <code>text</code> and <code>name</code>, replace <code>&amp;</code> with <code>&amp;amp;</code>, <code>&lt;</code> with <code>&amp;lt;</code> and <code>&gt;</code> with <code>&amp;gt;</code>, and in the <code>name</code> also <code>&quot;</code> with <code>&amp;quot;</code>, so a document can never close its own tag. Placeholders inside documents are <strong>not</strong> replaced.</li><li><strong>A blank task is refused</strong> with the same error type: missing, empty or only whitespace.</li></ol>
-<h2 id="practice-prose-3-b16">The cases</h2>
+<h2 id="practice-prose-3-b15">The cases</h2>
 <div class="scroll"><table><thead><tr><th>Id</th><th>What it checks</th></tr></thead><tbody><tr><td><code>m1</code></td><td>A full spec renders every section in the order above</td></tr><tr><td><code>e1</code></td><td>Absent, empty and whitespace-only optional sections are omitted, not rendered empty</td></tr><tr><td><code>e2</code></td><td>Variables are filled in one pass; a missing variable is named in the error</td></tr><tr><td><code>e3</code></td><td>A missing, empty or whitespace-only task is refused</td></tr><tr><td><code>e4</code></td><td>Document text and names are escaped, so a document cannot close its own tag</td></tr><tr><td><code>e5</code></td><td>Placeholders inside document text stay literal</td></tr><tr><td><code>e6</code></td><td>Documents and examples keep their order and their numbering</td></tr></tbody></table></div>
 <details class="disclosure"><summary>Show a worked solution</summary><figure class="code"><figcaption><span class="what">java</span></figcaption><pre><code class="language-java">import java.util.*;
 import java.util.regex.*;
@@ -1096,7 +1096,7 @@ public class TryIt {
     }
 }
 </code></pre></figure></details>
-<h2 id="practice-prose-3-b20">Starting code</h2>
+<h2 id="practice-prose-3-b19">Starting code</h2>
 <figure class="code"><figcaption><span class="what">java</span></figcaption><pre><code class="language-java">import java.util.*;
 import java.util.regex.*;
 import java.util.stream.*;
@@ -1278,16 +1278,15 @@ public class TryIt {
 </section>
 <section id="s-practice-prose-4" data-section="practice-prose-4" data-kind="practice" data-label="Practice: a prompt template builder, graded on structure (Kotlin)" data-edition="kotlin">
 <h2 id="practice-prose-4-b0">Problem statement</h2>
-<h2 id="practice-prose-4-b1">Practice: a prompt template builder, graded on structure</h2>
 <p>Write <code>build_prompt</code> (Python), <code>buildPrompt</code> (TypeScript), <code>PromptBuilder.build</code> (Java) or <code>buildPrompt</code> (Kotlin): it turns a prompt <strong>spec</strong> into one prompt string. The tests check the structure of the string, exactly, so the format below is the contract.</p>
-<h2 id="practice-prose-4-b3">What is already written, and what you write</h2>
+<h2 id="practice-prose-4-b2">What is already written, and what you write</h2>
 <p>The starter is a working prompt builder with eight gaps cut out of it. The plumbing is written and correct: the spec handling, the order of the sections, the placeholder pass, the block helper and the numbering loops. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the <code>log</code> line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names, with a leading underscore; the TypeScript, Java and Kotlin names are the camel-case forms, <code>renderDocument</code> for <code>_render_document</code>, and so on):</p>
 <ol class="items"><li><code>_join</code> unlocks every case: the sections separated by one blank line.</li><li><code>_present</code> unlocks <code>e1</code>: an absent, empty or whitespace-only text is not there.</li><li><code>_lookup</code> unlocks <code>e2</code>: a placeholder's value, or an error that names the variable.</li><li><code>_escape</code> unlocks <code>e4</code>: <code>&amp;</code>, <code>&lt;</code> and <code>&gt;</code> made harmless.</li><li><code>_render_document</code> unlocks <code>e4</code>, <code>e5</code> and <code>e6</code>: one document, escaped and never filled.</li><li><code>_render_example</code> unlocks <code>m1</code> and <code>e6</code>: one example with its input and output blocks.</li><li><code>_constraint_lines</code> unlocks <code>m1</code>: one <code>- </code> line per constraint.</li><li><code>_check_task</code> unlocks <code>e3</code>: a blank task is refused.</li></ol>
 <p><code>m1</code> needs gaps 1, 2, 3, 5, 6 and 7. A few lines each, about ten in all.</p>
-<h2 id="practice-prose-4-b7">The spec</h2>
+<h2 id="practice-prose-4-b6">The spec</h2>
 <div class="scroll"><table><thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead><tbody><tr><td><code>task</code></td><td>text</td><td>The ask. <strong>Required.</strong></td></tr><tr><td><code>role</code></td><td>text, optional</td><td>Who Claude is for this task</td></tr><tr><td><code>context</code></td><td>text, optional</td><td>Why and for whom</td></tr><tr><td><code>documents</code></td><td>list of <code>name</code> and <code>text</code>, optional</td><td>Source material (untrusted data)</td></tr><tr><td><code>examples</code></td><td>list of <code>input</code> and <code>output</code>, optional</td><td>Worked examples</td></tr><tr><td><code>constraints</code></td><td>list of text, optional</td><td>Rules the answer must obey</td></tr><tr><td><code>output_format</code></td><td>text, optional</td><td>The shape of the answer</td></tr></tbody></table></div>
 <p>Plus a <code>variables</code> map from names to text. (TypeScript, Java and Kotlin name the field <code>outputFormat</code>.)</p>
-<h2 id="practice-prose-4-b10">The output</h2>
+<h2 id="practice-prose-4-b9">The output</h2>
 <p>Sections appear in this order, separated by one blank line, with no trailing newline. A section is <strong>omitted entirely</strong> when its field is absent, <code>null</code>, empty or only whitespace; <code>task</code> is never omitted.</p>
 <figure class="code" data-frame="terminal"><figcaption><span class="what">output</span></figcaption><pre><code class="language-text">&lt;role&gt;
 {role}
@@ -1330,9 +1329,9 @@ public class TryIt {
 {task}
 &lt;/task&gt;</code></pre></figure>
 <p>Documents and examples keep the order they were given, numbered from 1.</p>
-<h2 id="practice-prose-4-b14">Rules</h2>
+<h2 id="practice-prose-4-b13">Rules</h2>
 <ol class="items"><li><strong>Variables.</strong> <code>{{name}}</code> in <code>role</code>, <code>context</code>, <code>constraints</code>, <code>output_format</code>, <code>task</code>, and the <code>input</code> and <code>output</code> of examples is replaced by the variable's value, in one pass: a value that itself contains <code>{{other}}</code> is inserted as it is. A placeholder with no value is an error that names the variable (Python <code>ValueError</code>, TypeScript <code>Error</code>, Java and Kotlin <code>IllegalArgumentException</code>; the message contains the variable's name).</li><li><strong>Documents are data.</strong> In a document's <code>text</code> and <code>name</code>, replace <code>&amp;</code> with <code>&amp;amp;</code>, <code>&lt;</code> with <code>&amp;lt;</code> and <code>&gt;</code> with <code>&amp;gt;</code>, and in the <code>name</code> also <code>&quot;</code> with <code>&amp;quot;</code>, so a document can never close its own tag. Placeholders inside documents are <strong>not</strong> replaced.</li><li><strong>A blank task is refused</strong> with the same error type: missing, empty or only whitespace.</li></ol>
-<h2 id="practice-prose-4-b16">The cases</h2>
+<h2 id="practice-prose-4-b15">The cases</h2>
 <div class="scroll"><table><thead><tr><th>Id</th><th>What it checks</th></tr></thead><tbody><tr><td><code>m1</code></td><td>A full spec renders every section in the order above</td></tr><tr><td><code>e1</code></td><td>Absent, empty and whitespace-only optional sections are omitted, not rendered empty</td></tr><tr><td><code>e2</code></td><td>Variables are filled in one pass; a missing variable is named in the error</td></tr><tr><td><code>e3</code></td><td>A missing, empty or whitespace-only task is refused</td></tr><tr><td><code>e4</code></td><td>Document text and names are escaped, so a document cannot close its own tag</td></tr><tr><td><code>e5</code></td><td>Placeholders inside document text stay literal</td></tr><tr><td><code>e6</code></td><td>Documents and examples keep their order and their numbering</td></tr></tbody></table></div>
 <details class="disclosure"><summary>Show a worked solution</summary><figure class="code"><figcaption><span class="what">kotlin</span></figcaption><pre><code class="language-kotlin">// Build a structured prompt from a spec. See ../../statement.md for the exact format.
 private val log = System.getLogger(&quot;promptBuilder&quot;)
@@ -1419,7 +1418,7 @@ fun main() {
     println(prompt)
 }
 </code></pre></figure></details>
-<h2 id="practice-prose-4-b20">Starting code</h2>
+<h2 id="practice-prose-4-b19">Starting code</h2>
 <figure class="code"><figcaption><span class="what">kotlin</span></figcaption><pre><code class="language-kotlin">// Build a structured prompt from a spec. See ../../statement.md for the exact format.
 private val log = System.getLogger(&quot;promptBuilder&quot;)
 

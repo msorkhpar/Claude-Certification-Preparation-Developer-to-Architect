@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a review job that runs Claude Code in CI and gates on its JSON"
-    },
-    {
       "type": "para",
       "text": "A team wants every pull request reviewed by Claude Code in CI. The first workflow is a single line that runs `claude` with a free-text prompt and prints prose into a file: nobody can tell from the job's status whether the review ran, the key is typed into the file, the tool list lets the run edit the checkout, and the review criteria are the sentence \"be conservative\". In this practice you write the job so that it is safe and its result can be trusted: the workflow, the schema of the answer, the criteria file, the prompt, and the function that turns what Claude printed into a job status and a list of comments. All four editions test the same behaviour. The logic is plain data work on text and JSON, and the course checks it with a model of the documented command-line behaviour (`examples/60-ci-gate`, in your language): nothing here starts Claude Code, needs a key or touches the network. The configuration files are the same in every language; the decision function is the code part, `review_gate.py`, `reviewGate.ts`, `ReviewGate.java` (the class `ReviewGate`) or `ReviewGate.kt` (the object `ReviewGate`), with `reviewPrompt` and `gate` as methods in Java and Kotlin and a provided `SchemaCheck` that you do not edit. The Java and Kotlin tests read the JSON with Jackson and the workflow with its YAML module."
     },
@@ -247,7 +242,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 6,
     "code": 4,
     "tables": 1,
@@ -259,7 +254,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "8cbfbbea998316dffc0f86baba8a78bf0763fa91a95786f095595152b6daa592",
+  "content_sha256": "b9a1c4b68ed722b381437dcb7af935e1eecc2ac814918f0c66389593a66aedb1",
   "starting_code": "import { logger } from \"../logger.ts\";\nconst log = logger(\"review_gate\");\n/** The decision of a review job and the prompt of a review run. See ../../statement.md. */\nimport { schemaCheck } from \"./schemaCheck.ts\";\n\nexport const SEVERITIES = [\"low\", \"medium\", \"high\"];\n\nexport function reviewPrompt(diff: string, prior: any[] = [], existingTests: string[] = []): string {\n  // TODO 1 of 9 (finish this to pass e4): the first instructions of the prompt. Add the sentence \"Report only findings\n  //   that are new or still unaddressed.\" as the third line of the instructions, after the line that points to the project\n  //   criteria. Example: the prompt starts with <instructions>, the review line, then this sentence.\n  const lines = [\"<instructions>\", \"Review the change in <diff> against the criteria in the project instructions.\"];\n  if (prior.length > 0) lines.push(\"Do not repeat a finding listed in <already_reported>.\");\n  if (existingTests.length > 0) lines.push(\"Do not suggest a test for a behaviour that an existing test in <existing_tests> already covers.\");\n  lines.push(\"</instructions>\");\n  if (prior.length > 0) lines.push(\"<already_reported>\", ...prior.map((p) => `- ${p.file}:${p.line} [${p.category}] ${p.issue}`), \"</already_reported>\");\n  if (existingTests.length > 0) lines.push(\"<existing_tests>\", ...existingTests.map((t) => `- ${t}`), \"</existing_tests>\");\n  lines.push(\"<diff>\", diff, \"</diff>\");\n  return lines.join(\"\\n\");\n}\n\nexport function gate(stdout: string, exitCode: number, schema: any, policy: any): any {\n  log.debug(\"gate input\", stdout);\n  const problems: string[] = [];\n  // TODO 2 of 9 (finish this to pass e1): the exit status. When claude exited with a status other than 0, add the\n  //   problem \"claude exited with status N\" (the job fails whatever the output looks like). Example: exit 2 and a perfect\n  //   answer -> exit 1 and that problem.\n  let envelope: any = null;\n  try {\n    envelope = JSON.parse(stdout);\n  } catch {\n    envelope = null;\n  }\n  if (typeof envelope !== \"object\" || envelope === null || Array.isArray(envelope)) return { exit: 1, comments: [], problems: [...problems, \"the output is not a JSON object\"] };\n  if (envelope.is_error || envelope.subtype !== \"success\") problems.push(`the run ended with ${envelope.subtype}`);\n  const output = envelope.structured_output;\n  if (output === undefined || output === null) problems.push(\"the result has no structured_output\");\n  // TODO 3 of 9 (finish this to pass e2): the schema check. Check the structured output against the schema with the\n  //   provided helper and add one problem per error, as \"schema \" followed by the error (which names the path). Example:\n  //   severity \"critical\" -> \"schema $.findings[0].severity: ...\".\n  if (problems.length > 0) return { exit: 1, comments: [], problems };\n  // TODO 4 of 9 (finish this to pass m1): the comments of a valid answer. Keep each finding whose severity is at or\n  //   above policy min_severity (the order is low, medium, high) and whose category is not in disabled_categories. Return\n  //   one comment {file, line, severity, body} per kept finding, in order, with the body \"ISSUE Suggested fix: FIX\".\n  //   Example: a medium bug at api.py:12 with floor medium -> one comment.\n  const comments: any[] = [];\n  // TODO 5 of 9 (finish this to pass e3): the decision. The job fails (exit 1) when at least one posted comment has a\n  //   severity listed in policy fail_on; otherwise it only comments (exit 0). Example: fail_on [high], one posted medium\n  //   comment -> exit 0.\n  const blocked = false;\n  return { exit: blocked ? 1 : 0, comments, problems: [] };\n}\n",
   "exercise": {
     "main_path": "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-2/project/reviewGate.ts",
@@ -336,7 +331,10 @@
     },
     "origin": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md",
     "concepts": [
-      "the practice of What the run knows: context, independence and the practice is solved"
+      "A CI review runs claude headless with -p, JSON output, a JSON schema, a turn limit, read-only tools, a timeout and a secret key.",
+      "A non-zero exit or an answer that breaks the schema fails the job and names the cause or the path of the problem.",
+      "Findings below the severity floor or in a disabled category are not posted, and only a severity in fail_on blocks the merge.",
+      "The prompt asks only for new or unaddressed findings, and the criteria give a concrete severity example at every level instead of \"be conservative\"."
     ],
     "files": [
       "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-2/project/.github/workflows/claude-review.yml",

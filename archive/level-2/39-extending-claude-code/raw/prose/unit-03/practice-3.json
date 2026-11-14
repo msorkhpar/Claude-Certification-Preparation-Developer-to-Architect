@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a release plugin with a guard hook"
-    },
-    {
       "type": "para",
       "text": "A team wants to share one set of extensions: a skill that drafts release notes, a skill that publishes a release, a subagent that reviews the changelog, and a hook that stops destructive commands. Claude Code packages these as a plugin. In this practice you write the plugin's files for a plugin called `release-kit`, and the team's settings that install it. Tests read the files, and run your hook script the way Claude Code does, as a process that reads one JSON event on standard input."
     },
@@ -274,7 +269,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 7,
+    "headings": 6,
     "paras": 10,
     "code": 7,
     "tables": 1,
@@ -286,7 +281,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "8925393855737cf22de99f174a9e8af2235625c25e79375ed7c0f24c0b2cc3c5",
+  "content_sha256": "5ee7343377b403774ff680eb3bd00040552219dac7e30956d7704fcef0f87d71",
   "starting_code": "#!/usr/bin/env python3\n\"\"\"A PreToolUse hook: reads one event from standard input and answers with its exit code, standard output and standard error.\"\"\"\nimport json\nimport logging\nimport re\nimport shlex\nimport sys\n\nlog = logging.getLogger(__name__)\n\nSHELLS = (\"sh\", \"bash\", \"zsh\")\nPROTECTED = (\".env\", \"package-lock.json\", \".git/\", \"secrets/\")\n\n\ndef git_subcommand(args):\n    i = 0\n    while i < len(args):\n        if args[i] in (\"-C\", \"-c\", \"--git-dir\", \"--work-tree\"):\n            i += 2\n        elif args[i].startswith(\"-\"):\n            i += 1\n        else:\n            return args[i]\n    return None\n\n\ndef is_forced_recursive_rm(program, args):\n    \"\"\"TODO 1 of 4 (unlocks m1): is this a recursive AND forced rm?\n\n    Receives the program name (no directory) and its list of arguments. Returns True for rm with a recursive flag (-r, -R, --recursive,\n    also inside a group such as -rf or -fr) and a force flag (-f, --force); False otherwise (`rm -r build` and `rm x.txt` are fine).\n    Example: is_forced_recursive_rm(\"rm\", [\"-r\", \"-f\", \"x\"]) -> True, is_forced_recursive_rm(\"rm\", [\"-r\", \"build\"]) -> False\n    \"\"\"\n    return False\n\n\ndef pipes_download_into_shell(program, args, position, stages):\n    \"\"\"TODO 2 of 4 (unlocks m1): is this stage a shell that a download is piped into?\n\n    Receives the stage's program name, its arguments, its position in the pipeline (0 is the first stage) and the list of all stage\n    texts. Returns True when the program is sh, bash or zsh, it is not the first stage, it has no -c, and the first stage starts\n    curl or wget (a path to either counts). Example: for `curl x | sh` the stage `sh` at position 1 -> True; `cat a | sh` -> False\n    \"\"\"\n    return False\n\n\ndef protected_pattern(path):\n    \"\"\"TODO 3 of 4 (unlocks e1): which protected pattern does this path contain?\n\n    Receives a path with `/` separators and uses PROTECTED. Returns the first pattern of PROTECTED that occurs in the path, else None.\n    Example: protected_pattern(\"/w/app/.git/config\") -> \".git/\", protected_pattern(\"/w/src/main.py\") -> None\n    \"\"\"\n    return None\n\n\ndef read_event(raw):\n    \"\"\"TODO 4 of 4 (unlocks e2): read the hook event from its raw text.\n\n    Receives the text of standard input. Returns the pair (tool_name, tool_input) where tool_input is the object under that key or {}\n    when it is missing or empty. Returns None for text that is not JSON, is empty, is not an object or has no tool_name.\n    Example: read_event('{\"tool_name\": \"Bash\", \"tool_input\": {\"command\": \"ls\"}}') -> (\"Bash\", {\"command\": \"ls\"}); read_event(\"[]\") -> None\n    \"\"\"\n    return None\n\n\ndef reason_to_refuse(command):\n    log.debug(\"reason_to_refuse input: %r\", command)\n    parts = re.split(r\"&&|\\|\\||;|&|\\n\", command)\n    for part in parts:\n        stages = part.split(\"|\")\n        for position, stage in enumerate(stages):\n            try:\n                words = shlex.split(stage)\n            except ValueError:\n                return \"a command that cannot be parsed is not run unreviewed\"\n            while words and re.fullmatch(r\"\\w+=\\S*\", words[0]):\n                words = words[1:]\n            if not words:\n                continue\n            program, args = words[0].rsplit(\"/\", 1)[-1], words[1:]\n            if program in SHELLS and \"-c\" in args and args.index(\"-c\") + 1 < len(args):\n                inner = reason_to_refuse(args[args.index(\"-c\") + 1])\n                if inner:\n                    return inner\n            if pipes_download_into_shell(program, args, position, stages):\n                return \"a download piped into a shell is not run\"\n            if program == \"git\" and git_subcommand(args) == \"push\":\n                return \"nothing is pushed from an agent\"\n            if is_forced_recursive_rm(program, args):\n                return \"a recursive forced delete is not run from an agent\"\n    return None\n\n\ndef main():\n    event = read_event(sys.stdin.read())\n    if event is None:\n        sys.stderr.write(\"Blocked: the hook event could not be read\")\n        return 2\n    tool, tool_input = event\n    if tool == \"Bash\":\n        reason = reason_to_refuse(str(tool_input.get(\"command\", \"\")))\n        if reason:\n            print(json.dumps({\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": reason}}))\n        return 0\n    if tool in (\"Edit\", \"Write\", \"MultiEdit\"):\n        path = str(tool_input.get(\"file_path\", \"\")).replace(\"\\\\\", \"/\")\n        pattern = protected_pattern(path)\n        if pattern:\n            sys.stderr.write(f\"Blocked: {path} is protected ({pattern})\")\n            return 2\n    return 0\n\n\nif __name__ == \"__main__\":\n    sys.exit(main())\n",
   "exercise": {
     "main_path": "practice/level-2/39-extending-claude-code/prose/unit-03/practice-3/project/scripts/guard.py",
@@ -361,7 +356,10 @@
     },
     "origin": "course/39-extending-claude-code/03-plugins-sharing-and-the-practice.md",
     "concepts": [
-      "the practice of Plugins, dependencies, sharing and the practice is solved"
+      "A PreToolUse hook denies with exit code 0 and a permissionDecision of deny, or blocks with exit code 2 and a reason on stderr.",
+      "A guard must catch git push, forced recursive rm and piped downloads in every spelling, while leaving safe commands alone.",
+      "A plugin finds its hook script through ${CLAUDE_PLUGIN_ROOT}, and disable-model-invocation lets only a person start a skill.",
+      "A plugin agent ignores permissionMode, hooks and mcpServers, and a dependency range of ~2.1.0 takes patch updates only."
     ],
     "files": [
       "practice/level-2/39-extending-claude-code/prose/unit-03/practice-3/project/.claude/settings.json",

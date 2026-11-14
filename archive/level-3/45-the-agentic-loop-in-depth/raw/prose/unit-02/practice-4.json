@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: an agent loop that is driven by the stop reason"
-    },
-    {
       "type": "para",
       "text": "The loop of module 26 ran until the model stopped asking for tools. This practice builds the loop an architect would ship: one that ends only when the model's own stop reason says so, treats the turn limit as a backstop and not as the way a run normally ends, and keeps the conversation in a state the API accepts. Nothing here touches the network: the model is a function that the tests script."
     },
@@ -217,7 +212,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 9,
+    "headings": 8,
     "paras": 5,
     "code": 2,
     "tables": 2,
@@ -229,7 +224,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "28dc88836398de0ead03d104397559942f0d6bc73597371959cfcfe0cf1962ae",
+  "content_sha256": "9e6b28fad10202deeeb1c28577e679c708e2f5bae93dabc477e52ad94a40aed9",
   "starting_code": "private val log = System.getLogger(\"agent\")\n\n/** The agent loop, driven by the stop reason. See ../../statement.md. Messages and replies are JSON-like maps. */\n\ntypealias Model = (List<Map<String, Any?>>) -> Map<String, Any?>\ntypealias Tools = Map<String, (Map<String, Any?>) -> String>\n\n/**\n * TODO 1 of 6 (unlocks m1 and e5): the text of a reply.\n * Receives a reply's content list of blocks. Returns the \"text\" of every block whose type is \"text\", joined with nothing between.\n * Example: [text \"Hi \", tool_use, text \"there\"] -> \"Hi there\"\n */\nprivate fun textOf(content: List<Map<String, Any?>>): String = \"\"\n\n/**\n * TODO 2 of 6 (unlocks e2 and e6): the tool calls of a reply.\n * Receives a reply's content list. Returns its tool_use blocks, in order; an empty list when there are none.\n * Example: [text \"x\", tool_use a] -> [tool_use a]\n */\nprivate fun callsOf(content: List<Map<String, Any?>>): List<Map<String, Any?>> = emptyList()\n\n/**\n * TODO 3 of 6 (unlocks m1, e2 and e3): one tool_result block.\n * Receives the tool_use block, the result text and a flag. Returns {type: tool_result, tool_use_id: the block's id, content: the text},\n * with is_error true added only when the flag is set (a good result has no is_error key).\n * Example: (block with id t1, \"boom\", true) -> {type: tool_result, tool_use_id: t1, content: boom, is_error: true}\n */\nprivate fun toolResult(block: Map<String, Any?>, content: String, isError: Boolean = false): Map<String, Any?> = linkedMapOf()\n\n/**\n * TODO 4 of 6 (unlocks m1, e5 and e6): the status a stop reason ends the run with (the loop only gets here when it cannot go on).\n * Receives the stop reason and the tool calls of the reply. Returns \"malformed\" for tool_use with no calls, \"done\" for end_turn and\n * stop_sequence, \"truncated\" for max_tokens, \"refused\" for refusal and \"unexpected\" for anything else.\n * Example: (\"max_tokens\", no calls) -> \"truncated\", (\"tool_use\", no calls) -> \"malformed\", (\"brand_new\", no calls) -> \"unexpected\"\n */\nprivate fun statusFor(reason: Any?, calls: List<Map<String, Any?>>): String = \"\"\n\n/**\n * TODO 5 of 6 (unlocks e4): has the turn limit been reached before the next model call?\n * Receives the model calls made so far and the limit. Returns true when no call is left. Example: (3, 3) -> true, (2, 3) -> false\n */\nprivate fun atLimit(turns: Int, maxTurns: Int): Boolean = false\n\n/**\n * TODO 6 of 6 (unlocks m1): the copy of the messages that the model is handed.\n * Receives the list of messages so far. Returns a new list with the same items, so later changes do not rewrite what the model saw.\n * Example: [a, b] -> a new list [a, b]\n */\nprivate fun snapshot(messages: List<Map<String, Any?>>): List<Map<String, Any?>> = messages\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun runTool(block: Map<String, Any?>, tools: Tools): Map<String, Any?> {\n    val name = block[\"name\"] as String\n    val handler = tools[name]\n        ?: return toolResult(block, \"Unknown tool: $name\", true)\n    return try {\n        toolResult(block, handler((block[\"input\"] as Map<String, Any?>?) ?: emptyMap()))\n    } catch (error: RuntimeException) { // a failing tool is a result for the model, not a crash of the loop\n        toolResult(block, error.message.toString(), true)\n    }\n}\n\nprivate fun outcome(status: String, text: String, turns: Int, messages: List<Map<String, Any?>>): Map<String, Any?> =\n    linkedMapOf(\"status\" to status, \"text\" to text, \"turns\" to turns, \"messages\" to messages)\n\n@Suppress(\"UNCHECKED_CAST\")\nfun runAgent(model: Model, tools: Tools, task: String, maxTurns: Int = 8): Map<String, Any?>? {\n    log.log(System.Logger.Level.DEBUG, \"runAgent input: {0}\", task)\n    val messages = mutableListOf<Map<String, Any?>>(linkedMapOf(\"role\" to \"user\", \"content\" to task))\n    var turns = 0\n    var lastText = \"\"\n    while (true) {\n        if (atLimit(turns, maxTurns)) return outcome(\"max_turns\", lastText, turns, messages) // the count is a backstop: it only ends a run the model has not ended itself\n        turns++\n        val reply = model(snapshot(messages))\n        val content = reply[\"content\"] as List<Map<String, Any?>>\n        lastText = textOf(content)\n        messages.add(linkedMapOf(\"role\" to \"assistant\", \"content\" to content))\n        val reason = reply[\"stop_reason\"]\n        val calls = callsOf(content)\n        if (reason != \"tool_use\" || calls.isEmpty()) return outcome(statusFor(reason, calls), lastText, turns, messages)\n        messages.add(linkedMapOf(\"role\" to \"user\", \"content\" to calls.map { runTool(it, tools) }))\n    }\n}\n",
   "exercise": {
     "main_path": "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-4/src/main/kotlin/AgentLoop.kt",
@@ -296,7 +291,10 @@
     },
     "origin": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md",
     "concepts": [
-      "the practice of Results, parallel calls, growing context and the practice is solved"
+      "The loop is decided by stop_reason alone, never by words in the text such as \"done\".",
+      "Every tool call of a turn is answered in one user message, in order, and a failing or unknown tool returns an error result.",
+      "The turn limit is a backstop checked before each call, and a run that ends on the last allowed turn is still done.",
+      "max_tokens, refusal and unknown stop reasons each get their own status, and tool_use with no tool call is malformed."
     ],
     "files": [
       "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"

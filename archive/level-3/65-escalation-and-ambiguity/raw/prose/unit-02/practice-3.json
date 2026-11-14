@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: an agent that escalates for the right reasons, asks which customer is meant and hands off what the person needs"
-    },
-    {
       "type": "para",
       "text": "A support agent escalates when the customer sounds angry and carries on when it merely feels confident; it picks the first of three customers who match a name; it quietly resolves a request that the policy never anticipated; and its hand-off to a person is a forty-turn transcript. In this practice you write the agent's decision rules and its hand-off: which of resolve, clarify and escalate a case gets, which fields to ask a customer about when several records match, and what the hand-off says. The model is not called. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -200,7 +195,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -212,7 +207,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "e8327b7a6bc27241c9e88403c8e49cf5fc15628f944db199f32e6d8c7ce99758",
+  "content_sha256": "2830f24ba2edfaf23f5d8e156aca3039991975efbb94774dd7b8b6fc856d8d29",
   "starting_code": "import java.util.ArrayList;\nimport java.util.LinkedHashSet;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** When a support agent resolves, asks or hands off, and what a hand-off carries. See ../../statement.md. */\nfinal class Escalation {\n    private static final System.Logger LOG = System.getLogger(Escalation.class.getName());\n    private Escalation() {}\n\n    record Case(boolean askedForPerson, int matches, boolean policyCovers, int attemptsWithoutProgress, String sentiment, int confidence) {}\n\n    record Decision(String action, String reason, boolean acknowledge) {}\n\n    record HandoffCase(String customerId, String issue, String rootCause, String amount, List<String> actions, String recommended, String transcript) {}\n\n    static Decision decide(Case c) {\n        return decide(c, 2);\n    }\n\n    static Decision decide(Case c, int maxAttempts) {\n        LOG.log(System.Logger.Level.DEBUG, \"decide input: {0}\", c);\n        // TODO 1 of 7 (finish this to pass m1, e4): the first rule. When the customer asked for a person, return the\n        //   decision escalate with the reason \"customer asked for a person\", before any other rule. Example:\n        //   asked_for_person true and two matches -> escalate.\n        // TODO 2 of 7 (finish this to pass e3): the ambiguity rule. When more than one customer record matches, return\n        //   the decision clarify with the reason \"ambiguous customer match\". Example: matches 2 -> clarify.\n        // TODO 3 of 7 (finish this to pass e2): the policy rule. When the policy does not cover the request, return the\n        //   decision escalate with the reason \"policy does not cover the request\". Example: policy_covers false ->\n        //   escalate.\n        // TODO 4 of 7 (finish this to pass e5): the progress rule. When the attempts without progress are at or above\n        //   max_attempts, return the decision escalate with the reason \"no progress\". Example: 2 attempts, limit 2 ->\n        //   escalate; 1 attempt -> not.\n        // TODO 5 of 7 (finish this to pass e1): the acknowledgement of a resolved case. Return resolve with the reason\n        //   \"within capability\" and acknowledge true when the sentiment is anything but calm, false when it is calm.\n        //   Example: sentiment frustrated -> resolve, acknowledge true.\n        return new Decision(\"resolve\", \"within capability\", false);\n    }\n\n    static List<String> clarifyingFields(List<Map<String, String>> matches) {\n        List<String> out = new ArrayList<>();\n        if (matches.size() < 2) return out;\n        // TODO 6 of 7 (finish this to pass e7): the fields to ask about. Receives the matching records (maps). Return\n        //   the names of the fields, other than id, whose values are not all the same across the matches; return none when\n        //   there are fewer than two matches. Example: two records that differ only in city -> [city].\n        return out;\n    }\n\n    private static String orElse(String value, String fallback) {\n        return value == null || value.isEmpty() ? fallback : value;\n    }\n\n    static String handoffText(HandoffCase c) {\n        if (c.customerId() == null || c.customerId().isEmpty() || c.issue() == null || c.issue().isEmpty()) throw new IllegalArgumentException(\"a hand-off needs a customer id and an issue\");\n        List<String> lines = List.of(\n            \"Customer: \" + c.customerId(),\n            \"Issue: \" + c.issue(),\n            \"Root cause: \" + orElse(c.rootCause(), \"unknown\"),\n            \"Amount: \" + orElse(c.amount(), \"unknown\"),\n            // TODO 7 of 7 (finish this to pass e8): the last two lines of the hand-off. Write \"Actions taken: \" with the\n            //   actions joined by \"; \" (or none when there are none) and \"Recommended action: \" with the recommendation\n            //   (or review the case when it is empty). Never the transcript. Example: actions [refund, email] -> \"Actions\n            //   taken: refund; email\".\n            \"Actions taken: none\",\n            \"Recommended action: review the case\");\n        return String.join(\"\\n\", lines);\n    }\n}\n",
   "exercise": {
     "main_path": "practice/level-3/65-escalation-and-ambiguity/prose/unit-02/practice-3/src/main/java/Escalation.java",
@@ -289,7 +284,10 @@
     },
     "origin": "course/65-escalation-and-ambiguity/02-ambiguous-matches-hand-offs-and-the-practice.md",
     "concepts": [
-      "the practice of Ambiguous matches, hand-offs, what must not leak and the practice is solved"
+      "A customer who asks for a person is escalated at once, even when the agent could resolve it or the match is ambiguous.",
+      "Frustration alone does not escalate; the reply acknowledges it, and sentiment or confidence scores never change the decision.",
+      "Several matching records get a clarifying question naming only the fields that differ, never a guess.",
+      "An uncovered request or no progress after the attempt limit escalates, with a hand-off of structured facts and no transcript."
     ],
     "files": [
       "practice/level-3/65-escalation-and-ambiguity/prose/unit-02/practice-3/src/main/java/TryIt.java"

@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: the decisions of an internal gateway"
-    },
-    {
       "type": "para",
       "text": "Four product teams call Claude through one internal gateway that holds the credentials, so that the platform team can route requests, enforce budgets, show each team what it spent and protect callers that cannot wait. In this practice you write the four decisions that gateway makes: the model a request is sent to, whether a request is admitted against the team's budget, the cost table that each team sees, and whether a caller gets its answer on the same connection or through accept-and-poll. The model is not called: the tests give you requests, policies and usage rows. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -191,7 +186,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -203,7 +198,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "a173b61af1304d05679b6b54465ee0e4e72cc93ef36f3cdfc0c30d83ae867a1e",
+  "content_sha256": "fa1ac32b10ad4e16c854d1e27d45fcf74520a7449882b3738dab65477644a681",
   "starting_code": "\"\"\"The decisions of an internal gateway: route a request, admit it against a budget, show back what each team spent and choose sync or accept-and-poll. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _chosen_model(request, policy):\n    \"\"\"TODO 1 of 6 (unlocks m1 and e6): the model the policy picks for a request.\n\n    Receives the request (`task`, and perhaps `model`, a pin) and the policy (`allowed`, `routes`, `default`). Returns the pinned model when it is in\n    `policy[\"allowed\"]`; otherwise the model `policy[\"routes\"]` names for the task, or `policy[\"default\"]` for a task that is not listed.\n    Example: task \"review\" with no pin -> \"opus\"; task \"classify\" pinned to \"opus\" (not allowed) -> \"haiku\"\n    \"\"\"\n    return None\n\n\ndef route(request, policy, status):\n    log.debug(\"route input: %r\", request)\n    \"\"\"TODO 2 of 6 (unlocks e1): the model for the request once the budget status is known.\n\n    Receives the request, the policy and the budget status (\"allow\", \"warn\" or \"block\"). Returns None when the status is \"block\"; the model from\n    `_chosen_model` when it is \"allow\"; for \"warn\" the cheaper model that `policy[\"cheaper\"]` names for it (the model itself when none is named).\n    Example: status \"warn\", chosen model \"opus\", cheaper {\"opus\": \"sonnet\"} -> \"sonnet\"\n    \"\"\"\n    return None\n\n\ndef admit(spend, budget, estimate):\n    \"\"\"TODO 3 of 6 (unlocks e2): admit one more request against the budget.\n\n    Receives what the team has spent, its budget and the estimated cost of the request, all in cents. Returns \"block\" when the budget is not positive or\n    `spend + estimate` is more than the budget; \"warn\" when it reaches 80 percent of the budget (80 percent itself warns) and is not over; else \"allow\".\n    Example: admit(700, 1000, 100) -> \"warn\", admit(900, 1000, 101) -> \"block\"\n    \"\"\"\n    return None\n\n\ndef _cost(row, prices):\n    \"\"\"TODO 4 of 6 (unlocks e3): what one row of tokens costs.\n\n    Receives a row (`model`, `input`, `cache_read`, `output`: token counts) and `prices`, which maps a model to cents per million tokens for the same three\n    kinds. Returns tokens times price, summed over the three kinds (not yet divided by a million). Raises ValueError(f\"unknown model: {name}\") for a model without a price.\n    Example: input 1_000_000 at price 200 and nothing else -> 200_000_000\n    \"\"\"\n    return 0\n\n\ndef _to_cents(value):\n    \"\"\"TODO 5 of 6 (unlocks e4): a team's total in whole cents.\n\n    Receives a total in cents times a million. Returns it divided by one million and rounded to the nearest cent, halves up, with integer arithmetic.\n    Example: _to_cents(500_000) -> 1, _to_cents(499_999) -> 0\n    \"\"\"\n    return 0\n\n\ndef showback(rows, prices):\n    totals = {}\n    for r in rows:\n        totals[r[\"team\"]] = totals.get(r[\"team\"], 0) + _cost(r, prices)\n    result = [{\"team\": team, \"cents\": _to_cents(value)} for team, value in totals.items()]\n    return sorted(result, key=lambda x: (-x[\"cents\"], x[\"team\"]))\n\n\ndef delivery(p95_seconds, timeout_seconds, margin_percent):\n    \"\"\"TODO 6 of 6 (unlocks e5): sync or accept-and-poll.\n\n    Receives the p95 latency and the caller's timeout in seconds and a safety margin in percent. Returns \"sync\" when the p95 plus the margin fits within the\n    timeout (an exact fit counts), otherwise \"accept-and-poll\". Use integer arithmetic: p95 * (100 + margin) against timeout * 100.\n    Example: delivery(8, 10, 25) -> \"sync\", delivery(8, 10, 26) -> \"accept-and-poll\"\n    \"\"\"\n    return None\n",
   "exercise": {
     "main_path": "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-1/gateway_budget.py",
@@ -267,7 +262,10 @@
     },
     "origin": "course/84-cost-and-capacity-engineering/02-the-gateway-budgets-and-callers-that-cannot-wait.md",
     "concepts": [
-      "the practice of The gateway, budgets and callers that cannot wait is solved"
+      "A request is blocked when it would exceed the budget, warned at 80 percent, and a warned team is moved to a cheaper model.",
+      "A team's pinned model is honoured only when the policy allows it; otherwise the route table picks the model.",
+      "Showback prices each team's tokens by model, rounds the total to a cent once, and refuses a model with no price.",
+      "A caller with a hard timeout gets accept-and-poll when the p95 plus its margin does not fit."
     ],
     "files": [
       "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-1/try_it.py"

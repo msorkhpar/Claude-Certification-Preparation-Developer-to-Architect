@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: review a batch of assistant conversations"
-    },
-    {
       "type": "para",
       "text": "A team runs a conversational assistant for a book shop. It has a persona, remembers a customer between sessions and hands over to a person when it should. Before each release the team reads a batch of conversations that reviewers have labelled, and decides whether the assistant may ship. In this practice you write that review: how many conversations the assistant settled alone, whether every signal of risk reached a person as a safety hand-off, whether conversations ran too long, how often the assistant asked the same question twice, which kinds of conversation are weak, and the verdict with its first reason. The model is not called: the tests give you the labelled batch. The shapes of the batch, of the policy and of the report are this course's own design for the capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -202,7 +197,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 7,
     "code": 2,
     "tables": 1,
@@ -214,7 +209,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "4366f342835076f812a8237b2402316df05aa4173a52ee86e8040e93e7f68a1f",
+  "content_sha256": "6926b9ff7610d18dea057904ea695e55404eb8a5b2e67fc5febb44d8035bdcf6",
   "starting_code": "// Review a batch of assistant conversations: how many the assistant settled, whether every safety signal reached a person, and whether the assistant may ship.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"conversation_review\");\n\nexport type Conversation = { id: string; segment: string; turns: number; resolved: boolean; handoff: string; needed_person: boolean; repeated: boolean; risk: boolean };\nexport type Policy = { max_turns: number; max_repeat: number; min_resolved: number; min_n: number };\nexport type Segment = { segment: string; n: number; resolved: number; percent: number; weak: boolean };\nexport type Report = {\n  n: number; resolved: number; resolved_pct: number; safety_missed: number; overlong: number; repeat_pct: number; repeat_ok: boolean; over_escalated: number;\n  under_escalated: number; segments: Segment[]; verdict: string; reason: string;\n};\n\n/**\n * TODO 1 of 8 (unlocks m1, e1 and e9): a whole percentage, rounded half up.\n * Receives a count and a total. Returns `Math.floor((200 * count + total) / (2 * total))`, and 0 when the total is 0.\n * Example: percent(2, 3) -> 67, percent(1, 8) -> 13, percent(0, 0) -> 0\n */\nexport function percent(count: number, total: number): number {\n  return 0;\n}\n\n/**\n * TODO 2 of 8 (unlocks m1 and e8): did the assistant settle this conversation alone?\n * Receives one conversation. Returns true only when `resolved` is true and `handoff` is `none` (a conversation a person settled is not one the assistant settled).\n * Example: settled({ resolved: true, handoff: \"requested\", ... }) -> false\n */\nexport function settled(c: Conversation): boolean {\n  return false;\n}\n\n/**\n * TODO 3 of 8 (unlocks e2): count the safety signals that did not reach a person as a safety hand-off.\n * Receives the conversations. Returns how many have `risk` and a `handoff` other than `safety` (`none` and `requested` both count as missed).\n * Example: one risk conversation with handoff \"requested\" and one with \"safety\" -> 1\n */\nexport function countSafetyMissed(conversations: Conversation[]): number {\n  return 0;\n}\n\n/**\n * TODO 4 of 8 (unlocks e3): count the overlong conversations.\n * Receives the conversations and the limit. Returns how many have more than `maxTurns` turns and `handoff` `none`.\n * Example: with a limit of 12, turns 12 -> 0, turns 13 -> 1, turns 30 with handoff \"stalled\" -> 0\n */\nexport function countOverlong(conversations: Conversation[], maxTurns: number): number {\n  return 0;\n}\n\n/**\n * TODO 5 of 8 (unlocks e1 and e4): are the repeated questions within the limit?\n * Receives the repeated count, the batch size and the limit in percent. Returns true when `repeated * 100 <= maxRepeat * n` (so true for an empty batch).\n * Example: isRepeatOk(1, 10, 10) -> true, isRepeatOk(2, 10, 10) -> false\n */\nexport function isRepeatOk(repeated: number, n: number, maxRepeat: number): boolean {\n  return false;\n}\n\n/**\n * TODO 6 of 8 (unlocks e7): count over- and under-escalation.\n * Receives the conversations. Returns [overEscalated, underEscalated]: hand-offs (any `handoff` but `none`) with no `needed_person` and no `risk`,\n * and conversations with `handoff` `none` that had `needed_person`.\n * Example: a \"requested\" hand-off nobody needed -> [1, 0]; a \"safety\" hand-off with risk -> [0, 0]\n */\nexport function countEscalations(conversations: Conversation[]): [number, number] {\n  return [0, 0];\n}\n\n/**\n * TODO 7 of 8 (unlocks m1, e5 and e6): one entry per segment.\n * Receives the conversations and the policy. Returns a list sorted by segment name of { segment, n, resolved, percent, weak }, with `resolved` counted by `settled`.\n * `weak` needs at least `min_n` conversations and `resolved * 100 < min_resolved * n` for the segment.\n * Example: 3 unresolved \"refunds\" conversations with min_n 3 -> [{ segment: \"refunds\", n: 3, resolved: 0, percent: 0, weak: true }]\n */\nexport function segmentsOf(conversations: Conversation[], policy: Policy): Segment[] {\n  return [{ segment: \"\", n: 0, resolved: 0, percent: 0, weak: false }];\n}\n\n/**\n * TODO 8 of 8 (unlocks m1, e1, e2 and e4): the verdict and its reason.\n * Receives the batch size, the missed safety count, the segments and `repeatOk`. Returns [verdict, reason]: [\"hold\", \"no_data\"] for an empty batch,\n * otherwise the first that applies of [\"hold\", \"safety\"], [\"hold\", \"weak_segment\"] and [\"hold\", \"repeats\"], and [\"ship\", \"none\"] when none does.\n * Example: chooseVerdict(5, 0, [], false) -> [\"hold\", \"repeats\"]\n */\nexport function chooseVerdict(n: number, safetyMissed: number, segments: Segment[], repeatOk: boolean): [string, string] {\n  return [\"\", \"\"];\n}\n\nexport function review(conversations: Conversation[], policy: Policy): Report {\n  log.debug(\"review input\", conversations);\n  const n = conversations.length;\n  const resolved = conversations.filter(settled).length;\n  const safetyMissed = countSafetyMissed(conversations);\n  const repeated = conversations.filter((c) => c.repeated).length;\n  const repeatOk = isRepeatOk(repeated, n, policy.max_repeat);\n  const [overEscalated, underEscalated] = countEscalations(conversations);\n  const segments = segmentsOf(conversations, policy);\n  const [verdict, reason] = chooseVerdict(n, safetyMissed, segments, repeatOk);\n  return {\n    n, resolved, resolved_pct: percent(resolved, n), safety_missed: safetyMissed, overlong: countOverlong(conversations, policy.max_turns), repeat_pct: percent(repeated, n),\n    repeat_ok: repeatOk, over_escalated: overEscalated, under_escalated: underEscalated, segments, verdict, reason,\n  };\n}\n",
   "exercise": {
     "main_path": "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-2/conversationReview.ts",
@@ -292,7 +287,10 @@
     },
     "origin": "course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
     "concepts": [
-      "the practice of Sensitive talk, hand-offs and judging a conversation is solved"
+      "Only conversations the assistant settled with no hand-off count as resolved, and percentages are whole numbers rounded half up.",
+      "A risk signal counts as missed unless it went to a person as a safety hand-off.",
+      "A conversation is overlong only above the turn limit with nobody taking over, and a hand-off is over-escalation only without need or risk.",
+      "A batch is held for missed safety, then a weak segment, then too many repeats; an empty batch is held for no data."
     ],
     "files": [
       "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-2/try-it.ts"

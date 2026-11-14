@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a data policy for a Claude deployment"
-    },
-    {
       "type": "para",
       "text": "A regulated customer asks where its data goes. The answer is a configuration: the platform that serves the model, the region, whether zero data retention is in place, how identifiers are handled, how tenants are separated and what the audit log keeps. In this practice you write the three checks around that configuration: the check that compares it with the customer's requirements, the rule that decides which audit entries to purge, and the routing rule that keeps each user's data in their region. The model is not called: the tests give you configurations as maps. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -212,7 +207,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 9,
+    "headings": 8,
     "paras": 9,
     "code": 2,
     "tables": 1,
@@ -224,7 +219,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "9d3a48d67bab13885f035d0a0479bdb7fcc4bff66b3dcef8cf822f8a3f067520",
+  "content_sha256": "dd487cb07a663cae4d554196d6c57ad9ff75df1b7173f53512f498de87918113",
   "starting_code": "\"\"\"A data policy for a Claude deployment: the findings of a configuration check, what a retention rule purges, and the deployment that may serve a user. See ../../statement.md.\"\"\"\nimport logging\nfrom datetime import date\n\nlog = logging.getLogger(__name__)\n\nSAFE_INPUT = (\"tokenise\", \"redact\")  # pii_handling values that keep identifiers out of the prompt\nWANT = {\"us\": \"us\", \"eu\": \"eu\", \"other\": \"global\"}  # the residency of the deployment that may serve a user region\n\n\ndef _report(findings):\n    \"\"\"TODO 1 of 6 (unlocks m1): the answer of check_deployment.\n\n    Receives the set of finding ids. Returns them as a list sorted by text, or None when there is nothing to report yet.\n    Example: _report({\"zdr-missing\", \"phi-no-baa\"}) -> [\"phi-no-baa\", \"zdr-missing\"]\n    \"\"\"\n    return None\n\n\ndef _residency_findings(req, config):\n    platform, region = config.get(\"platform\"), config.get(\"region\") or \"\"\n    if req.get(\"residency\") == \"us\":\n        if platform in (\"api\", \"aws-platform\"):\n            if config.get(\"inference_geo\") != \"us\":\n                return {\"residency-not-pinned\"}\n        elif not region.startswith(\"us-\"):\n            return {\"residency-region\"}\n    elif req.get(\"residency\") == \"eu\":\n        if platform in (\"api\", \"aws-platform\"):\n            return {\"residency-unavailable\"}\n        elif not (region.startswith(\"eu-\") or region.startswith(\"europe-\") or region == \"eu\"):\n            return {\"residency-region\"}\n    return set()\n\n\ndef _zdr_findings(req, config):\n    \"\"\"TODO 2 of 6 (unlocks e2): the findings about zero data retention.\n\n    Receives the requirements and the configuration. Returns a set of finding ids. When `zdr_required` is set: `zdr-not-anthropics` on the\n    platforms `bedrock` and `vertex` (and nothing else); on the others `zdr-missing` when `zdr` is not set, and `model-needs-retention` when the\n    model name starts with `claude-fable`. Nothing is required, nothing is found.\n    Example: platform \"api\", zdr False, zdr_required True -> {\"zdr-missing\"}\n    \"\"\"\n    return set()\n\n\ndef _phi_findings(req, config):\n    \"\"\"TODO 3 of 6 (unlocks e3): the findings about protected health information.\n\n    Receives the requirements and the configuration. Returns a set of finding ids. When `phi` is set: `phi-no-baa` on the platform `api` without\n    `hipaa_baa`; `phi-platform-unsupported` on `aws-platform`; `phi-not-deidentified` when `pii_handling` is not in SAFE_INPUT.\n    Example: platform \"api\", hipaa_baa False, pii_handling \"tokenise\", phi True -> {\"phi-no-baa\"}\n    \"\"\"\n    return set()\n\n\ndef _tenant_findings(req, config):\n    if req.get(\"multi_tenant\") and config.get(\"tenancy\") != \"workspace-per-tenant\":\n        return {\"tenant-isolation\"}\n    return set()\n\n\ndef _retention_findings(req, config):\n    findings = set()\n    days = (config.get(\"audit\") or {}).get(\"retain_days\")\n    if days is not None:\n        if req.get(\"audit_max_days\") is not None and days > req[\"audit_max_days\"]:\n            findings.add(\"retention-too-long\")\n        if req.get(\"audit_min_days\") is not None and days < req[\"audit_min_days\"]:\n            findings.add(\"retention-too-short\")\n    return findings\n\n\ndef _audit_findings(req, config):\n    \"\"\"TODO 4 of 6 (unlocks e5): the finding about stored prompts.\n\n    Receives the requirements and the configuration; the audit settings are `config[\"audit\"]` (it may be missing). Returns\n    {\"audit-stores-sensitive\"} when `store_prompts` is set and either `phi` is required or `pii_handling` is not in SAFE_INPUT; an empty set otherwise.\n    Example: store_prompts True, pii_handling \"none\" -> {\"audit-stores-sensitive\"}\n    \"\"\"\n    return set()\n\n\ndef check_deployment(config, req):\n    log.debug(\"check_deployment input: %r\", config)\n    findings = set()\n    for check in (_residency_findings, _zdr_findings, _phi_findings, _tenant_findings, _audit_findings, _retention_findings):\n        findings |= check(req, config)\n    return _report(findings)\n\n\ndef _age_days(day, today):\n    return (date.fromisoformat(today) - date.fromisoformat(day)).days\n\n\ndef retention_actions(entries, max_days, today):\n    \"\"\"TODO 5 of 6 (unlocks e7): what a retention rule purges.\n\n    Receives the entries (each has `id` and an ISO `date`, and may have `hold`), the limit in days and today's ISO date. Returns\n    {\"purge\": [ids], \"keep\": [ids]}, both sorted by id. An entry is purged when it is older than the limit (strictly) and is not on hold.\n    Example: an entry dated 365 days before today with max_days 365 is kept; one dated 366 days before is purged.\n    \"\"\"\n    return None\n\n\ndef pick_deployment(user_region, deployments):\n    \"\"\"TODO 6 of 6 (unlocks e8): the deployment that may serve a user.\n\n    Receives the user's region (\"us\", \"eu\" or \"other\") and the deployments (each has `name` and `residency`). Returns the first name, in\n    alphabetical order, of the deployments whose residency is WANT[user_region], or None when there is none (a global deployment does not serve \"us\" or \"eu\").\n    Example: \"eu\" with eu-main and eu-backup -> \"eu-backup\"\n    \"\"\"\n    return None\n",
   "exercise": {
     "main_path": "practice/level-4/83-deployment-architecture-and-data-handling/prose/unit-02/practice-1/data_policy.py",
@@ -298,7 +293,10 @@
     },
     "origin": "course/83-deployment-architecture-and-data-handling/02-the-identifier-boundary-the-audit-log-and-the-practice.md",
     "concepts": [
-      "the practice of The identifier boundary, the audit log and the practice is solved"
+      "US residency is pinned by inference_geo on the API, or by the cloud region on Bedrock and Vertex.",
+      "Zero data retention is an arrangement of Anthropic's own platforms, not of Bedrock or Vertex, and not of every model.",
+      "Protected health information needs a covered platform, a signed agreement where required and de-identified input, and the audit log never stores sensitive prompts.",
+      "Multi-tenant services need a workspace per tenant, and only entries past the retention limit and not on legal hold are purged."
     ],
     "files": [
       "practice/level-4/83-deployment-architecture-and-data-handling/prose/unit-02/practice-1/try_it.py"

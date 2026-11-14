@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a context that keeps the facts, trims the noise, never mixes customers and never splits a tool call"
-    },
-    {
       "type": "para",
       "text": "A support agent works with a customer over many turns. Its summaries turn \"$129.50 by 30 September\" into \"a refund soon\", every order lookup drops forty internal fields into the conversation, a late message with an old address overwrites the new one, a facts block loaded for one customer shows up in another customer's session, and the window that trims old messages sometimes keeps a tool result without the call that produced it. In this practice you write the context's building blocks: the trimming of a tool record, the update of case facts, the assembly of the context, the check of a summary against the facts, and the sliding window. The model is not called. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -184,7 +179,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -196,7 +191,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "fdf8642ecc3c21a245001e14535ee90c8cf9d3d3b05cdbee28d74f1ea74c3941",
+  "content_sha256": "5e1d58a9ab729f0c9bbd2421f4ed0be587215c57a58c902700d251f012516315",
   "starting_code": "\"\"\"What a long conversation keeps: trimmed tool output, case facts that newer information replaces, a context that never mixes customers, and a window that keeps tool calls whole. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef estimate_tokens(text):\n    return -(-len(text) // 4)\n\n\ndef trim_record(record, keep):\n    # TODO 1 of 6 (finish this to pass m1, e1): the trim. Receives a tool's record and the list of fields to keep.\n    #   Return a new record with only those fields, in the order of the list, with their exact values, skipping a field\n    #   that the record does not have. Example: record {id, status, notes}, keep [status, id] -> {status, id}.\n    return dict(record)\n\n\ndef update_facts(facts, name, value, as_of):\n    new = {n: {**f, \"superseded\": list(f[\"superseded\"])} for n, f in facts.items()}\n    current = new.get(name)\n    if current is None:\n        new[name] = {\"value\": value, \"as_of\": as_of, \"superseded\": []}\n    # TODO 2 of 6 (finish this to pass e2, e3): the update of a known fact. When the new date is the same as or later\n    #   than the stored one, replace the value and the date and append \"oldvalue@olddate\" to the history; when it is\n    #   earlier, keep the current value and append \"newvalue@newdate\" to the history. Example: stored 5@2026-01-02, new\n    #   7@2026-01-05 -> value 7, history [5@2026-01-02].\n    else:\n        current[\"value\"], current[\"as_of\"] = value, as_of\n    return new\n\n\ndef build_context(customer, facts, summary, recent):\n    log.debug(\"build_context input: %r\", customer)\n    parts = []\n    # TODO 3 of 6 (finish this to pass e4): the facts of one customer. Receives the customer and all the fact entries.\n    #   Keep only the entries whose customer is that customer. Example: facts of C1 and C2, customer C1 -> the C1 entries\n    #   only.\n    mine = list(facts)\n    # TODO 4 of 6 (finish this to pass e5): the case facts section. When there are facts for the customer, add first a\n    #   section titled \"## Case facts\" with one line per fact, \"name: value (as of date)\". Example: one fact -> \"## Case\n    #   facts\\norder: A-7 (as of 2026-01-02)\", before the summary.\n    parts.append(\"## Summary so far\\n\" + summary)\n    parts.append(\"## Recent messages\\n\" + \"\\n\".join(f\"{m['role']}: {m['text']}\" for m in recent))\n    return \"\\n\\n\".join(parts)\n\n\ndef missing_from_summary(summary, facts):\n    # TODO 5 of 6 (finish this to pass e6): the check of a summary. Receives the summary and the fact entries. Return\n    #   the names of the facts whose exact value does not appear in the summary text. Example: fact order = A-7, summary\n    #   \"customer wants a refund\" -> [order].\n    return []\n\n\ndef window(messages, budget):\n    units, i = [], 0\n    while i < len(messages):\n        m = messages[i]\n        # TODO 6 of 6 (finish this to pass e7): the units of the window. Walk the messages in order: a tool_use message\n        #   followed by the tool_result with the same id forms one unit of two, which is never split; any other message is\n        #   a unit of one. Example: [user, tool_use t1, tool_result t1] -> two units.\n        units.append([m])\n        i += 1\n    kept, used = [], 0\n    for unit in reversed(units):\n        cost = sum(estimate_tokens(x[\"text\"]) for x in unit)\n        if used + cost > budget:\n            break\n        kept.insert(0, unit)\n        used += cost\n    return [m for unit in kept for m in unit]\n",
   "exercise": {
     "main_path": "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-1/context_builder.py",
@@ -265,7 +260,10 @@
     },
     "origin": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md",
     "concepts": [
-      "the practice of Long sessions: windows, stale facts, late updates, isolation and the practice is solved"
+      "A trimmed tool result keeps only the named fields, with their exact values, in the named order.",
+      "A newer case fact replaces the old one and keeps it as history, while a late older fact never replaces the current value.",
+      "The context puts case facts first, then the summary, then recent messages, and never includes another customer's facts.",
+      "A summary that loses an exact value is reported, and the window keeps or drops a tool call together with its result."
     ],
     "files": [
       "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-1/try_it.py"

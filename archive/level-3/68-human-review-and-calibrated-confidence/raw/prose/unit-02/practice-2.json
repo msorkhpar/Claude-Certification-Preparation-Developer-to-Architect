@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: human review that does not fool itself"
-    },
-    {
       "type": "para",
       "text": "A team extracts fields from documents and reports \"98% accurate\" to justify removing the human reviewers. The figure is an average over thousands of easy invoices; handwritten documents are wrong four times in ten. In this practice you write the pieces that make a review process honest: accuracy broken down by segment, the decision whether a segment may be automated, a confidence threshold calibrated against labelled examples, a stratified sample for ongoing checks, routing of uncertain extractions to a limited number of reviewers, and a checkpoint for actions that cannot be undone. The model is not called. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -190,7 +185,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -202,7 +197,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "b8b366844f5496e47181469030676241969b41d1bce775a2e311c81003d9bc63",
+  "content_sha256": "92a1183403ed381c4b5bc21a8289cee5ec08637406c14fcf2e601df74e77d6ad",
   "starting_code": "import { logger } from \"./logger.ts\";\nconst log = logger(\"review_routing\");\n/** Human review without fooling yourself: accuracy by segment, the decision to automate, a calibrated confidence threshold, a stratified sample, review routing within capacity, and checkpoints for irreversible actions. See ../../statement.md. */\n\nexport const IRREVERSIBLE = [\"delete_records\", \"send_payment\", \"close_account\"];\n\nconst percent = (correct: number, total: number): number => Math.floor((200 * correct + total) / (2 * total));\n\nexport function accuracyBy(records: any[]): any[] {\n  log.debug(\"accuracyBy input\", records);\n  const groups = new Map<string, [number, number]>();\n  for (const r of records) {\n    const key = `${r.doc_type}/${r.field}`;\n    const [c, t] = groups.get(key) ?? [0, 0];\n    groups.set(key, [c + (r.correct ? 1 : 0), t + 1]);\n  }\n  let correct = 0;\n  let total = 0;\n  for (const [c, t] of groups.values()) {\n    correct += c;\n    total += t;\n  }\n  const out: any[] = [{ segment: \"overall\", correct, total, percent: total ? percent(correct, total) : 0 }];\n  // TODO 1 of 7 (finish this to pass m1, e1): the segment rows. After the overall row, add one row for each segment\n  //   (\"doc_type/field\"), sorted by name, with its correct count, its total and the rounded percent. Example:\n  //   invoice/total 8 of 10 -> {segment: invoice/total, correct 8, total 10, percent 80}.\n  for (const name of [...groups.keys()].sort()) {\n    const [c, t] = groups.get(name)!;\n    out.push({ segment: name, correct: c, total: t, percent: out[0].percent });\n  }\n  return out;\n}\n\nexport function canAutomate(records: any[], threshold: number, minN: number): { automate: boolean; failing: string[]; undersampled: string[] } {\n  const failing: string[] = [];\n  const undersampled: string[] = [];\n  const segments = accuracyBy(records).slice(1);\n  for (const s of segments) {\n    // TODO 2 of 7 (finish this to pass e2): the sort of the segments. For each segment (not the overall row): when its\n    //   total is below min_n it is undersampled; otherwise when its percent is below the threshold it is failing. Example:\n    //   min_n 5, segment with 4 records -> undersampled; 5 records at 70 percent, threshold 90 -> failing.\n  }\n  return { automate: segments.length > 0 && failing.length === 0 && undersampled.length === 0, failing, undersampled };\n}\n\nexport function calibrateThreshold(labeled: Array<[number, boolean]>, target: number): number | null {\n  // TODO 3 of 7 (finish this to pass e3, e4): the threshold. Receives the labelled items (confidence, correct) and the\n  //   target precision in percent. Try each distinct confidence from the lowest; return the first for which the items at\n  //   or above it are right at least target percent of the time; return none when no level does. Example: target 90 and no\n  //   level reaches it -> none.\n  return 0;\n}\n\nexport function stratifiedSample(items: any[], perStratum: number): string[] {\n  const strata: string[] = [];\n  for (const item of items) if (!strata.includes(item.stratum)) strata.push(item.stratum);\n  const chosen: string[] = [];\n  for (const stratum of strata) {\n    const members = items.filter((i) => i.stratum === stratum).sort((a, b) => a.rank - b.rank || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));\n    // TODO 4 of 7 (finish this to pass e5): the sample of one stratum. `members` are the stratum's items sorted by rank\n    //   then id. Take only the first per_stratum of them and add their ids. Example: 5 items, per_stratum 2 -> the 2 best\n    //   ranked.\n    chosen.push(...members.map((i) => i.id));\n  }\n  return chosen;\n}\n\nexport function route(extractions: any[], threshold: number, capacity: number): { review: string[]; backlog: string[]; auto: string[] } {\n  const priority = (e: any) => (e.conflict ? 0 : e.confidence);\n  // TODO 5 of 7 (finish this to pass e6): the review queue. Keep the extractions that have a conflict or a confidence\n  //   below the threshold, ordered with conflicts first, then by confidence (lowest first), then by id. Example: threshold\n  //   80, a conflict, a 60 and a 90 -> the conflict, then the 60.\n  const candidates = [...extractions];\n  const queue = candidates.map((e) => e.id);\n  const flagged = new Set(queue);\n  // TODO 6 of 7 (finish this to pass e7): the capacity cut. Split the queue: the first `capacity` ids go to review, the\n  //   others to the backlog, both in order. Example: queue [a, b, c], capacity 2 -> review [a, b], backlog [c].\n  return { review: queue, backlog: [], auto: extractions.filter((e) => !flagged.has(e.id)).map((e) => e.id) };\n}\n\nexport function checkpoint(action: string, amount: number, limit = 1000): string {\n  // TODO 7 of 7 (finish this to pass e8): the checkpoint. Receives the action, the amount and the limit. Return human\n  //   when the action is in IRREVERSIBLE or the amount is above the limit, otherwise auto. Example: close_account for 10\n  //   -> human.\n  return \"auto\";\n}\n",
   "exercise": {
     "main_path": "practice/level-3/68-human-review-and-calibrated-confidence/prose/unit-02/practice-2/reviewRouting.ts",
@@ -275,7 +270,10 @@
     },
     "origin": "course/68-human-review-and-calibrated-confidence/02-routing-review-checkpoints-and-the-practice.md",
     "concepts": [
-      "the practice of Routing review, checkpoints for irreversible actions, and the practice is solved"
+      "Accuracy is broken down by document type and field, because a high overall figure can hide a weak segment.",
+      "Automation needs every segment to pass with enough samples, and the threshold is the lowest confidence whose accepted items meet the target precision.",
+      "Conflicts and low-confidence extractions go to review weakest first, up to capacity, with the rest kept in a backlog.",
+      "An irreversible action, or an amount above the limit, needs a person whatever the confidence."
     ],
     "files": [
       "practice/level-3/68-human-review-and-calibrated-confidence/prose/unit-02/practice-2/try-it.ts"

@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a ledger of claims that keeps its sources"
-    },
-    {
       "type": "para",
       "text": "A research system sends three subagents to read different sources, and a synthesis agent writes the report. In the draft, a market-size figure appears without a source, two reports that disagree were averaged into a number nobody published, and a figure from 2022 is shown as if it contradicted one from 2024. In this practice you write the ledger that prevents those three failures: a finding that must carry its source and its date, a merge that records agreement, change over time and real conflict without choosing a winner, a coverage note that says what is well supported and what is missing, and the rendering of each kind of content in a fitting form. The model is not called. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -200,7 +195,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -212,7 +207,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "ea50c0881076ac259eb3b4fd9cdbf8b6be5853387c74f940fd7f54cc8f597f4b",
+  "content_sha256": "afb71889d111b41ea09ea6d50d0fa87596d46416926b97a84475f5488a25f08e",
   "starting_code": "/** Claims that keep their sources: required provenance fields, a merge that records agreement, change over time and conflict, a coverage note with gaps, and rendering by content type. See ../../statement.md. */\n\nprivate val log = System.getLogger(\"ledger\")\n\nval REQUIRED = listOf(\"claim\", \"value\", \"source\", \"date\")\nval KINDS = listOf(\"financial\", \"news\", \"technical\")\n\ndata class Finding(val claim: String?, val value: String?, val source: String?, val date: String?)\n\ndata class Src(val source: String, val date: String)\n\ndata class Val(val value: String, val sources: List<Src>)\n\ndata class Entry(val claim: String, val status: String, val values: List<Val>)\n\ndata class Gap(val claim: String, val reason: String)\n\ndata class Coverage(val wellSupported: List<String>, val singleSource: List<String>, val changed: List<String>, val contested: List<String>, val gaps: List<Gap>)\n\nprivate fun field(f: Finding, name: String): String = when (name) {\n    \"claim\" -> f.claim\n    \"value\" -> f.value\n    \"source\" -> f.source\n    else -> f.date\n} ?: \"\"\n\n// TODO 1 of 8 (finish this to pass e1): the provenance check. Receives one finding. Return the names, in REQUIRED order,\n//   of the fields that are absent, empty or only white space. Example: source \"\" and date \" \" -> [source, date].\nfun checkFinding(finding: Finding): List<String> = REQUIRED.filter { field(finding, it).isEmpty() }\n\nfun merge(findings: List<Finding>): List<Entry> {\n    log.log(System.Logger.Level.DEBUG, \"merge input: {0}\", findings)\n    findings.forEachIndexed { i, f ->\n        val missing = checkFinding(f)\n        require(missing.isEmpty()) { \"finding $i is missing ${missing.joinToString(\", \")}\" }\n    }\n    return findings.map { it.claim!! }.distinct().map { claim ->\n        val group = findings.filter { it.claim == claim }\n        val values = group.map { it.value!! }.distinct().map { value ->\n            // TODO 2 of 8 (finish this to pass m1): the sources of a value. When a finding repeats a source and date\n            //   pair that the value already holds, do not add it again; otherwise add the pair last. Example: Annual\n            //   report 2024-02-01 reported twice -> kept once.\n            Val(value, group.filter { it.value == value }.map { Src(it.source!!, it.date!!) })\n        }\n        // TODO 3 of 8 (finish this to pass e2, e3): the status of a claim. Receives the group of findings and its\n        //   distinct values. One value -> agreed. Several values where two different values share a date -> conflict (keep\n        //   all). Several values with no shared date -> changed, with the values ordered by their earliest date. Example:\n        //   12% and 9% both on 2024-05-01 -> conflict.\n        Entry(claim, \"agreed\", values)\n    }\n}\n\nfun coverageNote(planned: List<String>, merged: List<Entry>, unavailable: Map<String, String>): Coverage {\n    val have = merged.map { it.claim }.toSet()\n    return Coverage(\n        // TODO 4 of 8 (finish this to pass e4): the split of the agreed claims. For an agreed claim, add it to\n        //   well_supported when its value comes from at least two different sources, otherwise to single_source. Example:\n        //   two sources -> well_supported; one -> single_source.\n        emptyList(),\n        merged.filter { it.status == \"agreed\" }.map { it.claim },\n        merged.filter { it.status == \"changed\" }.map { it.claim },\n        merged.filter { it.status == \"conflict\" }.map { it.claim },\n        // TODO 5 of 8 (finish this to pass e5): the gaps. Receives the planned claims, the merged entries and the\n        //   reasons for unavailable claims. Return one {claim, reason} for each planned claim that has no merged entry,\n        //   with the reason from `unavailable` or \"no source found\". Example: planned [a, b], merged a -> gap b.\n        emptyList(),\n    )\n}\n\nfun render(entry: Entry, kind: String): String {\n    require(kind in KINDS) { \"unknown content type $kind\" }\n    val rows = entry.values.flatMap { v -> v.sources.map { s -> Triple(v.value, s.source, s.date) } }\n    return when (kind) {\n        // TODO 6 of 8 (finish this to pass e6): the financial rendering. Return a Markdown table: the header \"| Source |\n        //   Date | Value |\", the line \"|---|---|---|\" and one row \"| source | date | value |\" for each source of each\n        //   value. Example: one source -> three lines.\n        // TODO 7 of 8 (finish this to pass e8): the technical rendering. Return the claim followed by a colon, then one\n        //   line \"- value (source, date)\" for each source of each value. Example: one source -> two lines.\n        // TODO 8 of 8 (finish this to pass e7): the news ending. After the prose, add \" The sources disagree.\" for a\n        //   conflict and \" The figures are from different dates.\" for a changed claim. Example: conflict -> the prose ends\n        //   with that sentence.\n        else -> \"${entry.claim}: \" + rows.joinToString(\"; \") { (v, s, d) -> \"$v ($s, $d)\" } + \".\"\n    }\n}\n",
   "exercise": {
     "main_path": "practice/level-3/69-provenance-and-uncertainty/prose/unit-02/practice-4/src/main/kotlin/Ledger.kt",
@@ -289,7 +284,10 @@
     },
     "origin": "course/69-provenance-and-uncertainty/02-coverage-report-structure-rendering-and-the-practice.md",
     "concepts": [
-      "the practice of Coverage, report structure, rendering by content type, and the practice is solved"
+      "Every finding needs a claim, value, source and date, and each source and date pair is kept once per claim.",
+      "Two values from the same date are a conflict that keeps both, while values from different dates are a change.",
+      "The coverage note separates well-supported claims with two or more sources from single-source, changed, contested and missing ones.",
+      "Financial data is a table, technical findings a list, and news is prose that says when sources disagree or dates differ."
     ],
     "files": [
       "practice/level-3/69-provenance-and-uncertainty/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"

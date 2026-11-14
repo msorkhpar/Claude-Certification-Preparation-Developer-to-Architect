@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: review a batch of assistant conversations"
-    },
-    {
       "type": "para",
       "text": "A team runs a conversational assistant for a book shop. It has a persona, remembers a customer between sessions and hands over to a person when it should. Before each release the team reads a batch of conversations that reviewers have labelled, and decides whether the assistant may ship. In this practice you write that review: how many conversations the assistant settled alone, whether every signal of risk reached a person as a safety hand-off, whether conversations ran too long, how often the assistant asked the same question twice, which kinds of conversation are weak, and the verdict with its first reason. The model is not called: the tests give you the labelled batch. The shapes of the batch, of the policy and of the report are this course's own design for the capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -202,7 +197,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 7,
     "code": 2,
     "tables": 1,
@@ -214,7 +209,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "f49e1903f8c0b3e87395449f643232c743574551c0920de8a15017b412bc2737",
+  "content_sha256": "c54751a33ffc218fdb75522d9af0e5d1ea0a3cf4e3afd2233899966cd2c72659",
   "starting_code": "private val log = System.getLogger(\"conversation_review\")\n\ndata class Conversation(val id: String, val segment: String, val turns: Int, val resolved: Boolean, val handoff: String, val neededPerson: Boolean, val repeated: Boolean, val risk: Boolean)\n\ndata class Policy(val maxTurns: Int, val maxRepeat: Int, val minResolved: Int, val minN: Int)\n\ndata class Segment(val segment: String, val n: Int, val resolved: Int, val percent: Int, val weak: Boolean)\n\ndata class Report(\n    val n: Int, val resolved: Int, val resolvedPct: Int, val safetyMissed: Int, val overlong: Int, val repeatPct: Int, val repeatOk: Boolean, val overEscalated: Int,\n    val underEscalated: Int, val segments: List<Segment>, val verdict: String, val reason: String,\n)\n\n/**\n * TODO 1 of 8 (unlocks m1, e1 and e9): a whole percentage, rounded half up.\n * Receives a count and a total. Returns `(200 * count + total) / (2 * total)` in integer arithmetic, and 0 when the total is 0.\n * Example: percent(2, 3) -> 67, percent(1, 8) -> 13, percent(0, 0) -> 0\n */\nfun percent(count: Int, total: Int): Int = 0\n\n/**\n * TODO 2 of 8 (unlocks m1 and e8): did the assistant settle this conversation alone?\n * Receives one conversation. Returns true only when `resolved` is true and `handoff` is `none` (a conversation a person settled is not one the assistant settled).\n * Example: a resolved conversation with handoff \"requested\" -> false\n */\nfun settled(c: Conversation): Boolean = false\n\n/**\n * TODO 3 of 8 (unlocks e2): count the safety signals that did not reach a person as a safety hand-off.\n * Receives the conversations. Returns how many have `risk` and a `handoff` other than `safety` (`none` and `requested` both count as missed).\n * Example: one risk conversation with handoff \"requested\" and one with \"safety\" -> 1\n */\nfun countSafetyMissed(conversations: List<Conversation>): Int = 0\n\n/**\n * TODO 4 of 8 (unlocks e3): count the overlong conversations.\n * Receives the conversations and the limit. Returns how many have more than `maxTurns` turns and `handoff` `none`.\n * Example: with a limit of 12, turns 12 -> 0, turns 13 -> 1, turns 30 with handoff \"stalled\" -> 0\n */\nfun countOverlong(conversations: List<Conversation>, maxTurns: Int): Int = 0\n\n/**\n * TODO 5 of 8 (unlocks e1 and e4): are the repeated questions within the limit?\n * Receives the repeated count, the batch size and the limit in percent. Returns true when `repeated * 100 <= maxRepeat * n` (so true for an empty batch).\n * Example: isRepeatOk(1, 10, 10) -> true, isRepeatOk(2, 10, 10) -> false\n */\nfun isRepeatOk(repeated: Int, n: Int, maxRepeat: Int): Boolean = false\n\n/**\n * TODO 6 of 8 (unlocks e7): count over- and under-escalation.\n * Receives the conversations. Returns Pair(overEscalated, underEscalated): hand-offs (any `handoff` but `none`) with no `neededPerson` and no `risk`,\n * and conversations with `handoff` `none` that had `neededPerson`.\n * Example: a \"requested\" hand-off nobody needed -> Pair(1, 0); a \"safety\" hand-off with risk -> Pair(0, 0)\n */\nfun countEscalations(conversations: List<Conversation>): Pair<Int, Int> = Pair(0, 0)\n\n/**\n * TODO 7 of 8 (unlocks m1, e5 and e6): one entry per segment.\n * Receives the conversations and the policy. Returns a list sorted by segment name of Segment(segment, n, resolved, percent, weak), with `resolved` counted by `settled`.\n * `weak` needs at least `minN` conversations and `resolved * 100 < minResolved * n` for the segment.\n * Example: 3 unresolved \"refunds\" conversations with minN 3 -> [Segment(\"refunds\", 3, 0, 0, true)]\n */\nfun segmentsOf(conversations: List<Conversation>, policy: Policy): List<Segment> = listOf(Segment(\"\", 0, 0, 0, false))\n\n/**\n * TODO 8 of 8 (unlocks m1, e1, e2 and e4): the verdict and its reason.\n * Receives the batch size, the missed safety count, the segments and `repeatOk`. Returns Pair(verdict, reason): Pair(\"hold\", \"no_data\") for an empty batch,\n * otherwise the first that applies of Pair(\"hold\", \"safety\"), Pair(\"hold\", \"weak_segment\") and Pair(\"hold\", \"repeats\"), and Pair(\"ship\", \"none\") when none does.\n * Example: chooseVerdict(5, 0, emptyList(), false) -> Pair(\"hold\", \"repeats\")\n */\nfun chooseVerdict(n: Int, safetyMissed: Int, segments: List<Segment>, repeatOk: Boolean): Pair<String, String> = Pair(\"\", \"\")\n\n/** Review a batch of assistant conversations: how many the assistant settled, whether every safety signal reached a person, and whether the assistant may ship. */\nfun review(conversations: List<Conversation>, policy: Policy): Report {\n    log.log(System.Logger.Level.DEBUG, \"review input: {0}\", conversations)\n    val n = conversations.size\n    val resolved = conversations.count { settled(it) }\n    val safetyMissed = countSafetyMissed(conversations)\n    val repeated = conversations.count { it.repeated }\n    val repeatOk = isRepeatOk(repeated, n, policy.maxRepeat)\n    val (overEscalated, underEscalated) = countEscalations(conversations)\n    val segments = segmentsOf(conversations, policy)\n    val (verdict, reason) = chooseVerdict(n, safetyMissed, segments, repeatOk)\n    return Report(n, resolved, percent(resolved, n), safetyMissed, countOverlong(conversations, policy.maxTurns), percent(repeated, n), repeatOk, overEscalated, underEscalated, segments,\n        verdict, reason)\n}\n",
   "exercise": {
     "main_path": "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-4/src/main/kotlin/ConversationReview.kt",
@@ -296,7 +291,10 @@
     },
     "origin": "course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
     "concepts": [
-      "the practice of Sensitive talk, hand-offs and judging a conversation is solved"
+      "Only conversations the assistant settled with no hand-off count as resolved, and percentages are whole numbers rounded half up.",
+      "A risk signal counts as missed unless it went to a person as a safety hand-off.",
+      "A conversation is overlong only above the turn limit with nobody taking over, and a hand-off is over-escalation only without need or risk.",
+      "A batch is held for missed safety, then a weak segment, then too many repeats; an empty batch is held for no data."
     ],
     "files": [
       "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"

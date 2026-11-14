@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: review a tool that an agent proposes"
-    },
-    {
       "type": "para",
       "text": "A team lets its agent write its own tools: the agent proposes a name, a description, the permissions it needs, the limits it wants and the code. Before any proposed tool runs, a gate reads the proposal and decides: approve it, approve it behind a person's sign-off, send it back for a fix, or refuse it. In this practice you write that gate. The model is not called and no proposed code is ever executed: the gate reads the text of the proposal. The shapes of the proposal, of the policy and of the report, and the crude scan of the code, are this course's own design for the capstone, not an Anthropic interface, and a text scan is not a sandbox: it is the cheap first check in front of one. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -194,7 +189,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 7,
     "code": 2,
     "tables": 1,
@@ -206,7 +201,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "0ef1cd02e4e92ec6ad4ac72f8e521cd7a51f58e1da12db4ceee59a81e746ebd1",
+  "content_sha256": "72f2dd2aa9e00cf74f73c4e58728b90657fdb92aff4835c245eb4dbf8e2906eb",
   "starting_code": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.TreeSet;\nimport java.util.regex.Pattern;\n\n/** Review a tool that an agent proposes: its name and description, the limits it asks for, what its code does and which permissions it declares, and the decision. */\npublic final class ToolReview {\n    private static final System.Logger LOG = System.getLogger(ToolReview.class.getName());\n\n    public record Proposal(String name, String description, List<String> permissions, int timeoutS, int memoryMb, String code) {}\n\n    public record Policy(int minWords, int maxTimeout, int maxMemory, List<String> denied, List<String> approval) {}\n\n    public record Report(String name, String decision, List<String> refusals, List<String> findings, List<String> used, String audit) {}\n\n    static final List<String> FORBIDDEN = List.of(\"os.system\", \"subprocess\", \"eval(\", \"exec(\", \"__import__\");\n    // a deliberately crude scan of the code text: which permission each marker shows (the order of this table is not the order of the report)\n    static final Map<String, List<String>> MARKERS = new LinkedHashMap<>();\n\n    static {\n        MARKERS.put(\"network\", List.of(\"requests.\", \"urllib\"));\n        MARKERS.put(\"write_files\", List.of(\".write(\", \"shutil.\"));\n        MARKERS.put(\"read_files\", List.of(\"open(\", \".read(\"));\n        MARKERS.put(\"run_process\", List.of(\"subprocess\"));\n    }\n\n    /**\n     * TODO 1 of 6 (unlocks e1, e2 and e3): the findings about the name, the description and the limits.\n     * Receives the proposal and the policy. Returns a list, in this order, of {@code bad_name} (the name does not match {@code [a-z][a-z0-9_]{2,63}}),\n     * {@code short_description} (fewer than {@code minWords} words), {@code timeout} ({@code timeoutS} above {@code maxTimeout}) and {@code memory} ({@code memoryMb} above {@code maxMemory}).\n     * Example: a 3-word description with a policy minimum of 12 -> [\"short_description\"]\n     */\n    static List<String> findingsOf(Proposal proposal, Policy policy) {\n        return new ArrayList<>();\n    }\n\n    /**\n     * TODO 2 of 6 (unlocks e4): the forbidden tokens in the code.\n     * Receives the code text. Returns the tokens of {@code FORBIDDEN} that it contains, in alphabetical order.\n     * Example: \"eval(text)\\nos.system('ls')\" -> [\"eval(\", \"os.system\"]\n     */\n    static List<String> forbiddenCalls(String code) {\n        return List.of();\n    }\n\n    /**\n     * TODO 3 of 6 (unlocks e5, e6 and e8): the permissions the code shows.\n     * Receives the code text. Returns the permissions of {@code MARKERS} that have a marker in the code, in alphabetical order (the table is not in that order).\n     * Example: \"shutil.copy(a, b)\\nopen(a).read()\" -> [\"read_files\", \"write_files\"]\n     */\n    static List<String> permissionsUsed(String code) {\n        return List.of();\n    }\n\n    /**\n     * TODO 4 of 6 (unlocks e4 and e5): the refusals, in order.\n     * Receives the forbidden tokens, the permissions used, the permissions declared and the permissions the policy denies. Returns\n     * {@code forbidden:<token>} for each forbidden token, then {@code undeclared:<permission>} for each used permission that was not declared, then\n     * {@code denied:<permission>} for each declared permission that is denied (alphabetical within each group).\n     * Example: refusalsOf(List.of(), List.of(\"network\"), List.of(\"read_files\"), List.of(\"network\")) -> [\"undeclared:network\"]\n     */\n    static List<String> refusalsOf(List<String> forbidden, List<String> used, List<String> declared, List<String> denied) {\n        return new ArrayList<>();\n    }\n\n    /**\n     * TODO 5 of 6 (unlocks e6): does a declared permission need approval?\n     * Receives the declared permissions and the permissions that need approval. Returns true when any declared permission is among them.\n     * Example: isGated(List.of(\"read_files\", \"write_files\"), List.of(\"write_files\")) -> true\n     */\n    static boolean isGated(List<String> declared, List<String> approval) {\n        return false;\n    }\n\n    /**\n     * TODO 6 of 6 (unlocks m1, e6 and e7): the decision.\n     * Receives the refusals, the findings and {@code gated}. Returns {@code refuse} when there are refusals, otherwise {@code revise} when there are findings,\n     * otherwise {@code approve_with_gate} when gated, otherwise {@code approve}.\n     * Example: decide(List.of(), List.of(\"timeout\"), true) -> \"revise\"\n     */\n    static String decide(List<String> refusals, List<String> findings, boolean gated) {\n        return \"\";\n    }\n\n    public static Report review(Proposal proposal, Policy policy) {\n        LOG.log(System.Logger.Level.DEBUG, \"review input: {0}\", proposal);\n        String name = proposal.name();\n        List<String> declared = proposal.permissions();\n        List<String> findings = findingsOf(proposal, policy);\n        List<String> used = permissionsUsed(proposal.code());\n        List<String> refusals = refusalsOf(forbiddenCalls(proposal.code()), used, declared, policy.denied());\n        String decision = decide(refusals, findings, isGated(declared, policy.approval()));\n        return new Report(name, decision, refusals, findings, used, name + \": \" + decision);\n    }\n}\n",
   "exercise": {
     "main_path": "practice/level-3/77-scenario-agentic-tool-builder/prose/unit-02/practice-3/src/main/java/ToolReview.java",
@@ -283,7 +278,10 @@
     },
     "origin": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md",
     "concepts": [
-      "the practice of Reviewing a proposal, and the practice is solved"
+      "A tool name is lower-case snake case of at most 64 characters, and timeout and memory may equal their limits but not exceed them.",
+      "Forbidden calls such as eval or subprocess in the code refuse the tool, listed alphabetically.",
+      "A permission the code uses without declaring it, or a denied one, refuses the tool.",
+      "A refusal beats a revision, a revision beats a gate, and a declared permission that needs approval is approved only behind a gate."
     ],
     "files": [
       "practice/level-3/77-scenario-agentic-tool-builder/prose/unit-02/practice-3/src/main/java/TryIt.java"

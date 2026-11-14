@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a cost model and a model router, graded on a cost table"
-    },
-    {
       "type": "para",
       "text": "Write two functions: one that prices a request from the `usage` object the API returns, and one that picks the cheapest model that can take a task. Everything is plain data: no network, no clock."
     },
@@ -198,7 +193,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 9,
+    "headings": 8,
     "paras": 9,
     "code": 2,
     "tables": 1,
@@ -210,7 +205,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "e68e7859e1f0a6a76a27fbabe976cce1dae4480758a24c656c09cc1d3f018097",
+  "content_sha256": "b264279b22e0c733a10e02d9ffed96c9261e24497be7c7af6f52fdb117bd8be4",
   "starting_code": "import java.util.List;\nimport java.util.Map;\n\n/** A cost model and a model router. See ../../statement.md for the contract. Models, usages and tasks are JSON-like maps. */\nfinal class Router {\n    private static final System.Logger LOG = System.getLogger(Router.class.getName());\n    private Router() {}\n\n    private static long n(Map<String, Object> m, String key) {\n        Object v = m.get(key);\n        return v == null ? 0 : ((Number) v).longValue();\n    }\n\n    private static double d(Map<String, Object> m, String key) {\n        return ((Number) m.get(key)).doubleValue();\n    }\n\n    /** The cache-write tokens as {5-minute kind, 1-hour kind}; an unsplit count is all the 5-minute kind. */\n    @SuppressWarnings(\"unchecked\")\n    private static long[] writes(Map<String, Object> usage) {\n        Map<String, Object> split = (Map<String, Object>) usage.get(\"cache_creation\");\n        if (split == null) return new long[] {n(usage, \"cache_creation_input_tokens\"), 0};\n        return new long[] {n(split, \"ephemeral_5m_input_tokens\"), n(split, \"ephemeral_1h_input_tokens\")};\n    }\n\n    private static double cacheCost(Map<String, Object> model, Map<String, Object> usage) {\n        // TODO 1 of 6 (finish this to pass e1): the cost of the cache parts of a request: the writes and the reads.\n        // Receives the model (\"input\" price, \"cache_read_multiplier\") and the usage. Returns the 5-minute write tokens times 1.25 times the input price, plus the 1-hour write\n        // tokens times 2 times the input price, plus the cache read tokens times the input price times the model's cache_read_multiplier. writes(usage) gives the two write counts.\n        // Example: input price 4, cache_read_input_tokens 1000, multiplier 0.05 -> 200.0\n        return 0.0;\n    }\n\n    private static double applyBatch(double total, boolean batch) {\n        // TODO 2 of 6 (finish this to pass e2): the cost after the batch discount.\n        // Receives the total cost and whether the request is a batch. Returns half of the total when `batch` is true, the total unchanged otherwise.\n        // Example: applyBatch(1000, true) -> 500.0, applyBatch(1000, false) -> 1000.0\n        return total;\n    }\n\n    /** Cost of one request in micro-dollars (a price of $N per million tokens is N micro-dollars per token). */\n    static double requestCost(Map<String, Object> model, Map<String, Object> usage, boolean batch) {\n        double total = n(usage, \"input_tokens\") * d(model, \"input\") + cacheCost(model, usage) + n(usage, \"output_tokens\") * d(model, \"output\");\n        return Math.round(applyBatch(total, batch) * 1e6) / 1e6;\n    }\n\n    private static long inputTokens(Map<String, Object> usage) {\n        // TODO 3 of 6 (finish this to pass e4): the tokens the model has to hold as input.\n        // Receives the usage. Returns uncached input tokens plus cache read tokens plus every cache write (both kinds; writes(usage) gives them). A missing field counts as 0.\n        // Example: {input_tokens: 250000, cache_read_input_tokens: 50000} -> 300000\n        return 0;\n    }\n\n    private static boolean canTake(Map<String, Object> model, Map<String, Object> task, long tokens) {\n        // TODO 4 of 6 (finish this to pass m1, e4 and e5): whether the model is allowed and big enough for the task.\n        // Receives the model, the task (\"min_tier\" default 1, \"max_tokens\" default 0) and the task's total input tokens. Returns true when the model is not deprecated,\n        // its tier is at least min_tier, its context holds the input tokens and its max_output holds max_tokens. n(map, key) reads a number, 0 when missing.\n        // Example: a model with context 200000 and tokens 250000 -> false\n        return false;\n    }\n\n    /** The id of the cheapest of `models` for this usage; on a tie the lower tier, then the smaller id. */\n    private static String cheapest(List<Map<String, Object>> models, Map<String, Object> usage, boolean batch) {\n        // TODO 5 of 6 (finish this to pass m1, e3 and e6): the id of the cheapest of `models` for this usage.\n        // Receives a non-empty list of models, the usage and the batch flag. Prices each with requestCost(model, usage, batch) and returns the id of the lowest; on equal\n        // cost the lower tier wins, then the smaller id. The order of the list never matters.\n        // Example: Sonnet and Opus costing 200000 each -> the Sonnet id (tier 2 before tier 3)\n        return \"\";\n    }\n\n    /** An empty list of models is an error: no model can take the task. */\n    private static void requireChoice(List<Map<String, Object>> models) {\n        // TODO 6 of 6 (finish this to pass e5): an empty list of models is an error.\n        // Receives the models that can take the task. Throws new NoModelError(\"no model can take this task\") when the list is empty; returns nothing otherwise.\n        // Example: requireChoice(List.of()) throws NoModelError\n    }\n\n    /** The id of the cheapest model that can take the task; throws NoModelError when none can. */\n    @SuppressWarnings(\"unchecked\")\n    static String route(List<Map<String, Object>> catalog, Map<String, Object> task) {\n        LOG.log(System.Logger.Level.DEBUG, \"route input: {0}\", task);\n        Map<String, Object> usage = (Map<String, Object>) task.get(\"usage\");\n        long tokens = inputTokens(usage);\n        List<Map<String, Object>> eligible = catalog.stream().filter(m -> canTake(m, task, tokens)).toList();\n        requireChoice(eligible);\n        return cheapest(eligible, usage, Boolean.TRUE.equals(task.get(\"batch\")));\n    }\n}\n",
   "exercise": {
     "main_path": "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-3/src/main/java/Router.java",
@@ -277,7 +272,10 @@
     },
     "origin": "course/18-model-choice-cost-and-migration/02-usage-token-counting-and-a-cost-model.md",
     "concepts": [
-      "the practice of Reading usage, counting tokens before sending, and modelling cost is solved"
+      "A cache write costs 1.25 times the input price for five minutes and 2 times for one hour; reads use the model's multiplier.",
+      "A cache write reported without its split counts as the five-minute kind, and the batch discount halves every part of the cost.",
+      "The cheapest suitable model skips deprecated ones, those below the tier, and those whose context or output limit is too small.",
+      "A cost tie goes to the lower tier, and the order of the catalog never changes the choice."
     ],
     "files": [
       "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-3/src/main/java/TryIt.java"

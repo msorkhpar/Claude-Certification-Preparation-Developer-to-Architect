@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a review specification that cuts false positives"
-    },
-    {
       "type": "para",
       "text": "A review job in CI posts too many comments, and developers have stopped reading them. The prompt says \"be conservative\", its examples are all findings, and nobody knows which category is the noisy one. In this practice you write the three decisions behind a precise review: the function that builds the prompt from a specification and refuses a specification that is vague or incomplete, the report that computes how much developers trust each category and which patterns they dismiss, and the function that decides what a run does with an incomplete request. The model is not called: the tests give you specifications, verdicts and requests. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -222,7 +217,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -234,7 +229,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "07b9422b3334baa6b4200bbe047775b9c8adf7260214664763e52778f1b19888",
+  "content_sha256": "49e79c136f330aae555dfdf2edb16a0f3fa56d7425855d41a38ac028d134c269",
   "starting_code": "import { logger } from \"./logger.ts\";\nconst log = logger(\"review_spec\");\n/** A review specification that cuts false positives: the prompt, the trust in each category and the next step when a request is incomplete. See ../../statement.md. */\n\nexport const VAGUE = [\"be conservative\", \"high-confidence\", \"high confidence\", \"only important\", \"only significant\", \"if you are sure\", \"when you are sure\", \"use your judgment\"];\n\nconst present = (value: unknown): boolean => typeof value === \"string\" && value.trim() !== \"\";\nconst blank = (value: unknown): boolean => value === undefined || value === null || (typeof value === \"string\" && value.trim() === \"\");\n// TODO 2 of 7 (finish this to pass e1): the vague check. Receives a criterion's report or skip text. Return the first\n//   phrase of VAGUE that the lower-cased text contains, or nothing when it contains none. Example: \"Be conservative here\"\n//   -> \"be conservative\".\nconst vague = (_text: string): string | undefined => undefined;\n\nexport function buildReviewPrompt(spec: any, diff: string): string {\n  log.debug(\"buildReviewPrompt input\", spec);\n  const criteria: any[] = spec.criteria ?? [];\n  const examples: any[] = spec.examples ?? [];\n  if (criteria.length === 0) throw new Error(\"at least one criterion is required\");\n  const ids: string[] = [];\n  const blocks: string[] = [];\n  for (const c of criteria) {\n    for (const key of [\"report\", \"skip\"]) {\n      if (!present(c[key])) throw new Error(`criterion ${c.id}: ${key} is required`);\n      const phrase = vague(c[key]);\n      if (phrase) throw new Error(`criterion ${c.id}: ${key} is vague ('${phrase}'): name the pattern instead`);\n    }\n    const severity = c.severity ?? {};\n    // TODO 3 of 7 (finish this to pass e2): the severity check. For each of the levels high and low, refuse the\n    //   criterion when its severity has no concrete example text for that level. Example: severity {high: \"...\"} with no\n    //   low -> refused.\n    ids.push(c.id);\n    blocks.push(`<criterion id=\"${c.id}\">\\nReport: ${c.report}\\nSkip: ${c.skip}\\nSeverity high: ${severity.high}\\nSeverity low: ${severity.low}\\n</criterion>`);\n  }\n  // TODO 4 of 7 (finish this to pass e3): the examples check. Refuse the specification unless it has two to four\n  //   examples and their verdicts are exactly report and skip (at least one of each, nothing else). Example: three report\n  //   examples and no skip -> refused.\n  const shown: string[] = [];\n  for (const e of examples) {\n    if (!present(e.reason)) throw new Error(\"every example needs a reason\");\n    if (e.verdict === \"report\" && !ids.includes(e.category)) throw new Error(\"a report example names one of the criteria\");\n    const tag = e.verdict === \"report\" ? `verdict=\"report\" category=\"${e.category}\"` : 'verdict=\"skip\"';\n    shown.push(`<example ${tag}>\\n<code>${e.code}</code>\\n<reason>${e.reason}</reason>\\n</example>`);\n  }\n  // TODO 1 of 7 (finish this to pass m1): the end of the prompt. After the criteria and examples blocks, add the diff in\n  //   a <diff> block and return the whole prompt joined with newlines, so that the diff comes last. Example: criteria,\n  //   examples, then <diff>, the diff, </diff>.\n  return diff;\n}\n\nexport function categoryReport(findings: any[], minReviewed = 5, minPrecision = 0.5): any {\n  const byCategory = new Map<string, any[]>();\n  for (const f of findings) byCategory.set(f.category, [...(byCategory.get(f.category) ?? []), f]);\n  const categories: Record<string, any> = {};\n  for (const [name, items] of byCategory) {\n    const accepted = items.filter((f) => f.verdict === \"accepted\").length;\n    const counts = new Map<string, number>();\n    for (const f of items) if (f.verdict === \"dismissed\") counts.set(f.detected_pattern, (counts.get(f.detected_pattern) ?? 0) + 1);\n    // TODO 6 of 7 (finish this to pass e5): the top dismissed patterns. Receives the count of dismissals per detected\n    //   pattern. Return up to three [pattern, count] pairs, ordered by count (highest first) and then by pattern name.\n    //   Example: {a: 2, b: 3, c: 2, d: 1} -> [b 3], [a 2], [c 2].\n    const top = [...counts.entries()];\n    const precision = Math.round((accepted / items.length) * 100) / 100;\n    // TODO 5 of 7 (finish this to pass e4): the disable flag of a category. Receives the number reviewed, the precision,\n    //   min_reviewed and min_precision. A category is disabled when it has at least min_reviewed reviews and a precision\n    //   below min_precision. Example: 5 reviews, precision 0.4, defaults -> disabled; 4 reviews -> not.\n    categories[name] = { reviewed: items.length, precision, disable: false, top_dismissed: top.map(([pattern, count]) => [pattern, count]) };\n  }\n  return { categories, disable: Object.keys(categories).filter((n) => categories[n].disable).sort() };\n}\n\nexport function nextStep(request: any, required: string[], defaults: Record<string, string>, attended: boolean): any {\n  const missing = required.filter((f) => blank(request[f]));\n  const assumptions: Record<string, string> = {};\n  for (const f of missing) if (f in defaults) assumptions[f] = defaults[f];\n  const unresolved = missing.filter((f) => !(f in defaults));\n  // TODO 7 of 7 (finish this to pass e6, e7): the next step. `unresolved` holds the missing fields that have no default.\n  //   When some are unresolved and the run is attended, return action ask with those fields in `ask`; when unattended,\n  //   return action stop with an empty `ask`. Both carry the assumptions. Example: attended, unresolved [repo] -> ask\n  //   [repo].\n  return { action: \"proceed\", ask: [], assumptions };\n}\n",
   "exercise": {
     "main_path": "practice/level-3/61-criteria-and-examples/prose/unit-02/practice-2/reviewSpec.ts",
@@ -302,7 +297,10 @@
     },
     "origin": "course/61-criteria-and-examples/02-examples-asking-and-the-practice.md",
     "concepts": [
-      "the practice of Examples that settle the hard cases, asking and the practice is solved"
+      "A review prompt puts the criteria first, then the examples, then the diff last in a <diff> block.",
+      "Vague wording in a report or skip criterion is refused, and each criterion needs concrete severity examples for high and low.",
+      "Two to four examples are required, with at least one report and one skip, each with a reason and a known category.",
+      "A category with enough reviews and precision below the floor is disabled; an unattended run never asks, it states assumptions or stops."
     ],
     "files": [
       "practice/level-3/61-criteria-and-examples/prose/unit-02/practice-2/try-it.ts"

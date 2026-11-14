@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: platform access as configuration, graded by tests"
-    },
-    {
       "type": "para",
       "text": "Calling Claude through a cloud platform starts with set-up that no Messages call can fix: who may call which model, where the traffic goes and how much of it is allowed. Here that set-up is three JSON files, and the tests are the reviewer. **Edit the three files**; the tests read them and check every rule. The files are language-neutral: the same three files are in each folder, and the four test suites ask the same questions. The facts come from the Anthropic pages for Amazon Bedrock and Google Cloud, from AWS's policy documentation and from Google's IAM documentation, all read on 2026-10-02; the lesson pages name them and explain the rules. Every name in the files is a placeholder: no real account, project or key belongs here."
     },
@@ -202,7 +197,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 8,
     "code": 3,
     "tables": 1,
@@ -214,7 +209,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "8d9cbaab2286c40bc05fd5c8e104d464b52ac6037e0085bed328e6cbe7e83a7d",
+  "content_sha256": "2db8d931923adc81ac3a8dc08bc74aa3ec413298d688711b41a0a59e46bd5300",
   "starting_code": "{\n  \"Version\": \"2008-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\"bedrock:*\"],\n      \"Resource\": \"*\"\n    }\n  ]\n}\n",
   "exercise": {
     "main_path": "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/project/bedrock-policy.json",
@@ -286,7 +281,10 @@
     },
     "origin": "course/23-setting-up-claude-on-the-cloud-platforms/02-residency-quotas-logging-and-the-configuration-practice.md",
     "concepts": [
-      "the practice of Residency, quotas, logging and the configuration practice is solved"
+      "A least-privilege Bedrock policy uses version 2012-10-17, only Allow statements, invoke actions alone and no wildcards.",
+      "Each Bedrock resource is a foundation-model ARN with a documented region and the anthropic. model id.",
+      "A Vertex caller gets a custom role whose only permission is aiplatform.endpoints.predict, on an endpoint matching the residency.",
+      "Without Anthropic's approval a Bedrock quota is at most 5,000,000 input and 500,000 output tokens per minute."
     ],
     "files": [
       "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/project/quotas.json",

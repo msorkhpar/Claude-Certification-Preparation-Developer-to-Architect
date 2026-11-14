@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a retry policy, graded on scripted failures"
-    },
-    {
       "type": "para",
       "text": "Write the function that decides whether to try an API call again, and for how long to wait. No test waits: the sleep is injected and the failures are scripted."
     },
@@ -199,7 +194,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 2,
@@ -211,7 +206,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "68d43c9580d27c67252b3fbb87f4edbc756efd70485f5d8c4cd23620f1911d4d",
+  "content_sha256": "cca3824e0e15be5ea2ba11ec3b9cd59c2020a22947d4f488a221e5f7ce9acf9a",
   "starting_code": "\"\"\"A retry policy for API calls. See ../../statement.md for the contract.\"\"\"\nimport logging\nfrom dataclasses import dataclass\n\nlog = logging.getLogger(__name__)\n\n\n@dataclass\nclass Response:\n    status: int\n    headers: dict  # lower-case names\n    body: dict  # the parsed JSON body, or {} when there is none\n\n\nclass TransportError(Exception):\n    \"\"\"The connection failed or timed out: no reply was received.\"\"\"\n\n\nclass CallFailed(Exception):\n    \"\"\"The call did not succeed. error_type is the API's error type, \"connection_error\" or \"unknown\".\"\"\"\n\n    def __init__(self, status, error_type, attempts, request_id=None):\n        super().__init__(f\"{status} {error_type} after {attempts} attempt(s)\")\n        self.status, self.error_type, self.attempts, self.request_id = status, error_type, attempts, request_id\n\n\nRETRYABLE = {408, 409, 429}\n\n\ndef _status_retryable(status):\n    \"\"\"TODO 1 of 7 (finish this to pass m1 and e1): may a reply with this status be tried again?\n\n    Receives the HTTP status. Returns True for the statuses in RETRYABLE (408, 409, 429) and for every status of 500 and above (529\n    included); False for every other one.\n    Example: _status_retryable(529) -> True, _status_retryable(404) -> False\n    \"\"\"\n    return False\n\n\ndef _spend_cap(response):\n    \"\"\"TODO 2 of 7 (finish this to pass e4): is this 429 a spend cap rather than a rate limit?\n\n    Receives the Response. Returns True when its body's error.details.error_code is \"enforced_spend_limit_reached\" (any level may be\n    missing); retrying cannot succeed then.\n    Example: a body {\"error\": {\"details\": {\"error_code\": \"enforced_spend_limit_reached\"}}} -> True; {} -> False\n    \"\"\"\n    return False\n\n\ndef _retryable(response):\n    return _status_retryable(response.status) and not _spend_cap(response)\n\n\ndef _error_type(response):\n    \"\"\"TODO 3 of 7 (finish this to pass e1, e4 and e6): the API's error type of a reply.\n\n    Receives the Response. Returns body.error.type, or \"unknown\" when the body has none.\n    Example: a body {\"error\": {\"type\": \"overloaded_error\"}} -> \"overloaded_error\"; {} -> \"unknown\"\n    \"\"\"\n    return \"\"\n\n\ndef _request_id(response):\n    \"\"\"TODO 4 of 7 (finish this to pass e1, e4 and e6): the request id of a reply.\n\n    Receives the Response. Returns its `request-id` header (header names are lower case), or None when there is none.\n    Example: headers {\"request-id\": \"req_1\"} -> \"req_1\"; {} -> None\n    \"\"\"\n    return None\n\n\ndef _failure(response, attempts):\n    return CallFailed(response.status, _error_type(response), attempts, _request_id(response))\n\n\ndef _connection_failure(attempts):\n    \"\"\"TODO 5 of 7 (finish this to pass e5): the failure when the last attempt lost its connection.\n\n    Receives the number of attempts made. Returns a CallFailed with status 0, error type \"connection_error\", that many attempts and no\n    request id.\n    Example: _connection_failure(2) -> CallFailed(0, \"connection_error\", 2)\n    \"\"\"\n    return CallFailed(0, \"\", attempts)\n\n\ndef _retry_after(response):\n    \"\"\"TODO 6 of 7 (finish this to pass e2): the wait the server asked for.\n\n    Receives the Response. Returns its `retry-after` header as seconds (a float, never below 0); 0.0 when the header is absent or not a\n    number.\n    Example: headers {\"retry-after\": \"3\"} -> 3.0; {} -> 0.0; {\"retry-after\": \"soon\"} -> 0.0\n    \"\"\"\n    return 0.0\n\n\ndef _delay(attempt, base_delay, cap, jitter):\n    \"\"\"TODO 7 of 7 (finish this to pass m1, e3 and e5): the wait before the next attempt.\n\n    Receives the attempt that just failed (1 for the first), base_delay, cap and the jitter function. Returns jitter(min(cap, base_delay\n    times 2 to the power attempt - 1)): the jitter is applied last, after the cap.\n    Example: _delay(3, 1.0, 5.0, lambda d: d) -> 4.0, _delay(4, 1.0, 5.0, lambda d: d) -> 5.0\n    \"\"\"\n    return 0.0\n\n\ndef call_with_retry(send, sleep, max_attempts=4, base_delay=0.5, cap=8.0, jitter=lambda delay: delay):\n    log.debug(\"call_with_retry input: max_attempts=%r base_delay=%r cap=%r\", max_attempts, base_delay, cap)\n    attempt = 0\n    while True:\n        attempt += 1\n        try:\n            response = send()\n        except TransportError:\n            if attempt >= max_attempts:\n                raise _connection_failure(attempt)\n            wait = 0.0\n        else:\n            if response.status < 400:\n                return response\n            if not _retryable(response):\n                raise _failure(response, attempt)\n            if attempt >= max_attempts:\n                raise _failure(response, attempt)\n            wait = _retry_after(response)\n        sleep(max(_delay(attempt, base_delay, cap, jitter), wait))\n",
   "exercise": {
     "main_path": "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-1/retry.py",
@@ -275,7 +270,10 @@
     },
     "origin": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md",
     "concepts": [
-      "the practice of Retry, back-off and idempotency, and a retry policy is solved"
+      "Connection failures, 408, 409, 429 and every 500 and above are retried; other 4xx statuses are not.",
+      "A 429 that reports enforced_spend_limit_reached is a spend cap, not a rate limit, and is never retried.",
+      "The wait doubles from the base delay up to the cap, jitter is applied last, and retry-after sets a floor.",
+      "Giving up makes exactly max_attempts calls, never waits after the last one, and reports the last reply's status and request id."
     ],
     "files": [
       "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-1/try_it.py"

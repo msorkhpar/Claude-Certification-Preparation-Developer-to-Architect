@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: assemble a streamed message"
-    },
-    {
       "type": "para",
       "text": "A streamed reply arrives as events. Write the function that folds them into the message a non-streaming call would have returned. The events are the parsed `data:` objects, in order; the tests supply them."
     },
@@ -197,7 +192,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 7,
+    "headings": 6,
     "paras": 6,
     "code": 2,
     "tables": 2,
@@ -209,7 +204,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "1f7d15f770e47c2e3ad8bc5434550407c175602aba47bcfd2a6df1bdbabb907c",
+  "content_sha256": "004ed97ae91ae7ecbff79a9afee6adceb26452f4caf0207cad4604ca424bb154",
   "starting_code": "\"\"\"Assemble a streamed Messages reply from its events. See ../../statement.md for the contract.\"\"\"\nimport json\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\nclass StreamError(Exception):\n    \"\"\"The stream carried an error event, or ended before message_stop (error_type \"incomplete_stream\").\"\"\"\n\n    def __init__(self, error_type, message):\n        super().__init__(f\"{error_type}: {message}\")\n        self.error_type, self.message = error_type, message\n\n\ndef _start_message(start):\n    \"\"\"TODO 1 of 6 (finish this to pass m1 and e5): the message a message_start event begins.\n\n    Receives the `message` object of the event. Returns a new dict with its fields except `content`, then `content` as an empty list and `usage` as a COPY of its usage.\n    Example: _start_message({\"id\": \"m\", \"content\": [], \"usage\": {\"input_tokens\": 5}}) -> {\"id\": \"m\", \"content\": [], \"usage\": {\"input_tokens\": 5}}\n    \"\"\"\n    return {}\n\n\ndef _apply_delta(block, pieces, delta):\n    \"\"\"TODO 2 of 6 (finish this to pass m1 and e6): fold one content_block_delta into its block.\n\n    Receives the block (a dict), `pieces` (the fragment list of a tool_use block, else None) and the `delta`. `text_delta` appends `text` to the block's text,\n    `thinking_delta` appends `thinking`, `signature_delta` sets `signature`, `input_json_delta` appends `partial_json` to `pieces`. Returns nothing.\n    Example: block {\"text\": \"He\"}, delta {\"type\": \"text_delta\", \"text\": \"llo\"} -> block {\"text\": \"Hello\"}\n    \"\"\"\n\n\ndef _finish_block(block, pieces):\n    \"\"\"TODO 3 of 6 (finish this to pass e1): at content_block_stop, give a tool_use block its input.\n\n    Receives the block and its fragment list `pieces` (None for a block that is not tool_use). When `pieces` is a list, sets block[\"input\"] to the fragments joined and\n    parsed as JSON, or to {} when the joined text is empty or only white space. Returns nothing.\n    Example: pieces ['{\"ci', 'ty\": \"Pa', 'ris\"}'] -> block[\"input\"] == {\"city\": \"Paris\"}; pieces [\"\"] -> {}\n    \"\"\"\n\n\ndef _apply_message_delta(message, event):\n    \"\"\"TODO 4 of 6 (finish this to pass m1 and e5): fold a message_delta event into the message.\n\n    Receives the message and the event. Sets message[\"stop_reason\"] and [\"stop_sequence\"] from event[\"delta\"], and each key of event[\"usage\"] replaces the same key in\n    message[\"usage\"] (the output count is cumulative: replace, do not add). Returns nothing.\n    Example: usage {\"input_tokens\": 52, \"output_tokens\": 1} and event usage {\"output_tokens\": 38} -> {\"input_tokens\": 52, \"output_tokens\": 38}\n    \"\"\"\n\n\ndef _raise_error(event):\n    \"\"\"TODO 5 of 6 (finish this to pass e3): an error event ends the assembly.\n\n    Receives the event, whose \"error\" holds a \"type\" and a \"message\". Raises StreamError(type, message).\n    Example: {\"error\": {\"type\": \"overloaded_error\", \"message\": \"Overloaded\"}} raises StreamError(\"overloaded_error\", \"Overloaded\")\n    \"\"\"\n\n\ndef _check_complete(message, stopped):\n    \"\"\"TODO 6 of 6 (finish this to pass e4): a stream that never started or never reached message_stop is an error.\n\n    Receives the message (None before message_start) and whether message_stop was seen. Raises StreamError(\"incomplete_stream\", ...) unless both hold.\n    Example: _check_complete({...}, False) raises StreamError with error_type \"incomplete_stream\"\n    \"\"\"\n\n\ndef assemble(events):\n    log.debug(\"assemble input: %r\", events)\n    message, blocks, fragments, stopped = None, {}, {}, False\n    for event in events:\n        kind = event.get(\"type\")\n        if kind == \"message_start\":\n            message = _start_message(event[\"message\"])\n        elif kind == \"content_block_start\":\n            blocks[event[\"index\"]] = dict(event[\"content_block\"])\n            if event[\"content_block\"].get(\"type\") == \"tool_use\":\n                fragments[event[\"index\"]] = []\n        elif kind == \"content_block_delta\":\n            _apply_delta(blocks[event[\"index\"]], fragments.get(event[\"index\"]), event[\"delta\"])\n        elif kind == \"content_block_stop\":\n            _finish_block(blocks[event[\"index\"]], fragments.get(event[\"index\"]))\n        elif kind == \"message_delta\":\n            _apply_message_delta(message, event)\n        elif kind == \"message_stop\":\n            stopped = True\n        elif kind == \"error\":\n            _raise_error(event)\n        # ping and event types this client does not know are skipped: new types may be added\n    _check_complete(message, stopped)\n    message[\"content\"] = [blocks[i] for i in sorted(blocks)]\n    return message\n",
   "exercise": {
     "main_path": "practice/level-2/17-streaming/prose/unit-01/practice-1/assemble.py",
@@ -273,7 +268,10 @@
     },
     "origin": "course/17-streaming/01-events-and-assembling-a-message.md",
     "concepts": [
-      "the practice of Streaming events and assembling a message is solved"
+      "A streamed message is folded from its events: text, thinking and signature deltas append to the block at their index.",
+      "Tool input arrives as partial JSON fragments, joined and parsed at the block's stop, and no fragments mean an empty object.",
+      "The output token count in message_delta is cumulative and replaces the earlier value rather than adding to it.",
+      "Ping and unknown events are ignored, an error event raises, and a stream without message_stop is incomplete."
     ],
     "files": [
       "practice/level-2/17-streaming/prose/unit-01/practice-1/try_it.py"

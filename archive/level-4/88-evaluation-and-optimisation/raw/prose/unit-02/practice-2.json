@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: an evaluation kit"
-    },
-    {
       "type": "para",
       "text": "A team reports one accuracy figure for its assistant and ships whatever raises it. Two versions with the same figure are called equal although one of them fails the refunds that cost twenty times as much as a status question; a live test with a hundred cases is called a win; a version that lost three right answers in the refund segment ships because it gained three elsewhere; a wrong answer is blamed on the model before anyone checks whether the right document was retrieved; and the cheapest model is chosen without asking whether it is fast enough. In this practice you write the pieces that replace that: a report by segment with the cost of the errors, the latency percentile, the A/B verdict at 95 percent, the gate for a shadow run, the order of a diagnosis and the choice of a model under limits. The model is not called: the tests give you graded cases, counts and timings. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -188,7 +183,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -200,7 +195,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "4c49e59bd9acb7e54ba37ebb69c804f73ff27a810beb5b6ef9401403699815a7",
+  "content_sha256": "8e820b61673b6025a0092bf6421ab615bb4d480c3ad3276e3e2f8cd34d72d821",
   "starting_code": "/** Evaluation kit: a report by segment, a latency percentile, an A/B verdict, a shadow-run gate, a diagnosis order and a model choice under limits. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"evalkit\");\n\nexport type Line = [segment: string, cases: number, right: number, percent: number, cost: number];\nexport type Pair = [segment: string, oldOk: boolean, newOk: boolean];\nexport type Option = [name: string, accuracy: number, p95: number, cost: number];\nexport type Gate = { decision: string; lost: number; gained: number; blocked: string[] };\n\n/** Whole percent, half up, integers only (written for you). */\nexport function pct(part: number, whole: number): number {\n  return whole ? Math.floor((200 * part + whole) / (2 * whole)) : 0;\n}\n\n/**\n * TODO 1 of 7 (unlocks m1 and e1): the cost of the wrong answers of one segment.\n * Receives the number of wrong answers, the segment name and the costs by segment. Returns wrong times the segment's cost, 1 when the\n * segment has no entry. Example: errorCost(3, \"refund\", { refund: 20 }) -> 60, errorCost(2, \"odd\", { refund: 20 }) -> 2\n */\nfunction errorCost(wrong: number, segment: string, costs: Record<string, number>): number {\n  return 0;\n}\n\n/**\n * TODO 2 of 7 (unlocks m1 and e1): order the report lines.\n * Receives the lines [segment, cases, right, percent, cost]. Returns them with the highest cost first and equal costs by segment name.\n * Example: order([[\"a\", 1, 1, 100, 0], [\"b\", 2, 1, 50, 5]]) -> [[\"b\", 2, 1, 50, 5], [\"a\", 1, 1, 100, 0]]\n */\nfunction order(table: Line[]): Line[] {\n  return table;\n}\n\nexport function segmentTable(results: [string, boolean][], costs: Record<string, number>): Line[] {\n  log.debug(\"segmentTable input\", results);\n  const seen = new Map<string, [number, number]>();\n  for (const [segment, correct] of results) {\n    const [total, right] = seen.get(segment) ?? [0, 0];\n    seen.set(segment, [total + 1, right + (correct ? 1 : 0)]);\n  }\n  return order([...seen.entries()].map(([s, [n, r]]): Line => [s, n, r, pct(r, n), errorCost(n - r, s, costs)]));\n}\n\n/**\n * TODO 3 of 7 (unlocks e2): the nearest-rank percentile.\n * Receives the values in any order and p from 1 to 100. Returns the value at rank ceil(p * n / 100) of the sorted values, counting from 1,\n * and 0 for no values. Example: percentile([4800, 800, 1000, 900], 95) -> 4800\n */\nexport function percentile(values: number[], p: number): number {\n  return -1;\n}\n\n/**\n * TODO 4 of 7 (unlocks e3 and e4): the A/B verdict at 95 percent.\n * Receives the right answers and cases of the old version (x1 of n1) and the new one (x2 of n2). Returns \"too few cases\" when an arm has\n * fewer than minN cases, \"no clear difference\" when the pooled right answers are 0 or all, otherwise the integer test from the statement:\n * \"new is better\", \"old is better\" or \"no clear difference\". Example: abVerdict(410, 500, 438, 500) -> \"new is better\"\n */\nexport function abVerdict(x1: number, n1: number, x2: number, n2: number, minN = 200): string {\n  return \"\";\n}\n\n/**\n * TODO 5 of 7 (unlocks e5): ship or hold.\n * Receives the protected segments that lost, the number lost and the number gained. Returns \"hold\" when a protected segment lost or more\n * were lost than gained, \"ship\" otherwise. Example: decision([], 2, 2) -> \"ship\", decision([\"refund\"], 1, 5) -> \"hold\"\n */\nfunction decision(blocked: string[], lost: number, gained: number): string {\n  return \"\";\n}\n\nexport function shadowGate(pairs: Pair[], protectedSegments: string[]): Gate {\n  const lost = pairs.filter(([, o, n]) => o && !n).map((p) => p[0]);\n  const gained = pairs.filter(([, o, n]) => n && !o).length;\n  const blocked = [...new Set(lost.filter((s) => protectedSegments.includes(s)))].sort();\n  return { decision: decision(blocked, lost.length, gained), lost: lost.length, gained, blocked };\n}\n\n/**\n * TODO 6 of 7 (unlocks e6): where to look first for a wrong answer.\n * Receives four booleans. Returns \"retrieval or data\" when the evidence was not found, then \"ungrounded answer\" when it is not supported,\n * then \"format instructions\" when the format is wrong, then \"prompt or task\" when it fails on a stronger model, else \"model mismatch\".\n * Example: diagnose(true, true, false, true) -> \"format instructions\"\n */\nexport function diagnose(found: boolean, supported: boolean, formatOk: boolean, passesOnStronger: boolean): string {\n  return \"\";\n}\n\n/**\n * TODO 7 of 7 (unlocks e7): the cheapest model that meets both limits.\n * Receives options [name, accuracy, p95, cost]. Returns the name of the cheapest one with accuracy >= minAccuracy and p95 <= maxP95,\n * equal costs by name, or \"none\". Example: chooseModel([[\"a\", 90, 100, 2]], 95, 100) -> \"none\"\n */\nexport function chooseModel(options: Option[], minAccuracy: number, maxP95: number): string {\n  return \"\";\n}\n",
   "exercise": {
     "main_path": "practice/level-4/88-evaluation-and-optimisation/prose/unit-02/practice-2/evalkit.ts",
@@ -268,7 +263,10 @@
     },
     "origin": "course/88-evaluation-and-optimisation/02-changing-safely-diagnosing-and-the-practice.md",
     "concepts": [
-      "the practice of Changing safely, diagnosing a wrong answer and the practice is solved"
+      "A segment table reports accuracy and error cost with the costliest segment first, because an overall figure hides where errors hurt.",
+      "A percentile uses the nearest rank, and an A/B test with fewer than the minimum cases in either arm decides nothing.",
+      "A shadow run is held when a protected segment loses a case or more cases are lost than gained.",
+      "Diagnosis checks retrieval, then grounding, then format, then a stronger model, and the cheapest model within accuracy and latency limits is chosen."
     ],
     "files": [
       "practice/level-4/88-evaluation-and-optimisation/prose/unit-02/practice-2/try-it.ts"

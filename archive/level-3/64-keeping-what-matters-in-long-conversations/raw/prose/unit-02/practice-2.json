@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a context that keeps the facts, trims the noise, never mixes customers and never splits a tool call"
-    },
-    {
       "type": "para",
       "text": "A support agent works with a customer over many turns. Its summaries turn \"$129.50 by 30 September\" into \"a refund soon\", every order lookup drops forty internal fields into the conversation, a late message with an old address overwrites the new one, a facts block loaded for one customer shows up in another customer's session, and the window that trims old messages sometimes keeps a tool result without the call that produced it. In this practice you write the context's building blocks: the trimming of a tool record, the update of case facts, the assembly of the context, the check of a summary against the facts, and the sliding window. The model is not called. It is in Python, TypeScript, Java and Kotlin;"
     },
@@ -184,7 +179,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 8,
+    "headings": 7,
     "paras": 5,
     "code": 2,
     "tables": 1,
@@ -196,7 +191,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "9ae3a3ec45829122bb76e2d0e34a73675377519b2fbeecf33251a6ead7236576",
+  "content_sha256": "5d8fa186fb7006b83c1e3f8b043e382e8c6faf2a002b9d395ab1c164f0a92caa",
   "starting_code": "import { logger } from \"./logger.ts\";\nconst log = logger(\"context_builder\");\n/** What a long conversation keeps: trimmed tool output, case facts that newer information replaces, a context that never mixes customers, and a window that keeps tool calls whole. See ../../statement.md. */\n\nexport function estimateTokens(text: string): number {\n  return Math.ceil(text.length / 4);\n}\n\nexport function trimRecord(record: Record<string, string>, keep: string[]): Record<string, string> {\n  // TODO 1 of 6 (finish this to pass m1, e1): the trim. Receives a tool's record and the list of fields to keep. Return\n  //   a new record with only those fields, in the order of the list, with their exact values, skipping a field that the\n  //   record does not have. Example: record {id, status, notes}, keep [status, id] -> {status, id}.\n  return { ...record };\n}\n\nexport function updateFacts(facts: Record<string, any>, name: string, value: string, asOf: string): Record<string, any> {\n  const next: Record<string, any> = {};\n  for (const [n, f] of Object.entries(facts)) next[n] = { ...f, superseded: [...f.superseded] };\n  const current = next[name];\n  if (current === undefined) {\n    next[name] = { value, as_of: asOf, superseded: [] };\n  } else {\n    // TODO 2 of 6 (finish this to pass e2, e3): the update of a known fact. When the new date is the same as or later than\n    //   the stored one, replace the value and the date and append \"oldvalue@olddate\" to the history; when it is earlier,\n    //   keep the current value and append \"newvalue@newdate\" to the history. Example: stored 5@2026-01-02, new 7@2026-01-05\n    //   -> value 7, history [5@2026-01-02].\n    current.value = value;\n    current.as_of = asOf;\n  }\n  return next;\n}\n\nexport function buildContext(customer: string, facts: any[], summary: string, recent: any[]): string {\n  log.debug(\"buildContext input\", customer);\n  const parts: string[] = [];\n  // TODO 3 of 6 (finish this to pass e4): the facts of one customer. Receives the customer and all the fact entries.\n  //   Keep only the entries whose customer is that customer. Example: facts of C1 and C2, customer C1 -> the C1 entries\n  //   only.\n  const mine = [...facts];\n  // TODO 4 of 6 (finish this to pass e5): the case facts section. When there are facts for the customer, add first a\n  //   section titled \"## Case facts\" with one line per fact, \"name: value (as of date)\". Example: one fact -> \"## Case\n  //   facts\\norder: A-7 (as of 2026-01-02)\", before the summary.\n  parts.push(\"## Summary so far\\n\" + summary);\n  parts.push(\"## Recent messages\\n\" + recent.map((m) => `${m.role}: ${m.text}`).join(\"\\n\"));\n  return parts.join(\"\\n\\n\");\n}\n\nexport function missingFromSummary(summary: string, facts: any[]): string[] {\n  // TODO 5 of 6 (finish this to pass e6): the check of a summary. Receives the summary and the fact entries. Return the\n  //   names of the facts whose exact value does not appear in the summary text. Example: fact order = A-7, summary\n  //   \"customer wants a refund\" -> [order].\n  return [];\n}\n\nexport function window(messages: any[], budget: number): any[] {\n  const units: any[][] = [];\n  for (let i = 0; i < messages.length; ) {\n    const m = messages[i];\n    // TODO 6 of 6 (finish this to pass e7): the units of the window. Walk the messages in order: a tool_use message\n    //   followed by the tool_result with the same id forms one unit of two, which is never split; any other message is a\n    //   unit of one. Example: [user, tool_use t1, tool_result t1] -> two units.\n    units.push([m]);\n    i += 1;\n  }\n  const kept: any[][] = [];\n  let used = 0;\n  for (const unit of [...units].reverse()) {\n    const cost = unit.reduce((sum, x) => sum + estimateTokens(x.text), 0);\n    if (used + cost > budget) break;\n    kept.unshift(unit);\n    used += cost;\n  }\n  return kept.flat();\n}\n",
   "exercise": {
     "main_path": "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-2/contextBuilder.ts",
@@ -264,7 +259,10 @@
     },
     "origin": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md",
     "concepts": [
-      "the practice of Long sessions: windows, stale facts, late updates, isolation and the practice is solved"
+      "A trimmed tool result keeps only the named fields, with their exact values, in the named order.",
+      "A newer case fact replaces the old one and keeps it as history, while a late older fact never replaces the current value.",
+      "The context puts case facts first, then the summary, then recent messages, and never includes another customer's facts.",
+      "A summary that loses an exact value is reported, and the window keeps or drops a tool call together with its result."
     ],
     "files": [
       "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-2/try-it.ts"

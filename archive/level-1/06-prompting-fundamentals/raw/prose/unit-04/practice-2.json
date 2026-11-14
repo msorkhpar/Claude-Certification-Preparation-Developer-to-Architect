@@ -18,11 +18,6 @@
       "text": "Problem statement"
     },
     {
-      "type": "heading",
-      "level": 1,
-      "text": "Practice: a prompt template builder, graded on structure"
-    },
-    {
       "type": "para",
       "text": "Write `build_prompt` (Python), `buildPrompt` (TypeScript), `PromptBuilder.build` (Java) or `buildPrompt` (Kotlin): it turns a prompt **spec** into one prompt string. The tests check the structure of the string, exactly, so the format below is the contract."
     },
@@ -231,7 +226,7 @@
   "assets": [],
   "attachments": [],
   "counts": {
-    "headings": 9,
+    "headings": 8,
     "paras": 7,
     "code": 3,
     "tables": 2,
@@ -243,7 +238,7 @@
     "html": 0,
     "disclosures": 1
   },
-  "content_sha256": "0702e04f753a08a072bd5d7ff25a4b73ac33dc24f13937e0999d1fac90b97bc5",
+  "content_sha256": "88b3e284c40b5b70d12363e33531ceedac6b04d122a71d1ad3f0b72486290540",
   "starting_code": "// Build a structured prompt from a spec. See ../../statement.md for the exact format.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"promptBuilder\");\nexport interface Doc { name: string; text: string }\nexport interface Example { input: string; output: string }\nexport interface Spec {\n  task?: string | null;\n  role?: string | null;\n  context?: string | null;\n  documents?: Doc[];\n  examples?: Example[];\n  constraints?: string[];\n  outputFormat?: string | null;\n}\n\nfunction fill(text: string, variables: Record<string, string>): string {\n  return text.replace(/\\{\\{(\\w+)\\}\\}/g, (_m, name: string) => lookup(name, variables));\n}\n\nfunction block(tag: string, body: string): string {\n  return `<${tag}>\\n${body}\\n</${tag}>`;\n}\n\nfunction join(parts: string[]): string {\n  // TODO 1 of 8 (finish this to pass every case): the finished prompt from its rendered sections.\n  // Receives the rendered sections, in order. Returns them separated by one blank line, with no trailing newline.\n  // Example: join([\"<a>\", \"<b>\"]) -> \"<a>\\n\\n<b>\"\n  return \"\";\n}\n\nfunction present(value: string | null | undefined): value is string {\n  // TODO 2 of 8 (finish this to pass e1): is an optional text really there?\n  // Receives a text, null or undefined. Returns true unless it is null, undefined, empty or only whitespace.\n  // Example: present(\"  \") -> false, present(\"x\") -> true\n  return false;\n}\n\nfunction lookup(name: string, variables: Record<string, string>): string {\n  // TODO 3 of 8 (finish this to pass e2): the value of one placeholder.\n  // Receives the placeholder name and the variables. Returns the value as text; when the name has no value throws an Error whose\n  // message contains the name. Example: lookup(\"who\", { who: \"Ann\" }) -> \"Ann\", lookup(\"place\", {}) -> Error(\"missing variable: place\")\n  return \"\";\n}\n\nfunction escapeText(text: string): string {\n  // TODO 4 of 8 (finish this to pass e4): make document text harmless.\n  // Receives a text. Returns it with & as &amp;, < as &lt; and > as &gt; (the ampersand first).\n  // Example: escapeText(\"a </document> & b\") -> \"a &lt;/document&gt; &amp; b\"\n  return text;\n}\n\nfunction renderDocument(index: number, doc: Doc): string {\n  // TODO 5 of 8 (finish this to pass e4, e5 and e6): one rendered document.\n  // Receives its number (from 1) and a Doc. Returns `<document index=\"N\" name=\"NAME\">`, a newline, the text, a newline and `</document>`.\n  // Name and text are escaped (the name also turns \" into &quot;); placeholders in them are NOT filled.\n  // Example: renderDocument(1, { name: \"a\", text: \"x\" }) -> '<document index=\"1\" name=\"a\">\\nx\\n</document>'\n  return \"\";\n}\n\nfunction renderExample(index: number, ex: Example, variables: Record<string, string>): string {\n  // TODO 6 of 8 (finish this to pass m1 and e6): one rendered example.\n  // Receives its number (from 1), an Example and the variables. Returns `<example index=\"N\">`, the input block, the output block\n  // (placeholders filled in both) and `</example>`, each on its own line.\n  // Example: renderExample(1, { input: \"i\", output: \"o\" }, {}) -> '<example index=\"1\">\\n<input>\\ni\\n</input>\\n<output>\\no\\n</output>\\n</example>'\n  return \"\";\n}\n\nfunction constraintLines(constraints: string[], variables: Record<string, string>): string {\n  // TODO 7 of 8 (finish this to pass m1): the body of the constraints section.\n  // Receives the constraint texts and the variables. Returns one line per constraint, `- ` then the text with placeholders filled,\n  // joined by newlines. Example: constraintLines([\"Be brief.\"], {}) -> \"- Be brief.\"\n  return \"\";\n}\n\nfunction checkTask(task: string | null | undefined): void {\n  // TODO 8 of 8 (finish this to pass e3): refuse a blank task.\n  // Receives the task, which may be null or undefined. Throws Error(\"task is required\") when it is null, undefined, empty or only\n  // whitespace; otherwise returns nothing. Example: checkTask(\"  \") -> Error, checkTask(\"Say hi.\") -> undefined\n}\n\nexport function buildPrompt(spec: Spec, variables: Record<string, string> = {}): string {\n  log.debug(\"buildPrompt input\", spec, variables);\n  checkTask(spec.task);\n  const task = spec.task as string;\n  const parts: string[] = [];\n  if (present(spec.role)) parts.push(block(\"role\", fill(spec.role, variables)));\n  const documents = spec.documents ?? [];\n  if (documents.length > 0) {\n    const rendered = documents.map((doc, i) => renderDocument(i + 1, doc));\n    parts.push(block(\"documents\", rendered.join(\"\\n\")));\n  }\n  if (present(spec.context)) parts.push(block(\"context\", fill(spec.context, variables)));\n  const examples = spec.examples ?? [];\n  if (examples.length > 0) {\n    const rendered = examples.map((ex, i) => renderExample(i + 1, ex, variables));\n    parts.push(block(\"examples\", rendered.join(\"\\n\")));\n  }\n  const constraints = spec.constraints ?? [];\n  if (constraints.length > 0) parts.push(block(\"constraints\", constraintLines(constraints, variables)));\n  if (present(spec.outputFormat)) parts.push(block(\"output_format\", fill(spec.outputFormat, variables)));\n  parts.push(block(\"task\", fill(task, variables)));\n  return join(parts);\n}\n",
   "exercise": {
     "main_path": "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-2/promptBuilder.ts",
@@ -306,7 +301,10 @@
     },
     "origin": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md",
     "concepts": [
-      "the practice of Diagnosing a weak output, and a template builder is solved"
+      "A prompt puts role, documents, context, examples, constraints, output format and task in a fixed order, and leaves out any empty section.",
+      "Placeholders are filled in one pass, and a placeholder with no value is an error that names the variable.",
+      "Documents are untrusted data: their ampersands and angle brackets are escaped, and placeholders inside them stay literal.",
+      "A missing or blank task is refused, and documents and examples keep their given order and numbering."
     ],
     "files": [
       "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-2/try-it.ts"
